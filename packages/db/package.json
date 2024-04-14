@@ -1,6 +1,6 @@
 {
   "name": "@repo/db",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -15,6 +15,7 @@
     "redis-om": "^0.4.3"
   },
   "exports": {
-    "./client": "./src/index.ts"
+    "./prisma-client": "./src/index.ts",
+    "./redis": "./src/redis.ts"
   }
 }
