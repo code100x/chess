@@ -18,7 +18,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "ws": "^8.16.0"
+    "redis": "^4.6.13",
+    "ws": "^8.16.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {},
   "description": "Socket server for app"
