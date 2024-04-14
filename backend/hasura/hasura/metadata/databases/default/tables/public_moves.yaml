@@ -1,0 +1,3 @@
+table:
+  name: moves
+  schema: public

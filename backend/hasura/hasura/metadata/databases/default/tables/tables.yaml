@@ -1,0 +1,3 @@
+- "!include public_game.yaml"
+- "!include public_moves.yaml"
+- "!include public_user.yaml"

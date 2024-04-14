@@ -1,0 +1,18 @@
+table:
+  name: user
+  schema: public
+array_relationships:
+  - name: game_as_black_player
+    using:
+      foreign_key_constraint_on:
+        column: black_player
+        table:
+          name: game
+          schema: public
+  - name: games_as_white_player
+    using:
+      foreign_key_constraint_on:
+        column: white_player
+        table:
+          name: game
+          schema: public

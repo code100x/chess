@@ -1,0 +1,10 @@
+table:
+  name: game
+  schema: public
+object_relationships:
+  - name: user
+    using:
+      foreign_key_constraint_on: black_player
+  - name: userByWhitePlayer
+    using:
+      foreign_key_constraint_on: white_player

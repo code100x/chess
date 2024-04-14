@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
+  postgres:
+    image: postgres:15.0-alpine
+    ports:
+      - 4446:5432
+    volumes:
+      - data:/var/lib/postgresql1/data
+    restart: always
+    environment:
+      POSTGRES_DB: reef_dev
+      POSTGRES_PASSWORD: pass
+      POSTGRES_USER: user
+    healthcheck:
+      test: pg_isready --username=user --dbname=reef_dev --quiet
+      interval: 15s
+      timeout: 5s
+      
+  hasura:
+    image: hasura/graphql-engine:v2.18.0.cli-migrations-v3
+    ports:
+      - 8112:8080
+    depends_on:
+      - postgres
+    volumes:
+      - "./hasura/metadata:/hasura-metadata"
+      - "./hasura/migrations:/hasura-migrations"
+    restart: unless-stopped
+    healthcheck:
+      test: curl -f http://localhost:8080/healthz || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 15
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://user:pass@postgres/reef_dev
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" 
+
+volumes:
+  data:
