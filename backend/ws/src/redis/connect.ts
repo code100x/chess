@@ -1,5 +1,5 @@
 import { RedisClientType, createClient } from "redis";
-import { REDIS_URL } from "../config";
+import { DEFAULT_FEN, REDIS_URL } from "../config";
 import { Role } from "../types/game";
 import { MessageType, WsMessageParser } from "../types/message";
 import { Game } from "./game";
@@ -40,7 +40,7 @@ export class GameRoom {
         return this.instance;
     }
 
-    subscribe(gameId: string, userId: string, role: Role, ws: any) {
+    async subscribe(gameId: string, userId: string, role: Role, ws: any) {
         this.subscriptions.set(userId, [
             ...(this.subscriptions.get(userId) || []),
             gameId
@@ -53,15 +53,17 @@ export class GameRoom {
             });
         }
         else if(Object.keys(this.reverseSubscriptions.get(gameId) || {}).length == 1) {
-            // get the role of the user and assign the opposite role
             let role = Object.values(this.reverseSubscriptions.get(gameId) || {})[0]?.role === Role.Black ? Role.White : Role.Black;
             this.reverseSubscriptions.set(gameId, {
                 ...this.reverseSubscriptions.get(gameId),
                 [userId]: { userId, ws, role }
             });
-            this.game = new Game();
+            //todo: check if the game has already started
+            await Game.getInstance().pushFen(gameId, {
+                lan: "",
+                fen: DEFAULT_FEN,
+            });
         }
-        // check if the game already has a user as black and white
         else {
             this.reverseSubscriptions.set(gameId, {
                 ...this.reverseSubscriptions.get(gameId),
@@ -80,11 +82,16 @@ export class GameRoom {
                 const parsePayload = WsMessageParser.parse(JSON.parse(payload.toString()));
 
                 if (parsePayload.type === MessageType.Move) {
-                    // send the move to the user                    
+                    const lastMove = await Game.getInstance().getLastMove(gameId);                    
                     try {
                         const subs = this.reverseSubscriptions.get(gameId) || {};
                         Object.values(subs).forEach(({ ws }) => {
-                            ws.send(JSON.stringify(parsePayload));
+                            ws.send(JSON.stringify({
+                                type: MessageType.Move,
+                                payload: {
+                                    lastMove
+                                }
+                            }));
                         });
 
                     } catch (error) {
@@ -103,13 +110,15 @@ export class GameRoom {
         this.publisher.publish(gameId, JSON.stringify(data));
     }
     
-    move(gameId: string, userId: string, payload: any) {
+    async move(gameId: string, userId: string, payload: any) {
 
-        //todo: check for checkmate and stalemate, update the payload accordingly
-
+        
         // allow publishing only if the role is black or white
         if (this.reverseSubscriptions.get(gameId)?.[userId]) {
             if([Role.Black, Role.White].includes(this.reverseSubscriptions.get(gameId)?.[userId]?.role as Role)) {
+
+                //todo: check for checkmate and stalemate, update the payload accordingly
+                await Game.getInstance().move(gameId, userId, payload.from, payload.to);
                 this.publish(
                     gameId, {
                     type: MessageType.Move,
@@ -124,9 +133,6 @@ export class GameRoom {
         }
     }
 
-    getMove(gameId: string, userId: string, piece: string, position: string) {
-        // use the game object to get the current state of the game and decide
-    }
 
     unsubscribe(userId: string, gameId: string) {
         this.subscriptions.set(userId, [

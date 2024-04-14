@@ -5,6 +5,7 @@ import { WSPORT } from "./config";
 import cors from "cors";
 import { MessageType, WsMessageParser } from "./types/message";
 import { GameRoom } from "./redis/connect";
+import { Game } from "./redis/game";
 
 const app = express();
 
@@ -44,18 +45,23 @@ wss.on("connection", (ws, req) => {
 
     //Todo: handle authentication
 
-    ws.on("message", (message) => {
+    ws.on("message", async (message) => {
         const data = WsMessageParser.parse(JSON.parse(message.toString()));
 
         if(data.type === MessageType.Join) {
-            GameRoom.getInstance().subscribe(data.payload.gameId, data.payload.userId, data.payload.role, ws)
+            await GameRoom.getInstance().subscribe(data.payload.gameId, data.payload.userId, data.payload.role, ws)
         }
         if(data.type === MessageType.GetMoves) {
-            //todo: get the valid moves and send to user
+            await Game.getInstance().getLegalMoves(data.payload.gameId, data.payload.pos).then((moves) => {
+                ws.send(JSON.stringify({
+                    type: MessageType.GetMoves,
+                    payload: moves || []
+                }));
+            });
         }
         if(data.type === MessageType.Move) {
             //todo: check for valid move if valid then publish to game queue and if there is checkmate
-            GameRoom.getInstance().move(data.payload.gameId, data.payload.userId, data.payload);
+            await GameRoom.getInstance().move(data.payload.gameId, data.payload.userId, data.payload);
         }
 
     });
@@ -76,6 +82,13 @@ process.on("unhandledRejection", function (reason, _promise) {
 Promise.all([
     new Promise((resolve, reject) => {
         GameRoom.getInstance().connect().then(() => {
+            resolve(true);
+        }).catch((error) => {
+            reject(error);
+        });
+    }),
+    new Promise((resolve, reject) => {
+        Game.getInstance().connect().then(() => {
             resolve(true);
         }).catch((error) => {
             reject(error);
