@@ -46,7 +46,6 @@ wss.on("connection", (ws, req) => {
 
     ws.on("message", (message) => {
         const data = WsMessageParser.parse(JSON.parse(message.toString()));
-        console.log(data);
 
         if(data.type === MessageType.Join) {
             GameRoom.getInstance().subscribe(data.payload.gameId, data.payload.userId, data.payload.role, ws)
@@ -75,7 +74,13 @@ process.on("unhandledRejection", function (reason, _promise) {
 });
 
 Promise.all([
-    
+    new Promise((resolve, reject) => {
+        GameRoom.getInstance().connect().then(() => {
+            resolve(true);
+        }).catch((error) => {
+            reject(error);
+        });
+    })
 ]).then(() => {
     server.listen(WSPORT, async () => {
         console.log(`Server listening on port: ${WSPORT}\n`);

@@ -25,8 +25,11 @@ export class GameRoom {
         this.subscriptions = new Map<string, string[]>();
         this.reverseSubscriptions = new Map<string, { [userId: string]: { userId: string, ws: any, role: Role } }>();
 
-        this.subscriber.connect();
-        this.publisher.connect();
+    }
+
+    async connect() {
+        await this.subscriber.connect();
+        await this.publisher.connect();
     }
 
     // singleton
@@ -65,8 +68,6 @@ export class GameRoom {
                 [userId]: { userId, ws, role: Role.Audience }
             });
         }
-
-        console.log(this.reverseSubscriptions.get(gameId) || {});
 
 
         // to subscribe to the game if already a user is present as black or white
