@@ -1,0 +1,37 @@
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  Game      Game?    @relation(fields: [gameId], references: [id])
+  gameId    Int?
+  Move      Move[]
+}
+
+model Game {
+  id        Int      @id @default(autoincrement())
+  name      String?
+  fen       String
+  status    String
+  winnerId  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  players   User[]
+  Move      Move[]
+}
+
+model Move {
+  id       Int    @id @default(autoincrement())
+  gameId   Int
+  playerId Int
+  move     String
+
+  game   Game @relation(fields: [gameId], references: [id])
+  player User @relation(fields: [playerId], references: [id])
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
