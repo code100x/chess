@@ -1,4 +1,4 @@
-name: Containerize ws
+name: Containerize worker
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: "mv docker/ws/Dockerfile ."
+      - run: "mv docker/worker/Dockerfile ."
 
       - name: add secrets
         env:
@@ -22,7 +22,11 @@ jobs:
           cd backend/ws
           touch .env
           printf 'REDIS_URL=%s\n' "${{secrets.REDIS_URL}}" >> .env
-          printf 'WSPORT=%s\n' "${{secrets.WSPORT}}" >> .env
+          printf 'HASURA_URL=%s\n' "${{secrets.HASURA_URL}}" >> .env
+          printf 'AUTH_JWT=%s\n' "${{secrets.AUTH_JWT}}" >> .env
+          printf 'HASURA_ADMIN_SERCRET=%s\n' "${{secrets.HASURA_ADMIN_SERCRET}}" >> .env
+          printf 'AUTH_JWT_PUBLIC_KEY=%s\n' "${{secrets.AUTH_JWT_PUBLIC_KEY}}" >> .env
+          printf 'AUTH_JWT_PRIVATE_KEY=%s\n' "${{secrets.AUTH_JWT_PRIVATE_KEY}}" >> .env
           cd ../..
 
       - name: docker login
@@ -31,8 +35,8 @@ jobs:
           DOCKER_PASSWORD: ${{secrets.DOCKERHUB_TOKEN}}
       #   run: |
       #     docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-      # - name: Build the Ws Docker image
-      #   run: docker build . --tag code100x/chess-ws:${{ github.sha }}
+      # - name: Build the Worker Docker image
+      #   run: docker build . --tag code100x/chess-worker:${{ github.sha }}
 
       # - name: Docker Push
-      #   run: docker push code100x/chess-ws:${{ github.sha }}
+      #   run: docker push code100x/chess-worker:${{ github.sha }}
