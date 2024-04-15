@@ -21,5 +21,8 @@
     "apps/*",
     "packages/*",
     "backend/*"
-  ]
+  ],
+  "dependencies": {
+    "tsup": "^8.0.2"
+  }
 }
