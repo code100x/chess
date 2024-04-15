@@ -1,3 +1,7 @@
 table:
   name: moves
   schema: public
+object_relationships:
+  - name: game
+    using:
+      foreign_key_constraint_on: game_id

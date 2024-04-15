@@ -8,3 +8,11 @@ object_relationships:
   - name: userByWhitePlayer
     using:
       foreign_key_constraint_on: white_player
+array_relationships:
+  - name: moves
+    using:
+      foreign_key_constraint_on:
+        column: game_id
+        table:
+          name: moves
+          schema: public
