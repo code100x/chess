@@ -27,6 +27,9 @@ jobs:
           printf 'HASURA_ADMIN_SERCRET=%s\n' "${{secrets.HASURA_ADMIN_SERCRET}}" >> .env
           printf 'AUTH_JWT_PUBLIC_KEY=%s\n' "${{secrets.AUTH_JWT_PUBLIC_KEY}}" >> .env
           printf 'AUTH_JWT_PRIVATE_KEY=%s\n' "${{secrets.AUTH_JWT_PRIVATE_KEY}}" >> .env
+          printf 'MAIL_SERVICE=%s\n' "${{secrets.MAIL_SERVICE}}" >> .env
+          printf 'GMAIL=%s\n' "${{secrets.GMAIL}}" >> .env
+          printf 'GMAIL_APP_PASS=%s\n' "${{secrets.GMAIL_APP_PASS}}" >> .env
           cd ../..
 
       - name: docker login

@@ -1,0 +1,27 @@
+{
+  "name": "@chess/worker",
+  "version": "0.0.1",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "type": "commonjs",
+  "license": "MIT",
+  "private": "true",
+  "scripts": {
+    "build": "esbuild ./src/index.js --bundle --platform=node --outfile=dist/index.js",
+    "dev": "yarn build && node dist/index.js --trace-warning",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "nodemailer": "^6.9.13",
+    "redis": "^4.6.13",
+    "speakeasy": "^2.0.0"
+  },
+  "devDependencies": {
+    "@chess/common": "*",
+    "@chess/zeus": "*",
+    "@types/nodemailer": "^6.4.14",
+    "@types/speakeasy": "^2.0.10"
+  },
+  "description": "Notification worker for app"
+}
