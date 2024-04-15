@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js" 
+}
+
+datasource db {
+  provider  = "postgresql"
+  url  	    = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+    ADMIN
+    USER
+}
+
+model User {
+  id                       String    @id @default(cuid())
+  name                     String?
+  email                    String?   @unique
+  emailVerified            DateTime?
+  image                    String?
+  password                 String?
+  confirm_password         String?
+  role                     UserRole  @default(USER)  
+  accounts                 Account[]
+  isTwoFactorEnabled       Boolean   @default(false)
+  twoFactorConfirmation    TwoFactorConfirmation?
+  // sessions      Session[] We are not using session for this one here
+
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+//Below schema is for 2FA 
+
+
+// If we are implementing magic link sort of stuff we can use this
+model VerificationToken {
+  id String @id @default(cuid())
+  email String
+  token String @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model PasswordResetToken{
+  id        String  @id @default(uuid())
+  email     String 
+  token     String  @unique
+  expires   DateTime
+
+  @@unique([email,token])
+}
+
+model TwoFactorToken{
+  id                 String @id @default(cuid())
+  email              String 
+  token              String @unique
+  expires            DateTime
+
+  @@unique([email,token])
+}
+
+model TwoFactorConfirmation{
+  id                 String @id @default(cuid())
+  userId             String @unique
+  user User @relation(fields: [userId],references: [id],onDelete: Cascade)
+}
