@@ -1,7 +1,9 @@
 import { Router } from "express";
-import { UserSignupSchema, dbResStatus, responseStatus } from "@chess/common";
+import { CACHE_EXPIRY, User, UserSignupSchema, dbResStatus, responseStatus } from "@chess/common";
 import { setHashPassword, setJWTCookie } from "../utils/utils";
-import { insertUser } from "../db/user";
+import { insertUser, queryUserById } from "../db/user";
+import { extractUserId } from "../utils/middleware";
+import { UserCache } from "../redis/user";
 
 export const userRouter = Router();
 
@@ -58,3 +60,54 @@ userRouter.post("/", async (req, res) => {
         })
     }
 });
+
+/**
+ * User me endpoint
+ */
+userRouter.get('/me' , extractUserId, async (req, res) => {
+    try {
+        //@ts-ignore
+        const id = req.id;
+        //@ts-ignore
+        const jwt = req.jwt;
+        if(id || jwt) {
+            // checking cache
+            const userCache = await UserCache.getInstance().getUser<User>(id);
+            if(userCache) {
+                return res.status(302).json({
+                    status: responseStatus.Ok,
+                    user: {...userCache, jwt} as User
+                });
+            }
+
+            // fetch the db
+            const {user, status, msg} = await queryUserById<User>(id);
+            if(status == dbResStatus.Error || !user) {
+                return res.status(500).json({
+                    status: responseStatus.Error,
+                    msg
+                });
+            };
+
+            // cache the user
+            await UserCache.getInstance().cacheUser<User>(id, user, CACHE_EXPIRY);
+
+            return res.status(200).json({
+                status: responseStatus.Ok,
+                user: {...user, jwt} as User
+            });
+
+        }
+        return res.status(401).json({
+            status: responseStatus.Error,
+            msg: "Unauthorized"
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            //@ts-expect-error
+            error: error.message,
+            status: responseStatus.Error,
+        })
+    }
+})

@@ -3,6 +3,7 @@ import { API_PORT } from "./config";
 import cors from "cors";
 import morgan from "morgan";
 import { userRouter } from "./routes/user";
+import { UserCache } from "./redis/user";
 
 const app = express();
 
@@ -48,6 +49,18 @@ process.on('uncaughtException', (err) => {
     process.exit(1);
 });
 
-app.listen(API_PORT, () => {
-    console.log(`Server is running on port ${API_PORT}`)
+Promise.all([
+    new Promise((resolve, reject) => {
+        UserCache.getInstance().getClient.connect().then(() => {
+            resolve(true);
+        }).catch((error) => {
+            reject(error);
+        });
+    }),
+]).then(() => {
+    app.listen(API_PORT, async () => {
+        console.log(`Server listening on port: ${API_PORT}\n`);
+    });
+}).catch((error) => {
+    console.error('Error while connecting producers:', error);
 });

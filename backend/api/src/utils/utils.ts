@@ -30,7 +30,7 @@ export const setJWTCookie = async (
     req: Request,
     res: Response,
     userId: string,
-) => {
+): Promise<string> => {
     const secret = await importPKCS8(AUTH_JWT_PRIVATE_KEY, JWT_ALGO);
 
     const jwt = await new SignJWT({
@@ -74,4 +74,8 @@ export const validateJwt = async (jwt: string) => {
         issuer: "code100x",
         audience: "chess",
     });
+};
+
+export const clearCookie = (res: Response, cookieName: string) => {
+    res.clearCookie(cookieName);
 };
