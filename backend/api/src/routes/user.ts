@@ -28,7 +28,6 @@ userRouter.post("/", async (req, res) => {
 
         //todo: cache the client data;
         //todo: push the verification process to a messaging queue;
-        //todo: sign a jwt token and send it to the client; ✔️
         /**
          * Sign a jwt token
          */

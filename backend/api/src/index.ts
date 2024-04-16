@@ -4,6 +4,8 @@ import cors from "cors";
 import morgan from "morgan";
 import { userRouter } from "./routes/user";
 import { UserCache } from "./redis/user";
+import { gameRouter } from "./routes/game";
+import { extractUserId } from "./utils/middleware";
 
 const app = express();
 
@@ -43,6 +45,7 @@ app.get('/health', (_, res) => {
 });
 
 app.use('/user', userRouter);
+app.use('/game', extractUserId, gameRouter);
 
 process.on('uncaughtException', (err) => {
     console.log('Uncaught Exception:', err);

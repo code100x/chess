@@ -13,6 +13,7 @@ COPY ["tsconfig.json", "./tsconfig.json"]
 
 COPY ["packages/typescript-config", "./packages/typescript-config"]
 COPY ["packages/eslint-config", "./packages/eslint-config"]
+COPY ["packages/common", "./packages/common"]
 COPY ["backend/ws", "./backend/ws"]
 
 

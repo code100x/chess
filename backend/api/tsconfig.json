@@ -3,6 +3,6 @@
   "compilerOptions": {
     "outDir": "dist"
   },
-  "include": ["src"],
+  "include": ["src", "../ws/src/worker"],
   "exclude": ["node_modules", "dist"]
 }
