@@ -6,6 +6,7 @@ import cors from "cors";
 import { MessageType, WsMessageParser } from "./types/message";
 import { GameRoom } from "./redis/connect";
 import { Game } from "./redis/game";
+import { Worker } from "./worker/publish";
 
 const app = express();
 
@@ -97,7 +98,14 @@ Promise.all([
         }).catch((error) => {
             reject(error);
         });
-    })
+    }),
+    new Promise((resolve, reject) => {
+        Worker.getInstance().connect().then(() => {
+            resolve(true);
+        }).catch((error) => {
+            reject(error);
+        });
+    }),
 ]).then(() => {
     server.listen(WSPORT, async () => {
         console.log(`Server listening on port: ${WSPORT}\n`);

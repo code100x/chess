@@ -23,6 +23,8 @@
     "ws": "^8.16.0",
     "zod": "^3.22.4"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@chess/common": "*"
+  },
   "description": "Socket server for app"
 }
