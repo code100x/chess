@@ -31,8 +31,8 @@ export class Redis {
     }
 
     async popQueue(queue: string): Promise<string> {
-        const response = await this.client.rPop(queue);
-        return response || "";
+        const response = await this.client.brPop(queue, 0);
+        return response?.element || "";
     }
 
     async pushQueue(queue: string, messsage: string) {

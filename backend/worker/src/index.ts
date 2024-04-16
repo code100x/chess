@@ -30,7 +30,7 @@ function spawn() {
     return worker;
 }
 
-if (cluster.isPrimary) {
+if (cluster.isMaster) {
     for (let i = 0; i < count; i++) {
         spawn();
     }
@@ -43,7 +43,9 @@ if (cluster.isPrimary) {
 
     Promise.all([
         new Promise((resolve) => {
-            Redis.getInstance().getClient.on('ready', resolve);
+            Redis.getInstance().getClient.connect().then(() => {
+                resolve(true);
+            });
         }),
     ]).then(() => {
         app.listen(PORT, async () => {
@@ -54,11 +56,20 @@ if (cluster.isPrimary) {
     });
 
 } else {
-    (async () => {
+    console.log(`Worker ${process.pid} started`);
+    Promise.all([
+        new Promise((resolve) => {
+            Redis.getInstance().getClient.connect().then(() => {
+                resolve(true);
+            });
+        }),
+    ]).then(async () => {
         while (true) {
             await processQueue();
         }
-    })();
+    }).catch((error) => {
+        console.error('Error while connecting producers:', error);
+    });
 }
 
 process.on("uncaughtException", function (err) {

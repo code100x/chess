@@ -1,6 +1,6 @@
 import { Redis } from "./Redis";
 import { WORKER_QUEUE, WORKER_PROCESSES } from "@chess/common";
-import { sendOtp } from "./process";
+import { sendOtp, updateGame } from "./process";
 
 export const processQueue = async () => {
     return new Promise<void>(async (resolve, reject) => {
@@ -11,14 +11,15 @@ export const processQueue = async () => {
                 //wait for 4 seconds before checking again
                 setTimeout(resolve, 4000);
             } else {
-                console.log('Processing email queue...');
+                console.log('Processing queue...');
                 await processWorker(response);
                 // Hold to avoid overwelming the worker
                 clearTimeout(setTimeout(resolve, 1000 * 10));
                 resolve();
             }
         } catch (error) {
-
+            console.error('Error while processing queue:', error);
+            reject()
         }
     });
 }
@@ -31,6 +32,9 @@ export const processWorker = async (response: string) => {
         switch (type as WORKER_PROCESSES) {
             case WORKER_PROCESSES.SEND_OTP:
                 await sendOtp(payload);
+                break;
+            case WORKER_PROCESSES.DB_ADD_PLAYER:
+                await updateGame(payload);
                 break;
             //todo: Add more worker processes
             default:

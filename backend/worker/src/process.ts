@@ -1,4 +1,6 @@
+import { GameRole } from "@chess/common";
 import { Redis } from "./Redis";
+import { addPlayer } from "./db/game";
 import { genOtp, sendOTP } from "./utils";
 
 export const sendOtp = async ({
@@ -16,5 +18,20 @@ export const sendOtp = async ({
     await Redis.getInstance().getClient.set(otp.toString(), id, {
         EX: 60 * 10
     });
+    console.log("Otp send to ", id)
     return true
+}
+
+export const updateGame = async ({
+    gameId,
+    userId,
+    role
+}: {
+    gameId: string,
+    userId: string,
+    role: string
+}): Promise<void> => {
+    await addPlayer(gameId, userId, role as GameRole.Black | GameRole.White);
+    console.log(`Player with role as ${role} added to game ${gameId}`)
+    return;
 }
