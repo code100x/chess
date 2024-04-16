@@ -4,6 +4,7 @@ export enum MessageType {
     Move = "move",
     Join = "join",
     GetMoves = "getMoves",
+    GetMatch = "getMatch",
 }
 
 export const WsMessageParser = z.object({

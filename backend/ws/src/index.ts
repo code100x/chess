@@ -41,12 +41,16 @@ app.get("/_health", (_req, res) => {
     });
 });
 
-wss.on("connection", (ws, req) => {
+wss.on("connection", (ws, _) => {
 
     //Todo: handle authentication
 
     ws.on("message", async (message) => {
         const data = WsMessageParser.parse(JSON.parse(message.toString()));
+
+        if(data.type === MessageType.GetMatch) {
+            await GameRoom.getInstance().getMatch(data.payload, ws);
+        }
 
         if(data.type === MessageType.Join) {
             await GameRoom.getInstance().subscribe(data.payload.gameId, data.payload.userId, data.payload.role, ws)

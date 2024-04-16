@@ -40,6 +40,48 @@ export class GameRoom {
         return this.instance;
     }
 
+    //todo: give payload some type
+    async getMatch(payload: any, ws: any) {
+        const exceptGames = payload.exceptGame;
+        let remainGames: string[] = [];
+        this.reverseSubscriptions.forEach((value, key) => {
+            if(!exceptGames.includes(key)) {
+                remainGames.push(key);      
+            }
+        });
+        const games = remainGames.filter((gameId) => {
+            const room = this.reverseSubscriptions.get(gameId) || {};
+            if(Object.keys(room).length >= 2) {
+                return false;
+            }
+            if(Object.keys(room).length === 1) {
+                return Object.values(room)[0]?.role !== payload.role;
+            }
+            return false;
+        });
+
+        if(games.length > 0) {
+            return ws.send(JSON.stringify({
+                type: MessageType.GetMatch,
+                payload: {
+                    type: MessageType.GetMatch,
+                    payload: {
+                        matchedGameId: games[Math.floor(Math.random() * games.length)]
+                    }
+                }
+            }));
+        }
+        return ws.send(JSON.stringify({
+            type: MessageType.GetMatch,
+            payload: {
+                type: MessageType.GetMatch,
+                payload: {
+                    matchedGameId: []
+                }
+            }
+        }));
+    }
+
     async subscribe(gameId: string, userId: string, role: Role, ws: any) {
         this.subscriptions.set(userId, [
             ...(this.subscriptions.get(userId) || []),
