@@ -1069,14 +1069,83 @@ export type ValueTypes = {
   ["cursor_ordering"]: cursor_ordering;
   /** game table */
   ["game"]: AliasType<{
-    black_player?: boolean | `@${string}`;
+    /** An object relationship */
+    black_player?: ValueTypes["user"];
+    black_player_id?: boolean | `@${string}`;
     created_at?: boolean | `@${string}`;
     id?: boolean | `@${string}`;
+    moves?: [
+      {
+        /** distinct select on columns */
+        distinct_on?:
+          | Array<ValueTypes["moves_select_column"]>
+          | undefined
+          | null
+          | Variable<any, string> /** limit the number of rows returned */;
+        limit?:
+          | number
+          | undefined
+          | null
+          | Variable<
+              any,
+              string
+            > /** skip the first n rows. Use only with order_by */;
+        offset?:
+          | number
+          | undefined
+          | null
+          | Variable<any, string> /** sort the rows by one or more columns */;
+        order_by?:
+          | Array<ValueTypes["moves_order_by"]>
+          | undefined
+          | null
+          | Variable<any, string> /** filter the rows returned */;
+        where?:
+          | ValueTypes["moves_bool_exp"]
+          | undefined
+          | null
+          | Variable<any, string>;
+      },
+      ValueTypes["moves"],
+    ];
+    moves_aggregate?: [
+      {
+        /** distinct select on columns */
+        distinct_on?:
+          | Array<ValueTypes["moves_select_column"]>
+          | undefined
+          | null
+          | Variable<any, string> /** limit the number of rows returned */;
+        limit?:
+          | number
+          | undefined
+          | null
+          | Variable<
+              any,
+              string
+            > /** skip the first n rows. Use only with order_by */;
+        offset?:
+          | number
+          | undefined
+          | null
+          | Variable<any, string> /** sort the rows by one or more columns */;
+        order_by?:
+          | Array<ValueTypes["moves_order_by"]>
+          | undefined
+          | null
+          | Variable<any, string> /** filter the rows returned */;
+        where?:
+          | ValueTypes["moves_bool_exp"]
+          | undefined
+          | null
+          | Variable<any, string>;
+      },
+      ValueTypes["moves_aggregate"],
+    ];
+    status?: boolean | `@${string}`;
     /** An object relationship */
-    user?: ValueTypes["user"];
-    /** An object relationship */
-    userByWhitePlayer?: ValueTypes["user"];
-    white_player?: boolean | `@${string}`;
+    white_player?: ValueTypes["user"];
+    white_player_id?: boolean | `@${string}`;
     __typename?: boolean | `@${string}`;
   }>;
   /** aggregated selection of "game" */
@@ -1165,6 +1234,11 @@ export type ValueTypes = {
       | null
       | Variable<any, string>;
     black_player?:
+      | ValueTypes["user_bool_exp"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    black_player_id?:
       | ValueTypes["uuid_comparison_exp"]
       | undefined
       | null
@@ -1179,17 +1253,27 @@ export type ValueTypes = {
       | undefined
       | null
       | Variable<any, string>;
-    user?:
-      | ValueTypes["user_bool_exp"]
+    moves?:
+      | ValueTypes["moves_bool_exp"]
       | undefined
       | null
       | Variable<any, string>;
-    userByWhitePlayer?:
-      | ValueTypes["user_bool_exp"]
+    moves_aggregate?:
+      | ValueTypes["moves_aggregate_bool_exp"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    status?:
+      | ValueTypes["String_comparison_exp"]
       | undefined
       | null
       | Variable<any, string>;
     white_player?:
+      | ValueTypes["user_bool_exp"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    white_player_id?:
       | ValueTypes["uuid_comparison_exp"]
       | undefined
       | null
@@ -1200,6 +1284,11 @@ export type ValueTypes = {
   /** input type for inserting data into table "game" */
   ["game_insert_input"]: {
     black_player?:
+      | ValueTypes["user_obj_rel_insert_input"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    black_player_id?:
       | ValueTypes["uuid"]
       | undefined
       | null
@@ -1210,17 +1299,18 @@ export type ValueTypes = {
       | null
       | Variable<any, string>;
     id?: ValueTypes["uuid"] | undefined | null | Variable<any, string>;
-    user?:
-      | ValueTypes["user_obj_rel_insert_input"]
+    moves?:
+      | ValueTypes["moves_arr_rel_insert_input"]
       | undefined
       | null
       | Variable<any, string>;
-    userByWhitePlayer?:
-      | ValueTypes["user_obj_rel_insert_input"]
-      | undefined
-      | null
-      | Variable<any, string>;
+    status?: string | undefined | null | Variable<any, string>;
     white_player?:
+      | ValueTypes["user_obj_rel_insert_input"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    white_player_id?:
       | ValueTypes["uuid"]
       | undefined
       | null
@@ -1228,15 +1318,16 @@ export type ValueTypes = {
   };
   /** aggregate max on columns */
   ["game_max_fields"]: AliasType<{
-    black_player?: boolean | `@${string}`;
+    black_player_id?: boolean | `@${string}`;
     created_at?: boolean | `@${string}`;
     id?: boolean | `@${string}`;
-    white_player?: boolean | `@${string}`;
+    status?: boolean | `@${string}`;
+    white_player_id?: boolean | `@${string}`;
     __typename?: boolean | `@${string}`;
   }>;
   /** order by max() on columns of table "game" */
   ["game_max_order_by"]: {
-    black_player?:
+    black_player_id?:
       | ValueTypes["order_by"]
       | undefined
       | null
@@ -1247,7 +1338,8 @@ export type ValueTypes = {
       | null
       | Variable<any, string>;
     id?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
-    white_player?:
+    status?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    white_player_id?:
       | ValueTypes["order_by"]
       | undefined
       | null
@@ -1255,15 +1347,16 @@ export type ValueTypes = {
   };
   /** aggregate min on columns */
   ["game_min_fields"]: AliasType<{
-    black_player?: boolean | `@${string}`;
+    black_player_id?: boolean | `@${string}`;
     created_at?: boolean | `@${string}`;
     id?: boolean | `@${string}`;
-    white_player?: boolean | `@${string}`;
+    status?: boolean | `@${string}`;
+    white_player_id?: boolean | `@${string}`;
     __typename?: boolean | `@${string}`;
   }>;
   /** order by min() on columns of table "game" */
   ["game_min_order_by"]: {
-    black_player?:
+    black_player_id?:
       | ValueTypes["order_by"]
       | undefined
       | null
@@ -1274,7 +1367,8 @@ export type ValueTypes = {
       | null
       | Variable<any, string>;
     id?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
-    white_player?:
+    status?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    white_player_id?:
       | ValueTypes["order_by"]
       | undefined
       | null
@@ -1288,6 +1382,16 @@ export type ValueTypes = {
     returning?: ValueTypes["game"];
     __typename?: boolean | `@${string}`;
   }>;
+  /** input type for inserting object relation for remote table "game" */
+  ["game_obj_rel_insert_input"]: {
+    data: ValueTypes["game_insert_input"] | Variable<any, string>;
+    /** upsert condition */
+    on_conflict?:
+      | ValueTypes["game_on_conflict"]
+      | undefined
+      | null
+      | Variable<any, string>;
+  };
   /** on_conflict condition type for table "game" */
   ["game_on_conflict"]: {
     constraint: ValueTypes["game_constraint"] | Variable<any, string>;
@@ -1303,6 +1407,11 @@ export type ValueTypes = {
   /** Ordering options when selecting data from "game". */
   ["game_order_by"]: {
     black_player?:
+      | ValueTypes["user_order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    black_player_id?:
       | ValueTypes["order_by"]
       | undefined
       | null
@@ -1313,17 +1422,18 @@ export type ValueTypes = {
       | null
       | Variable<any, string>;
     id?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
-    user?:
-      | ValueTypes["user_order_by"]
+    moves_aggregate?:
+      | ValueTypes["moves_aggregate_order_by"]
       | undefined
       | null
       | Variable<any, string>;
-    userByWhitePlayer?:
-      | ValueTypes["user_order_by"]
-      | undefined
-      | null
-      | Variable<any, string>;
+    status?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
     white_player?:
+      | ValueTypes["user_order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    white_player_id?:
       | ValueTypes["order_by"]
       | undefined
       | null
@@ -1337,7 +1447,7 @@ export type ValueTypes = {
   ["game_select_column"]: game_select_column;
   /** input type for updating data in table "game" */
   ["game_set_input"]: {
-    black_player?:
+    black_player_id?:
       | ValueTypes["uuid"]
       | undefined
       | null
@@ -1348,7 +1458,8 @@ export type ValueTypes = {
       | null
       | Variable<any, string>;
     id?: ValueTypes["uuid"] | undefined | null | Variable<any, string>;
-    white_player?:
+    status?: string | undefined | null | Variable<any, string>;
+    white_player_id?:
       | ValueTypes["uuid"]
       | undefined
       | null
@@ -1369,7 +1480,7 @@ export type ValueTypes = {
   };
   /** Initial value of the column from where the streaming should start */
   ["game_stream_cursor_value_input"]: {
-    black_player?:
+    black_player_id?:
       | ValueTypes["uuid"]
       | undefined
       | null
@@ -1380,7 +1491,8 @@ export type ValueTypes = {
       | null
       | Variable<any, string>;
     id?: ValueTypes["uuid"] | undefined | null | Variable<any, string>;
-    white_player?:
+    status?: string | undefined | null | Variable<any, string>;
+    white_player_id?:
       | ValueTypes["uuid"]
       | undefined
       | null
@@ -1407,6 +1519,8 @@ export type ValueTypes = {
     created_at?: boolean | `@${string}`;
     flags?: boolean | `@${string}`;
     from?: boolean | `@${string}`;
+    /** An object relationship */
+    game?: ValueTypes["game"];
     game_id?: boolean | `@${string}`;
     id?: boolean | `@${string}`;
     lan?: boolean | `@${string}`;
@@ -1423,6 +1537,27 @@ export type ValueTypes = {
     nodes?: ValueTypes["moves"];
     __typename?: boolean | `@${string}`;
   }>;
+  ["moves_aggregate_bool_exp"]: {
+    count?:
+      | ValueTypes["moves_aggregate_bool_exp_count"]
+      | undefined
+      | null
+      | Variable<any, string>;
+  };
+  ["moves_aggregate_bool_exp_count"]: {
+    arguments?:
+      | Array<ValueTypes["moves_select_column"]>
+      | undefined
+      | null
+      | Variable<any, string>;
+    distinct?: boolean | undefined | null | Variable<any, string>;
+    filter?:
+      | ValueTypes["moves_bool_exp"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    predicate: ValueTypes["Int_comparison_exp"] | Variable<any, string>;
+  };
   /** aggregate fields of "moves" */
   ["moves_aggregate_fields"]: AliasType<{
     count?: [
@@ -1440,6 +1575,30 @@ export type ValueTypes = {
     min?: ValueTypes["moves_min_fields"];
     __typename?: boolean | `@${string}`;
   }>;
+  /** order by aggregate values of table "moves" */
+  ["moves_aggregate_order_by"]: {
+    count?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    max?:
+      | ValueTypes["moves_max_order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    min?:
+      | ValueTypes["moves_min_order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+  };
+  /** input type for inserting array relation for remote table "moves" */
+  ["moves_arr_rel_insert_input"]: {
+    data: Array<ValueTypes["moves_insert_input"]> | Variable<any, string>;
+    /** upsert condition */
+    on_conflict?:
+      | ValueTypes["moves_on_conflict"]
+      | undefined
+      | null
+      | Variable<any, string>;
+  };
   /** Boolean expression to filter rows from the table "moves". All fields are combined with a logical 'AND'. */
   ["moves_bool_exp"]: {
     _and?:
@@ -1489,6 +1648,11 @@ export type ValueTypes = {
       | Variable<any, string>;
     from?:
       | ValueTypes["String_comparison_exp"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    game?:
+      | ValueTypes["game_bool_exp"]
       | undefined
       | null
       | Variable<any, string>;
@@ -1548,6 +1712,11 @@ export type ValueTypes = {
       | Variable<any, string>;
     flags?: string | undefined | null | Variable<any, string>;
     from?: string | undefined | null | Variable<any, string>;
+    game?:
+      | ValueTypes["game_obj_rel_insert_input"]
+      | undefined
+      | null
+      | Variable<any, string>;
     game_id?: ValueTypes["uuid"] | undefined | null | Variable<any, string>;
     id?: ValueTypes["uuid"] | undefined | null | Variable<any, string>;
     lan?: string | undefined | null | Variable<any, string>;
@@ -1580,6 +1749,48 @@ export type ValueTypes = {
     updated_at?: boolean | `@${string}`;
     __typename?: boolean | `@${string}`;
   }>;
+  /** order by max() on columns of table "moves" */
+  ["moves_max_order_by"]: {
+    after_fen?:
+      | ValueTypes["order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    before_fen?:
+      | ValueTypes["order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    captured?:
+      | ValueTypes["order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    color?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    created_at?:
+      | ValueTypes["order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    flags?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    from?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    game_id?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    id?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    lan?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    piece?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    promotion?:
+      | ValueTypes["order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    san?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    to?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    updated_at?:
+      | ValueTypes["order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+  };
   /** aggregate min on columns */
   ["moves_min_fields"]: AliasType<{
     after_fen?: boolean | `@${string}`;
@@ -1599,6 +1810,48 @@ export type ValueTypes = {
     updated_at?: boolean | `@${string}`;
     __typename?: boolean | `@${string}`;
   }>;
+  /** order by min() on columns of table "moves" */
+  ["moves_min_order_by"]: {
+    after_fen?:
+      | ValueTypes["order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    before_fen?:
+      | ValueTypes["order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    captured?:
+      | ValueTypes["order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    color?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    created_at?:
+      | ValueTypes["order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    flags?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    from?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    game_id?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    id?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    lan?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    piece?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    promotion?:
+      | ValueTypes["order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+    san?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    to?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    updated_at?:
+      | ValueTypes["order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
+  };
   /** response of any mutation on the table "moves" */
   ["moves_mutation_response"]: AliasType<{
     /** number of rows affected by the mutation */
@@ -1644,6 +1897,11 @@ export type ValueTypes = {
       | Variable<any, string>;
     flags?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
     from?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
+    game?:
+      | ValueTypes["game_order_by"]
+      | undefined
+      | null
+      | Variable<any, string>;
     game_id?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
     id?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
     lan?: ValueTypes["order_by"] | undefined | null | Variable<any, string>;
@@ -3024,14 +3282,61 @@ export type ResolverInputTypes = {
   ["cursor_ordering"]: cursor_ordering;
   /** game table */
   ["game"]: AliasType<{
-    black_player?: boolean | `@${string}`;
+    /** An object relationship */
+    black_player?: ResolverInputTypes["user"];
+    black_player_id?: boolean | `@${string}`;
     created_at?: boolean | `@${string}`;
     id?: boolean | `@${string}`;
+    moves?: [
+      {
+        /** distinct select on columns */
+        distinct_on?:
+          | Array<ResolverInputTypes["moves_select_column"]>
+          | undefined
+          | null /** limit the number of rows returned */;
+        limit?:
+          | number
+          | undefined
+          | null /** skip the first n rows. Use only with order_by */;
+        offset?:
+          | number
+          | undefined
+          | null /** sort the rows by one or more columns */;
+        order_by?:
+          | Array<ResolverInputTypes["moves_order_by"]>
+          | undefined
+          | null /** filter the rows returned */;
+        where?: ResolverInputTypes["moves_bool_exp"] | undefined | null;
+      },
+      ResolverInputTypes["moves"],
+    ];
+    moves_aggregate?: [
+      {
+        /** distinct select on columns */
+        distinct_on?:
+          | Array<ResolverInputTypes["moves_select_column"]>
+          | undefined
+          | null /** limit the number of rows returned */;
+        limit?:
+          | number
+          | undefined
+          | null /** skip the first n rows. Use only with order_by */;
+        offset?:
+          | number
+          | undefined
+          | null /** sort the rows by one or more columns */;
+        order_by?:
+          | Array<ResolverInputTypes["moves_order_by"]>
+          | undefined
+          | null /** filter the rows returned */;
+        where?: ResolverInputTypes["moves_bool_exp"] | undefined | null;
+      },
+      ResolverInputTypes["moves_aggregate"],
+    ];
+    status?: boolean | `@${string}`;
     /** An object relationship */
-    user?: ResolverInputTypes["user"];
-    /** An object relationship */
-    userByWhitePlayer?: ResolverInputTypes["user"];
-    white_player?: boolean | `@${string}`;
+    white_player?: ResolverInputTypes["user"];
+    white_player_id?: boolean | `@${string}`;
     __typename?: boolean | `@${string}`;
   }>;
   /** aggregated selection of "game" */
@@ -3088,59 +3393,80 @@ export type ResolverInputTypes = {
     _and?: Array<ResolverInputTypes["game_bool_exp"]> | undefined | null;
     _not?: ResolverInputTypes["game_bool_exp"] | undefined | null;
     _or?: Array<ResolverInputTypes["game_bool_exp"]> | undefined | null;
-    black_player?: ResolverInputTypes["uuid_comparison_exp"] | undefined | null;
+    black_player?: ResolverInputTypes["user_bool_exp"] | undefined | null;
+    black_player_id?:
+      | ResolverInputTypes["uuid_comparison_exp"]
+      | undefined
+      | null;
     created_at?:
       | ResolverInputTypes["timestamptz_comparison_exp"]
       | undefined
       | null;
     id?: ResolverInputTypes["uuid_comparison_exp"] | undefined | null;
-    user?: ResolverInputTypes["user_bool_exp"] | undefined | null;
-    userByWhitePlayer?: ResolverInputTypes["user_bool_exp"] | undefined | null;
-    white_player?: ResolverInputTypes["uuid_comparison_exp"] | undefined | null;
+    moves?: ResolverInputTypes["moves_bool_exp"] | undefined | null;
+    moves_aggregate?:
+      | ResolverInputTypes["moves_aggregate_bool_exp"]
+      | undefined
+      | null;
+    status?: ResolverInputTypes["String_comparison_exp"] | undefined | null;
+    white_player?: ResolverInputTypes["user_bool_exp"] | undefined | null;
+    white_player_id?:
+      | ResolverInputTypes["uuid_comparison_exp"]
+      | undefined
+      | null;
   };
   /** unique or primary key constraints on table "game" */
   ["game_constraint"]: game_constraint;
   /** input type for inserting data into table "game" */
   ["game_insert_input"]: {
-    black_player?: ResolverInputTypes["uuid"] | undefined | null;
-    created_at?: ResolverInputTypes["timestamptz"] | undefined | null;
-    id?: ResolverInputTypes["uuid"] | undefined | null;
-    user?: ResolverInputTypes["user_obj_rel_insert_input"] | undefined | null;
-    userByWhitePlayer?:
+    black_player?:
       | ResolverInputTypes["user_obj_rel_insert_input"]
       | undefined
       | null;
-    white_player?: ResolverInputTypes["uuid"] | undefined | null;
+    black_player_id?: ResolverInputTypes["uuid"] | undefined | null;
+    created_at?: ResolverInputTypes["timestamptz"] | undefined | null;
+    id?: ResolverInputTypes["uuid"] | undefined | null;
+    moves?: ResolverInputTypes["moves_arr_rel_insert_input"] | undefined | null;
+    status?: string | undefined | null;
+    white_player?:
+      | ResolverInputTypes["user_obj_rel_insert_input"]
+      | undefined
+      | null;
+    white_player_id?: ResolverInputTypes["uuid"] | undefined | null;
   };
   /** aggregate max on columns */
   ["game_max_fields"]: AliasType<{
-    black_player?: boolean | `@${string}`;
+    black_player_id?: boolean | `@${string}`;
     created_at?: boolean | `@${string}`;
     id?: boolean | `@${string}`;
-    white_player?: boolean | `@${string}`;
+    status?: boolean | `@${string}`;
+    white_player_id?: boolean | `@${string}`;
     __typename?: boolean | `@${string}`;
   }>;
   /** order by max() on columns of table "game" */
   ["game_max_order_by"]: {
-    black_player?: ResolverInputTypes["order_by"] | undefined | null;
+    black_player_id?: ResolverInputTypes["order_by"] | undefined | null;
     created_at?: ResolverInputTypes["order_by"] | undefined | null;
     id?: ResolverInputTypes["order_by"] | undefined | null;
-    white_player?: ResolverInputTypes["order_by"] | undefined | null;
+    status?: ResolverInputTypes["order_by"] | undefined | null;
+    white_player_id?: ResolverInputTypes["order_by"] | undefined | null;
   };
   /** aggregate min on columns */
   ["game_min_fields"]: AliasType<{
-    black_player?: boolean | `@${string}`;
+    black_player_id?: boolean | `@${string}`;
     created_at?: boolean | `@${string}`;
     id?: boolean | `@${string}`;
-    white_player?: boolean | `@${string}`;
+    status?: boolean | `@${string}`;
+    white_player_id?: boolean | `@${string}`;
     __typename?: boolean | `@${string}`;
   }>;
   /** order by min() on columns of table "game" */
   ["game_min_order_by"]: {
-    black_player?: ResolverInputTypes["order_by"] | undefined | null;
+    black_player_id?: ResolverInputTypes["order_by"] | undefined | null;
     created_at?: ResolverInputTypes["order_by"] | undefined | null;
     id?: ResolverInputTypes["order_by"] | undefined | null;
-    white_player?: ResolverInputTypes["order_by"] | undefined | null;
+    status?: ResolverInputTypes["order_by"] | undefined | null;
+    white_player_id?: ResolverInputTypes["order_by"] | undefined | null;
   };
   /** response of any mutation on the table "game" */
   ["game_mutation_response"]: AliasType<{
@@ -3150,6 +3476,12 @@ export type ResolverInputTypes = {
     returning?: ResolverInputTypes["game"];
     __typename?: boolean | `@${string}`;
   }>;
+  /** input type for inserting object relation for remote table "game" */
+  ["game_obj_rel_insert_input"]: {
+    data: ResolverInputTypes["game_insert_input"];
+    /** upsert condition */
+    on_conflict?: ResolverInputTypes["game_on_conflict"] | undefined | null;
+  };
   /** on_conflict condition type for table "game" */
   ["game_on_conflict"]: {
     constraint: ResolverInputTypes["game_constraint"];
@@ -3158,12 +3490,17 @@ export type ResolverInputTypes = {
   };
   /** Ordering options when selecting data from "game". */
   ["game_order_by"]: {
-    black_player?: ResolverInputTypes["order_by"] | undefined | null;
+    black_player?: ResolverInputTypes["user_order_by"] | undefined | null;
+    black_player_id?: ResolverInputTypes["order_by"] | undefined | null;
     created_at?: ResolverInputTypes["order_by"] | undefined | null;
     id?: ResolverInputTypes["order_by"] | undefined | null;
-    user?: ResolverInputTypes["user_order_by"] | undefined | null;
-    userByWhitePlayer?: ResolverInputTypes["user_order_by"] | undefined | null;
-    white_player?: ResolverInputTypes["order_by"] | undefined | null;
+    moves_aggregate?:
+      | ResolverInputTypes["moves_aggregate_order_by"]
+      | undefined
+      | null;
+    status?: ResolverInputTypes["order_by"] | undefined | null;
+    white_player?: ResolverInputTypes["user_order_by"] | undefined | null;
+    white_player_id?: ResolverInputTypes["order_by"] | undefined | null;
   };
   /** primary key columns input for table: game */
   ["game_pk_columns_input"]: {
@@ -3173,10 +3510,11 @@ export type ResolverInputTypes = {
   ["game_select_column"]: game_select_column;
   /** input type for updating data in table "game" */
   ["game_set_input"]: {
-    black_player?: ResolverInputTypes["uuid"] | undefined | null;
+    black_player_id?: ResolverInputTypes["uuid"] | undefined | null;
     created_at?: ResolverInputTypes["timestamptz"] | undefined | null;
     id?: ResolverInputTypes["uuid"] | undefined | null;
-    white_player?: ResolverInputTypes["uuid"] | undefined | null;
+    status?: string | undefined | null;
+    white_player_id?: ResolverInputTypes["uuid"] | undefined | null;
   };
   /** Streaming cursor of the table "game" */
   ["game_stream_cursor_input"]: {
@@ -3187,10 +3525,11 @@ export type ResolverInputTypes = {
   };
   /** Initial value of the column from where the streaming should start */
   ["game_stream_cursor_value_input"]: {
-    black_player?: ResolverInputTypes["uuid"] | undefined | null;
+    black_player_id?: ResolverInputTypes["uuid"] | undefined | null;
     created_at?: ResolverInputTypes["timestamptz"] | undefined | null;
     id?: ResolverInputTypes["uuid"] | undefined | null;
-    white_player?: ResolverInputTypes["uuid"] | undefined | null;
+    status?: string | undefined | null;
+    white_player_id?: ResolverInputTypes["uuid"] | undefined | null;
   };
   /** update columns of table "game" */
   ["game_update_column"]: game_update_column;
@@ -3209,6 +3548,8 @@ export type ResolverInputTypes = {
     created_at?: boolean | `@${string}`;
     flags?: boolean | `@${string}`;
     from?: boolean | `@${string}`;
+    /** An object relationship */
+    game?: ResolverInputTypes["game"];
     game_id?: boolean | `@${string}`;
     id?: boolean | `@${string}`;
     lan?: boolean | `@${string}`;
@@ -3225,6 +3566,21 @@ export type ResolverInputTypes = {
     nodes?: ResolverInputTypes["moves"];
     __typename?: boolean | `@${string}`;
   }>;
+  ["moves_aggregate_bool_exp"]: {
+    count?:
+      | ResolverInputTypes["moves_aggregate_bool_exp_count"]
+      | undefined
+      | null;
+  };
+  ["moves_aggregate_bool_exp_count"]: {
+    arguments?:
+      | Array<ResolverInputTypes["moves_select_column"]>
+      | undefined
+      | null;
+    distinct?: boolean | undefined | null;
+    filter?: ResolverInputTypes["moves_bool_exp"] | undefined | null;
+    predicate: ResolverInputTypes["Int_comparison_exp"];
+  };
   /** aggregate fields of "moves" */
   ["moves_aggregate_fields"]: AliasType<{
     count?: [
@@ -3241,6 +3597,18 @@ export type ResolverInputTypes = {
     min?: ResolverInputTypes["moves_min_fields"];
     __typename?: boolean | `@${string}`;
   }>;
+  /** order by aggregate values of table "moves" */
+  ["moves_aggregate_order_by"]: {
+    count?: ResolverInputTypes["order_by"] | undefined | null;
+    max?: ResolverInputTypes["moves_max_order_by"] | undefined | null;
+    min?: ResolverInputTypes["moves_min_order_by"] | undefined | null;
+  };
+  /** input type for inserting array relation for remote table "moves" */
+  ["moves_arr_rel_insert_input"]: {
+    data: Array<ResolverInputTypes["moves_insert_input"]>;
+    /** upsert condition */
+    on_conflict?: ResolverInputTypes["moves_on_conflict"] | undefined | null;
+  };
   /** Boolean expression to filter rows from the table "moves". All fields are combined with a logical 'AND'. */
   ["moves_bool_exp"]: {
     _and?: Array<ResolverInputTypes["moves_bool_exp"]> | undefined | null;
@@ -3256,6 +3624,7 @@ export type ResolverInputTypes = {
       | null;
     flags?: ResolverInputTypes["String_comparison_exp"] | undefined | null;
     from?: ResolverInputTypes["String_comparison_exp"] | undefined | null;
+    game?: ResolverInputTypes["game_bool_exp"] | undefined | null;
     game_id?: ResolverInputTypes["uuid_comparison_exp"] | undefined | null;
     id?: ResolverInputTypes["uuid_comparison_exp"] | undefined | null;
     lan?: ResolverInputTypes["String_comparison_exp"] | undefined | null;
@@ -3279,6 +3648,7 @@ export type ResolverInputTypes = {
     created_at?: ResolverInputTypes["timestamptz"] | undefined | null;
     flags?: string | undefined | null;
     from?: string | undefined | null;
+    game?: ResolverInputTypes["game_obj_rel_insert_input"] | undefined | null;
     game_id?: ResolverInputTypes["uuid"] | undefined | null;
     id?: ResolverInputTypes["uuid"] | undefined | null;
     lan?: string | undefined | null;
@@ -3307,6 +3677,24 @@ export type ResolverInputTypes = {
     updated_at?: boolean | `@${string}`;
     __typename?: boolean | `@${string}`;
   }>;
+  /** order by max() on columns of table "moves" */
+  ["moves_max_order_by"]: {
+    after_fen?: ResolverInputTypes["order_by"] | undefined | null;
+    before_fen?: ResolverInputTypes["order_by"] | undefined | null;
+    captured?: ResolverInputTypes["order_by"] | undefined | null;
+    color?: ResolverInputTypes["order_by"] | undefined | null;
+    created_at?: ResolverInputTypes["order_by"] | undefined | null;
+    flags?: ResolverInputTypes["order_by"] | undefined | null;
+    from?: ResolverInputTypes["order_by"] | undefined | null;
+    game_id?: ResolverInputTypes["order_by"] | undefined | null;
+    id?: ResolverInputTypes["order_by"] | undefined | null;
+    lan?: ResolverInputTypes["order_by"] | undefined | null;
+    piece?: ResolverInputTypes["order_by"] | undefined | null;
+    promotion?: ResolverInputTypes["order_by"] | undefined | null;
+    san?: ResolverInputTypes["order_by"] | undefined | null;
+    to?: ResolverInputTypes["order_by"] | undefined | null;
+    updated_at?: ResolverInputTypes["order_by"] | undefined | null;
+  };
   /** aggregate min on columns */
   ["moves_min_fields"]: AliasType<{
     after_fen?: boolean | `@${string}`;
@@ -3326,6 +3714,24 @@ export type ResolverInputTypes = {
     updated_at?: boolean | `@${string}`;
     __typename?: boolean | `@${string}`;
   }>;
+  /** order by min() on columns of table "moves" */
+  ["moves_min_order_by"]: {
+    after_fen?: ResolverInputTypes["order_by"] | undefined | null;
+    before_fen?: ResolverInputTypes["order_by"] | undefined | null;
+    captured?: ResolverInputTypes["order_by"] | undefined | null;
+    color?: ResolverInputTypes["order_by"] | undefined | null;
+    created_at?: ResolverInputTypes["order_by"] | undefined | null;
+    flags?: ResolverInputTypes["order_by"] | undefined | null;
+    from?: ResolverInputTypes["order_by"] | undefined | null;
+    game_id?: ResolverInputTypes["order_by"] | undefined | null;
+    id?: ResolverInputTypes["order_by"] | undefined | null;
+    lan?: ResolverInputTypes["order_by"] | undefined | null;
+    piece?: ResolverInputTypes["order_by"] | undefined | null;
+    promotion?: ResolverInputTypes["order_by"] | undefined | null;
+    san?: ResolverInputTypes["order_by"] | undefined | null;
+    to?: ResolverInputTypes["order_by"] | undefined | null;
+    updated_at?: ResolverInputTypes["order_by"] | undefined | null;
+  };
   /** response of any mutation on the table "moves" */
   ["moves_mutation_response"]: AliasType<{
     /** number of rows affected by the mutation */
@@ -3349,6 +3755,7 @@ export type ResolverInputTypes = {
     created_at?: ResolverInputTypes["order_by"] | undefined | null;
     flags?: ResolverInputTypes["order_by"] | undefined | null;
     from?: ResolverInputTypes["order_by"] | undefined | null;
+    game?: ResolverInputTypes["game_order_by"] | undefined | null;
     game_id?: ResolverInputTypes["order_by"] | undefined | null;
     id?: ResolverInputTypes["order_by"] | undefined | null;
     lan?: ResolverInputTypes["order_by"] | undefined | null;
@@ -4306,14 +4713,19 @@ export type ModelTypes = {
   ["cursor_ordering"]: cursor_ordering;
   /** game table */
   ["game"]: {
-    black_player: ModelTypes["uuid"];
+    /** An object relationship */
+    black_player?: ModelTypes["user"] | undefined;
+    black_player_id?: ModelTypes["uuid"] | undefined;
     created_at: ModelTypes["timestamptz"];
     id: ModelTypes["uuid"];
+    /** An array relationship */
+    moves: Array<ModelTypes["moves"]>;
+    /** An aggregate relationship */
+    moves_aggregate: ModelTypes["moves_aggregate"];
+    status: string;
     /** An object relationship */
-    user: ModelTypes["user"];
-    /** An object relationship */
-    userByWhitePlayer: ModelTypes["user"];
-    white_player: ModelTypes["uuid"];
+    white_player?: ModelTypes["user"] | undefined;
+    white_player_id?: ModelTypes["uuid"] | undefined;
   };
   /** aggregated selection of "game" */
   ["game_aggregate"]: {
@@ -4352,50 +4764,59 @@ export type ModelTypes = {
     _and?: Array<ModelTypes["game_bool_exp"]> | undefined;
     _not?: ModelTypes["game_bool_exp"] | undefined;
     _or?: Array<ModelTypes["game_bool_exp"]> | undefined;
-    black_player?: ModelTypes["uuid_comparison_exp"] | undefined;
+    black_player?: ModelTypes["user_bool_exp"] | undefined;
+    black_player_id?: ModelTypes["uuid_comparison_exp"] | undefined;
     created_at?: ModelTypes["timestamptz_comparison_exp"] | undefined;
     id?: ModelTypes["uuid_comparison_exp"] | undefined;
-    user?: ModelTypes["user_bool_exp"] | undefined;
-    userByWhitePlayer?: ModelTypes["user_bool_exp"] | undefined;
-    white_player?: ModelTypes["uuid_comparison_exp"] | undefined;
+    moves?: ModelTypes["moves_bool_exp"] | undefined;
+    moves_aggregate?: ModelTypes["moves_aggregate_bool_exp"] | undefined;
+    status?: ModelTypes["String_comparison_exp"] | undefined;
+    white_player?: ModelTypes["user_bool_exp"] | undefined;
+    white_player_id?: ModelTypes["uuid_comparison_exp"] | undefined;
   };
   ["game_constraint"]: game_constraint;
   /** input type for inserting data into table "game" */
   ["game_insert_input"]: {
-    black_player?: ModelTypes["uuid"] | undefined;
+    black_player?: ModelTypes["user_obj_rel_insert_input"] | undefined;
+    black_player_id?: ModelTypes["uuid"] | undefined;
     created_at?: ModelTypes["timestamptz"] | undefined;
     id?: ModelTypes["uuid"] | undefined;
-    user?: ModelTypes["user_obj_rel_insert_input"] | undefined;
-    userByWhitePlayer?: ModelTypes["user_obj_rel_insert_input"] | undefined;
-    white_player?: ModelTypes["uuid"] | undefined;
+    moves?: ModelTypes["moves_arr_rel_insert_input"] | undefined;
+    status?: string | undefined;
+    white_player?: ModelTypes["user_obj_rel_insert_input"] | undefined;
+    white_player_id?: ModelTypes["uuid"] | undefined;
   };
   /** aggregate max on columns */
   ["game_max_fields"]: {
-    black_player?: ModelTypes["uuid"] | undefined;
+    black_player_id?: ModelTypes["uuid"] | undefined;
     created_at?: ModelTypes["timestamptz"] | undefined;
     id?: ModelTypes["uuid"] | undefined;
-    white_player?: ModelTypes["uuid"] | undefined;
+    status?: string | undefined;
+    white_player_id?: ModelTypes["uuid"] | undefined;
   };
   /** order by max() on columns of table "game" */
   ["game_max_order_by"]: {
-    black_player?: ModelTypes["order_by"] | undefined;
+    black_player_id?: ModelTypes["order_by"] | undefined;
     created_at?: ModelTypes["order_by"] | undefined;
     id?: ModelTypes["order_by"] | undefined;
-    white_player?: ModelTypes["order_by"] | undefined;
+    status?: ModelTypes["order_by"] | undefined;
+    white_player_id?: ModelTypes["order_by"] | undefined;
   };
   /** aggregate min on columns */
   ["game_min_fields"]: {
-    black_player?: ModelTypes["uuid"] | undefined;
+    black_player_id?: ModelTypes["uuid"] | undefined;
     created_at?: ModelTypes["timestamptz"] | undefined;
     id?: ModelTypes["uuid"] | undefined;
-    white_player?: ModelTypes["uuid"] | undefined;
+    status?: string | undefined;
+    white_player_id?: ModelTypes["uuid"] | undefined;
   };
   /** order by min() on columns of table "game" */
   ["game_min_order_by"]: {
-    black_player?: ModelTypes["order_by"] | undefined;
+    black_player_id?: ModelTypes["order_by"] | undefined;
     created_at?: ModelTypes["order_by"] | undefined;
     id?: ModelTypes["order_by"] | undefined;
-    white_player?: ModelTypes["order_by"] | undefined;
+    status?: ModelTypes["order_by"] | undefined;
+    white_player_id?: ModelTypes["order_by"] | undefined;
   };
   /** response of any mutation on the table "game" */
   ["game_mutation_response"]: {
@@ -4403,6 +4824,12 @@ export type ModelTypes = {
     affected_rows: number;
     /** data from the rows affected by the mutation */
     returning: Array<ModelTypes["game"]>;
+  };
+  /** input type for inserting object relation for remote table "game" */
+  ["game_obj_rel_insert_input"]: {
+    data: ModelTypes["game_insert_input"];
+    /** upsert condition */
+    on_conflict?: ModelTypes["game_on_conflict"] | undefined;
   };
   /** on_conflict condition type for table "game" */
   ["game_on_conflict"]: {
@@ -4412,12 +4839,14 @@ export type ModelTypes = {
   };
   /** Ordering options when selecting data from "game". */
   ["game_order_by"]: {
-    black_player?: ModelTypes["order_by"] | undefined;
+    black_player?: ModelTypes["user_order_by"] | undefined;
+    black_player_id?: ModelTypes["order_by"] | undefined;
     created_at?: ModelTypes["order_by"] | undefined;
     id?: ModelTypes["order_by"] | undefined;
-    user?: ModelTypes["user_order_by"] | undefined;
-    userByWhitePlayer?: ModelTypes["user_order_by"] | undefined;
-    white_player?: ModelTypes["order_by"] | undefined;
+    moves_aggregate?: ModelTypes["moves_aggregate_order_by"] | undefined;
+    status?: ModelTypes["order_by"] | undefined;
+    white_player?: ModelTypes["user_order_by"] | undefined;
+    white_player_id?: ModelTypes["order_by"] | undefined;
   };
   /** primary key columns input for table: game */
   ["game_pk_columns_input"]: {
@@ -4426,10 +4855,11 @@ export type ModelTypes = {
   ["game_select_column"]: game_select_column;
   /** input type for updating data in table "game" */
   ["game_set_input"]: {
-    black_player?: ModelTypes["uuid"] | undefined;
+    black_player_id?: ModelTypes["uuid"] | undefined;
     created_at?: ModelTypes["timestamptz"] | undefined;
     id?: ModelTypes["uuid"] | undefined;
-    white_player?: ModelTypes["uuid"] | undefined;
+    status?: string | undefined;
+    white_player_id?: ModelTypes["uuid"] | undefined;
   };
   /** Streaming cursor of the table "game" */
   ["game_stream_cursor_input"]: {
@@ -4440,10 +4870,11 @@ export type ModelTypes = {
   };
   /** Initial value of the column from where the streaming should start */
   ["game_stream_cursor_value_input"]: {
-    black_player?: ModelTypes["uuid"] | undefined;
+    black_player_id?: ModelTypes["uuid"] | undefined;
     created_at?: ModelTypes["timestamptz"] | undefined;
     id?: ModelTypes["uuid"] | undefined;
-    white_player?: ModelTypes["uuid"] | undefined;
+    status?: string | undefined;
+    white_player_id?: ModelTypes["uuid"] | undefined;
   };
   ["game_update_column"]: game_update_column;
   ["game_updates"]: {
@@ -4461,6 +4892,8 @@ export type ModelTypes = {
     created_at: ModelTypes["timestamptz"];
     flags: string;
     from: string;
+    /** An object relationship */
+    game: ModelTypes["game"];
     game_id: ModelTypes["uuid"];
     id: ModelTypes["uuid"];
     lan: string;
@@ -4475,11 +4908,32 @@ export type ModelTypes = {
     aggregate?: ModelTypes["moves_aggregate_fields"] | undefined;
     nodes: Array<ModelTypes["moves"]>;
   };
+  ["moves_aggregate_bool_exp"]: {
+    count?: ModelTypes["moves_aggregate_bool_exp_count"] | undefined;
+  };
+  ["moves_aggregate_bool_exp_count"]: {
+    arguments?: Array<ModelTypes["moves_select_column"]> | undefined;
+    distinct?: boolean | undefined;
+    filter?: ModelTypes["moves_bool_exp"] | undefined;
+    predicate: ModelTypes["Int_comparison_exp"];
+  };
   /** aggregate fields of "moves" */
   ["moves_aggregate_fields"]: {
     count: number;
     max?: ModelTypes["moves_max_fields"] | undefined;
     min?: ModelTypes["moves_min_fields"] | undefined;
+  };
+  /** order by aggregate values of table "moves" */
+  ["moves_aggregate_order_by"]: {
+    count?: ModelTypes["order_by"] | undefined;
+    max?: ModelTypes["moves_max_order_by"] | undefined;
+    min?: ModelTypes["moves_min_order_by"] | undefined;
+  };
+  /** input type for inserting array relation for remote table "moves" */
+  ["moves_arr_rel_insert_input"]: {
+    data: Array<ModelTypes["moves_insert_input"]>;
+    /** upsert condition */
+    on_conflict?: ModelTypes["moves_on_conflict"] | undefined;
   };
   /** Boolean expression to filter rows from the table "moves". All fields are combined with a logical 'AND'. */
   ["moves_bool_exp"]: {
@@ -4493,6 +4947,7 @@ export type ModelTypes = {
     created_at?: ModelTypes["timestamptz_comparison_exp"] | undefined;
     flags?: ModelTypes["String_comparison_exp"] | undefined;
     from?: ModelTypes["String_comparison_exp"] | undefined;
+    game?: ModelTypes["game_bool_exp"] | undefined;
     game_id?: ModelTypes["uuid_comparison_exp"] | undefined;
     id?: ModelTypes["uuid_comparison_exp"] | undefined;
     lan?: ModelTypes["String_comparison_exp"] | undefined;
@@ -4512,6 +4967,7 @@ export type ModelTypes = {
     created_at?: ModelTypes["timestamptz"] | undefined;
     flags?: string | undefined;
     from?: string | undefined;
+    game?: ModelTypes["game_obj_rel_insert_input"] | undefined;
     game_id?: ModelTypes["uuid"] | undefined;
     id?: ModelTypes["uuid"] | undefined;
     lan?: string | undefined;
@@ -4539,6 +4995,24 @@ export type ModelTypes = {
     to?: string | undefined;
     updated_at?: ModelTypes["timestamptz"] | undefined;
   };
+  /** order by max() on columns of table "moves" */
+  ["moves_max_order_by"]: {
+    after_fen?: ModelTypes["order_by"] | undefined;
+    before_fen?: ModelTypes["order_by"] | undefined;
+    captured?: ModelTypes["order_by"] | undefined;
+    color?: ModelTypes["order_by"] | undefined;
+    created_at?: ModelTypes["order_by"] | undefined;
+    flags?: ModelTypes["order_by"] | undefined;
+    from?: ModelTypes["order_by"] | undefined;
+    game_id?: ModelTypes["order_by"] | undefined;
+    id?: ModelTypes["order_by"] | undefined;
+    lan?: ModelTypes["order_by"] | undefined;
+    piece?: ModelTypes["order_by"] | undefined;
+    promotion?: ModelTypes["order_by"] | undefined;
+    san?: ModelTypes["order_by"] | undefined;
+    to?: ModelTypes["order_by"] | undefined;
+    updated_at?: ModelTypes["order_by"] | undefined;
+  };
   /** aggregate min on columns */
   ["moves_min_fields"]: {
     after_fen?: string | undefined;
@@ -4556,6 +5030,24 @@ export type ModelTypes = {
     san?: string | undefined;
     to?: string | undefined;
     updated_at?: ModelTypes["timestamptz"] | undefined;
+  };
+  /** order by min() on columns of table "moves" */
+  ["moves_min_order_by"]: {
+    after_fen?: ModelTypes["order_by"] | undefined;
+    before_fen?: ModelTypes["order_by"] | undefined;
+    captured?: ModelTypes["order_by"] | undefined;
+    color?: ModelTypes["order_by"] | undefined;
+    created_at?: ModelTypes["order_by"] | undefined;
+    flags?: ModelTypes["order_by"] | undefined;
+    from?: ModelTypes["order_by"] | undefined;
+    game_id?: ModelTypes["order_by"] | undefined;
+    id?: ModelTypes["order_by"] | undefined;
+    lan?: ModelTypes["order_by"] | undefined;
+    piece?: ModelTypes["order_by"] | undefined;
+    promotion?: ModelTypes["order_by"] | undefined;
+    san?: ModelTypes["order_by"] | undefined;
+    to?: ModelTypes["order_by"] | undefined;
+    updated_at?: ModelTypes["order_by"] | undefined;
   };
   /** response of any mutation on the table "moves" */
   ["moves_mutation_response"]: {
@@ -4579,6 +5071,7 @@ export type ModelTypes = {
     created_at?: ModelTypes["order_by"] | undefined;
     flags?: ModelTypes["order_by"] | undefined;
     from?: ModelTypes["order_by"] | undefined;
+    game?: ModelTypes["game_order_by"] | undefined;
     game_id?: ModelTypes["order_by"] | undefined;
     id?: ModelTypes["order_by"] | undefined;
     lan?: ModelTypes["order_by"] | undefined;
@@ -4703,9 +5196,9 @@ export type ModelTypes = {
     game_aggregate: ModelTypes["game_aggregate"];
     /** fetch data from the table: "game" using primary key columns */
     game_by_pk?: ModelTypes["game"] | undefined;
-    /** fetch data from the table: "moves" */
+    /** An array relationship */
     moves: Array<ModelTypes["moves"]>;
-    /** fetch aggregated fields from the table: "moves" */
+    /** An aggregate relationship */
     moves_aggregate: ModelTypes["moves_aggregate"];
     /** fetch data from the table: "moves" using primary key columns */
     moves_by_pk?: ModelTypes["moves"] | undefined;
@@ -4725,9 +5218,9 @@ export type ModelTypes = {
     game_by_pk?: ModelTypes["game"] | undefined;
     /** fetch data from the table in a streaming manner: "game" */
     game_stream: Array<ModelTypes["game"]>;
-    /** fetch data from the table: "moves" */
+    /** An array relationship */
     moves: Array<ModelTypes["moves"]>;
-    /** fetch aggregated fields from the table: "moves" */
+    /** An aggregate relationship */
     moves_aggregate: ModelTypes["moves_aggregate"];
     /** fetch data from the table: "moves" using primary key columns */
     moves_by_pk?: ModelTypes["moves"] | undefined;
@@ -4986,14 +5479,19 @@ export type GraphQLTypes = {
   /** game table */
   ["game"]: {
     __typename: "game";
-    black_player: GraphQLTypes["uuid"];
+    /** An object relationship */
+    black_player?: GraphQLTypes["user"] | undefined;
+    black_player_id?: GraphQLTypes["uuid"] | undefined;
     created_at: GraphQLTypes["timestamptz"];
     id: GraphQLTypes["uuid"];
+    /** An array relationship */
+    moves: Array<GraphQLTypes["moves"]>;
+    /** An aggregate relationship */
+    moves_aggregate: GraphQLTypes["moves_aggregate"];
+    status: string;
     /** An object relationship */
-    user: GraphQLTypes["user"];
-    /** An object relationship */
-    userByWhitePlayer: GraphQLTypes["user"];
-    white_player: GraphQLTypes["uuid"];
+    white_player?: GraphQLTypes["user"] | undefined;
+    white_player_id?: GraphQLTypes["uuid"] | undefined;
   };
   /** aggregated selection of "game" */
   ["game_aggregate"]: {
@@ -5034,53 +5532,62 @@ export type GraphQLTypes = {
     _and?: Array<GraphQLTypes["game_bool_exp"]> | undefined;
     _not?: GraphQLTypes["game_bool_exp"] | undefined;
     _or?: Array<GraphQLTypes["game_bool_exp"]> | undefined;
-    black_player?: GraphQLTypes["uuid_comparison_exp"] | undefined;
+    black_player?: GraphQLTypes["user_bool_exp"] | undefined;
+    black_player_id?: GraphQLTypes["uuid_comparison_exp"] | undefined;
     created_at?: GraphQLTypes["timestamptz_comparison_exp"] | undefined;
     id?: GraphQLTypes["uuid_comparison_exp"] | undefined;
-    user?: GraphQLTypes["user_bool_exp"] | undefined;
-    userByWhitePlayer?: GraphQLTypes["user_bool_exp"] | undefined;
-    white_player?: GraphQLTypes["uuid_comparison_exp"] | undefined;
+    moves?: GraphQLTypes["moves_bool_exp"] | undefined;
+    moves_aggregate?: GraphQLTypes["moves_aggregate_bool_exp"] | undefined;
+    status?: GraphQLTypes["String_comparison_exp"] | undefined;
+    white_player?: GraphQLTypes["user_bool_exp"] | undefined;
+    white_player_id?: GraphQLTypes["uuid_comparison_exp"] | undefined;
   };
   /** unique or primary key constraints on table "game" */
   ["game_constraint"]: game_constraint;
   /** input type for inserting data into table "game" */
   ["game_insert_input"]: {
-    black_player?: GraphQLTypes["uuid"] | undefined;
+    black_player?: GraphQLTypes["user_obj_rel_insert_input"] | undefined;
+    black_player_id?: GraphQLTypes["uuid"] | undefined;
     created_at?: GraphQLTypes["timestamptz"] | undefined;
     id?: GraphQLTypes["uuid"] | undefined;
-    user?: GraphQLTypes["user_obj_rel_insert_input"] | undefined;
-    userByWhitePlayer?: GraphQLTypes["user_obj_rel_insert_input"] | undefined;
-    white_player?: GraphQLTypes["uuid"] | undefined;
+    moves?: GraphQLTypes["moves_arr_rel_insert_input"] | undefined;
+    status?: string | undefined;
+    white_player?: GraphQLTypes["user_obj_rel_insert_input"] | undefined;
+    white_player_id?: GraphQLTypes["uuid"] | undefined;
   };
   /** aggregate max on columns */
   ["game_max_fields"]: {
     __typename: "game_max_fields";
-    black_player?: GraphQLTypes["uuid"] | undefined;
+    black_player_id?: GraphQLTypes["uuid"] | undefined;
     created_at?: GraphQLTypes["timestamptz"] | undefined;
     id?: GraphQLTypes["uuid"] | undefined;
-    white_player?: GraphQLTypes["uuid"] | undefined;
+    status?: string | undefined;
+    white_player_id?: GraphQLTypes["uuid"] | undefined;
   };
   /** order by max() on columns of table "game" */
   ["game_max_order_by"]: {
-    black_player?: GraphQLTypes["order_by"] | undefined;
+    black_player_id?: GraphQLTypes["order_by"] | undefined;
     created_at?: GraphQLTypes["order_by"] | undefined;
     id?: GraphQLTypes["order_by"] | undefined;
-    white_player?: GraphQLTypes["order_by"] | undefined;
+    status?: GraphQLTypes["order_by"] | undefined;
+    white_player_id?: GraphQLTypes["order_by"] | undefined;
   };
   /** aggregate min on columns */
   ["game_min_fields"]: {
     __typename: "game_min_fields";
-    black_player?: GraphQLTypes["uuid"] | undefined;
+    black_player_id?: GraphQLTypes["uuid"] | undefined;
     created_at?: GraphQLTypes["timestamptz"] | undefined;
     id?: GraphQLTypes["uuid"] | undefined;
-    white_player?: GraphQLTypes["uuid"] | undefined;
+    status?: string | undefined;
+    white_player_id?: GraphQLTypes["uuid"] | undefined;
   };
   /** order by min() on columns of table "game" */
   ["game_min_order_by"]: {
-    black_player?: GraphQLTypes["order_by"] | undefined;
+    black_player_id?: GraphQLTypes["order_by"] | undefined;
     created_at?: GraphQLTypes["order_by"] | undefined;
     id?: GraphQLTypes["order_by"] | undefined;
-    white_player?: GraphQLTypes["order_by"] | undefined;
+    status?: GraphQLTypes["order_by"] | undefined;
+    white_player_id?: GraphQLTypes["order_by"] | undefined;
   };
   /** response of any mutation on the table "game" */
   ["game_mutation_response"]: {
@@ -5090,6 +5597,12 @@ export type GraphQLTypes = {
     /** data from the rows affected by the mutation */
     returning: Array<GraphQLTypes["game"]>;
   };
+  /** input type for inserting object relation for remote table "game" */
+  ["game_obj_rel_insert_input"]: {
+    data: GraphQLTypes["game_insert_input"];
+    /** upsert condition */
+    on_conflict?: GraphQLTypes["game_on_conflict"] | undefined;
+  };
   /** on_conflict condition type for table "game" */
   ["game_on_conflict"]: {
     constraint: GraphQLTypes["game_constraint"];
@@ -5098,12 +5611,14 @@ export type GraphQLTypes = {
   };
   /** Ordering options when selecting data from "game". */
   ["game_order_by"]: {
-    black_player?: GraphQLTypes["order_by"] | undefined;
+    black_player?: GraphQLTypes["user_order_by"] | undefined;
+    black_player_id?: GraphQLTypes["order_by"] | undefined;
     created_at?: GraphQLTypes["order_by"] | undefined;
     id?: GraphQLTypes["order_by"] | undefined;
-    user?: GraphQLTypes["user_order_by"] | undefined;
-    userByWhitePlayer?: GraphQLTypes["user_order_by"] | undefined;
-    white_player?: GraphQLTypes["order_by"] | undefined;
+    moves_aggregate?: GraphQLTypes["moves_aggregate_order_by"] | undefined;
+    status?: GraphQLTypes["order_by"] | undefined;
+    white_player?: GraphQLTypes["user_order_by"] | undefined;
+    white_player_id?: GraphQLTypes["order_by"] | undefined;
   };
   /** primary key columns input for table: game */
   ["game_pk_columns_input"]: {
@@ -5113,10 +5628,11 @@ export type GraphQLTypes = {
   ["game_select_column"]: game_select_column;
   /** input type for updating data in table "game" */
   ["game_set_input"]: {
-    black_player?: GraphQLTypes["uuid"] | undefined;
+    black_player_id?: GraphQLTypes["uuid"] | undefined;
     created_at?: GraphQLTypes["timestamptz"] | undefined;
     id?: GraphQLTypes["uuid"] | undefined;
-    white_player?: GraphQLTypes["uuid"] | undefined;
+    status?: string | undefined;
+    white_player_id?: GraphQLTypes["uuid"] | undefined;
   };
   /** Streaming cursor of the table "game" */
   ["game_stream_cursor_input"]: {
@@ -5127,10 +5643,11 @@ export type GraphQLTypes = {
   };
   /** Initial value of the column from where the streaming should start */
   ["game_stream_cursor_value_input"]: {
-    black_player?: GraphQLTypes["uuid"] | undefined;
+    black_player_id?: GraphQLTypes["uuid"] | undefined;
     created_at?: GraphQLTypes["timestamptz"] | undefined;
     id?: GraphQLTypes["uuid"] | undefined;
-    white_player?: GraphQLTypes["uuid"] | undefined;
+    status?: string | undefined;
+    white_player_id?: GraphQLTypes["uuid"] | undefined;
   };
   /** update columns of table "game" */
   ["game_update_column"]: game_update_column;
@@ -5150,6 +5667,8 @@ export type GraphQLTypes = {
     created_at: GraphQLTypes["timestamptz"];
     flags: string;
     from: string;
+    /** An object relationship */
+    game: GraphQLTypes["game"];
     game_id: GraphQLTypes["uuid"];
     id: GraphQLTypes["uuid"];
     lan: string;
@@ -5165,12 +5684,33 @@ export type GraphQLTypes = {
     aggregate?: GraphQLTypes["moves_aggregate_fields"] | undefined;
     nodes: Array<GraphQLTypes["moves"]>;
   };
+  ["moves_aggregate_bool_exp"]: {
+    count?: GraphQLTypes["moves_aggregate_bool_exp_count"] | undefined;
+  };
+  ["moves_aggregate_bool_exp_count"]: {
+    arguments?: Array<GraphQLTypes["moves_select_column"]> | undefined;
+    distinct?: boolean | undefined;
+    filter?: GraphQLTypes["moves_bool_exp"] | undefined;
+    predicate: GraphQLTypes["Int_comparison_exp"];
+  };
   /** aggregate fields of "moves" */
   ["moves_aggregate_fields"]: {
     __typename: "moves_aggregate_fields";
     count: number;
     max?: GraphQLTypes["moves_max_fields"] | undefined;
     min?: GraphQLTypes["moves_min_fields"] | undefined;
+  };
+  /** order by aggregate values of table "moves" */
+  ["moves_aggregate_order_by"]: {
+    count?: GraphQLTypes["order_by"] | undefined;
+    max?: GraphQLTypes["moves_max_order_by"] | undefined;
+    min?: GraphQLTypes["moves_min_order_by"] | undefined;
+  };
+  /** input type for inserting array relation for remote table "moves" */
+  ["moves_arr_rel_insert_input"]: {
+    data: Array<GraphQLTypes["moves_insert_input"]>;
+    /** upsert condition */
+    on_conflict?: GraphQLTypes["moves_on_conflict"] | undefined;
   };
   /** Boolean expression to filter rows from the table "moves". All fields are combined with a logical 'AND'. */
   ["moves_bool_exp"]: {
@@ -5184,6 +5724,7 @@ export type GraphQLTypes = {
     created_at?: GraphQLTypes["timestamptz_comparison_exp"] | undefined;
     flags?: GraphQLTypes["String_comparison_exp"] | undefined;
     from?: GraphQLTypes["String_comparison_exp"] | undefined;
+    game?: GraphQLTypes["game_bool_exp"] | undefined;
     game_id?: GraphQLTypes["uuid_comparison_exp"] | undefined;
     id?: GraphQLTypes["uuid_comparison_exp"] | undefined;
     lan?: GraphQLTypes["String_comparison_exp"] | undefined;
@@ -5204,6 +5745,7 @@ export type GraphQLTypes = {
     created_at?: GraphQLTypes["timestamptz"] | undefined;
     flags?: string | undefined;
     from?: string | undefined;
+    game?: GraphQLTypes["game_obj_rel_insert_input"] | undefined;
     game_id?: GraphQLTypes["uuid"] | undefined;
     id?: GraphQLTypes["uuid"] | undefined;
     lan?: string | undefined;
@@ -5232,6 +5774,24 @@ export type GraphQLTypes = {
     to?: string | undefined;
     updated_at?: GraphQLTypes["timestamptz"] | undefined;
   };
+  /** order by max() on columns of table "moves" */
+  ["moves_max_order_by"]: {
+    after_fen?: GraphQLTypes["order_by"] | undefined;
+    before_fen?: GraphQLTypes["order_by"] | undefined;
+    captured?: GraphQLTypes["order_by"] | undefined;
+    color?: GraphQLTypes["order_by"] | undefined;
+    created_at?: GraphQLTypes["order_by"] | undefined;
+    flags?: GraphQLTypes["order_by"] | undefined;
+    from?: GraphQLTypes["order_by"] | undefined;
+    game_id?: GraphQLTypes["order_by"] | undefined;
+    id?: GraphQLTypes["order_by"] | undefined;
+    lan?: GraphQLTypes["order_by"] | undefined;
+    piece?: GraphQLTypes["order_by"] | undefined;
+    promotion?: GraphQLTypes["order_by"] | undefined;
+    san?: GraphQLTypes["order_by"] | undefined;
+    to?: GraphQLTypes["order_by"] | undefined;
+    updated_at?: GraphQLTypes["order_by"] | undefined;
+  };
   /** aggregate min on columns */
   ["moves_min_fields"]: {
     __typename: "moves_min_fields";
@@ -5250,6 +5810,24 @@ export type GraphQLTypes = {
     san?: string | undefined;
     to?: string | undefined;
     updated_at?: GraphQLTypes["timestamptz"] | undefined;
+  };
+  /** order by min() on columns of table "moves" */
+  ["moves_min_order_by"]: {
+    after_fen?: GraphQLTypes["order_by"] | undefined;
+    before_fen?: GraphQLTypes["order_by"] | undefined;
+    captured?: GraphQLTypes["order_by"] | undefined;
+    color?: GraphQLTypes["order_by"] | undefined;
+    created_at?: GraphQLTypes["order_by"] | undefined;
+    flags?: GraphQLTypes["order_by"] | undefined;
+    from?: GraphQLTypes["order_by"] | undefined;
+    game_id?: GraphQLTypes["order_by"] | undefined;
+    id?: GraphQLTypes["order_by"] | undefined;
+    lan?: GraphQLTypes["order_by"] | undefined;
+    piece?: GraphQLTypes["order_by"] | undefined;
+    promotion?: GraphQLTypes["order_by"] | undefined;
+    san?: GraphQLTypes["order_by"] | undefined;
+    to?: GraphQLTypes["order_by"] | undefined;
+    updated_at?: GraphQLTypes["order_by"] | undefined;
   };
   /** response of any mutation on the table "moves" */
   ["moves_mutation_response"]: {
@@ -5274,6 +5852,7 @@ export type GraphQLTypes = {
     created_at?: GraphQLTypes["order_by"] | undefined;
     flags?: GraphQLTypes["order_by"] | undefined;
     from?: GraphQLTypes["order_by"] | undefined;
+    game?: GraphQLTypes["game_order_by"] | undefined;
     game_id?: GraphQLTypes["order_by"] | undefined;
     id?: GraphQLTypes["order_by"] | undefined;
     lan?: GraphQLTypes["order_by"] | undefined;
@@ -5403,9 +5982,9 @@ export type GraphQLTypes = {
     game_aggregate: GraphQLTypes["game_aggregate"];
     /** fetch data from the table: "game" using primary key columns */
     game_by_pk?: GraphQLTypes["game"] | undefined;
-    /** fetch data from the table: "moves" */
+    /** An array relationship */
     moves: Array<GraphQLTypes["moves"]>;
-    /** fetch aggregated fields from the table: "moves" */
+    /** An aggregate relationship */
     moves_aggregate: GraphQLTypes["moves_aggregate"];
     /** fetch data from the table: "moves" using primary key columns */
     moves_by_pk?: GraphQLTypes["moves"] | undefined;
@@ -5426,9 +6005,9 @@ export type GraphQLTypes = {
     game_by_pk?: GraphQLTypes["game"] | undefined;
     /** fetch data from the table in a streaming manner: "game" */
     game_stream: Array<GraphQLTypes["game"]>;
-    /** fetch data from the table: "moves" */
+    /** An array relationship */
     moves: Array<GraphQLTypes["moves"]>;
-    /** fetch aggregated fields from the table: "moves" */
+    /** An aggregate relationship */
     moves_aggregate: GraphQLTypes["moves_aggregate"];
     /** fetch data from the table: "moves" using primary key columns */
     moves_by_pk?: GraphQLTypes["moves"] | undefined;
@@ -5661,17 +6240,19 @@ export const enum game_constraint {
 }
 /** select columns of table "game" */
 export const enum game_select_column {
-  black_player = "black_player",
+  black_player_id = "black_player_id",
   created_at = "created_at",
   id = "id",
-  white_player = "white_player",
+  status = "status",
+  white_player_id = "white_player_id",
 }
 /** update columns of table "game" */
 export const enum game_update_column {
-  black_player = "black_player",
+  black_player_id = "black_player_id",
   created_at = "created_at",
   id = "id",
-  white_player = "white_player",
+  status = "status",
+  white_player_id = "white_player_id",
 }
 /** unique or primary key constraints on table "moves" */
 export const enum moves_constraint {
@@ -5765,6 +6346,7 @@ type ZEUS_VARIABLES = {
   ["game_insert_input"]: ValueTypes["game_insert_input"];
   ["game_max_order_by"]: ValueTypes["game_max_order_by"];
   ["game_min_order_by"]: ValueTypes["game_min_order_by"];
+  ["game_obj_rel_insert_input"]: ValueTypes["game_obj_rel_insert_input"];
   ["game_on_conflict"]: ValueTypes["game_on_conflict"];
   ["game_order_by"]: ValueTypes["game_order_by"];
   ["game_pk_columns_input"]: ValueTypes["game_pk_columns_input"];
@@ -5774,9 +6356,15 @@ type ZEUS_VARIABLES = {
   ["game_stream_cursor_value_input"]: ValueTypes["game_stream_cursor_value_input"];
   ["game_update_column"]: ValueTypes["game_update_column"];
   ["game_updates"]: ValueTypes["game_updates"];
+  ["moves_aggregate_bool_exp"]: ValueTypes["moves_aggregate_bool_exp"];
+  ["moves_aggregate_bool_exp_count"]: ValueTypes["moves_aggregate_bool_exp_count"];
+  ["moves_aggregate_order_by"]: ValueTypes["moves_aggregate_order_by"];
+  ["moves_arr_rel_insert_input"]: ValueTypes["moves_arr_rel_insert_input"];
   ["moves_bool_exp"]: ValueTypes["moves_bool_exp"];
   ["moves_constraint"]: ValueTypes["moves_constraint"];
   ["moves_insert_input"]: ValueTypes["moves_insert_input"];
+  ["moves_max_order_by"]: ValueTypes["moves_max_order_by"];
+  ["moves_min_order_by"]: ValueTypes["moves_min_order_by"];
   ["moves_on_conflict"]: ValueTypes["moves_on_conflict"];
   ["moves_order_by"]: ValueTypes["moves_order_by"];
   ["moves_pk_columns_input"]: ValueTypes["moves_pk_columns_input"];

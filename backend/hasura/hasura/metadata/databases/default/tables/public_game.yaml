@@ -2,12 +2,12 @@ table:
   name: game
   schema: public
 object_relationships:
-  - name: user
+  - name: black_player
     using:
-      foreign_key_constraint_on: black_player
-  - name: userByWhitePlayer
+      foreign_key_constraint_on: black_player_id
+  - name: white_player
     using:
-      foreign_key_constraint_on: white_player
+      foreign_key_constraint_on: white_player_id
 array_relationships:
   - name: moves
     using:
