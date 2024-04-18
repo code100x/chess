@@ -80,31 +80,25 @@ export class Game {
     }
 
     gameOver(socket: WebSocket) {
-        console.log("game over")
         this.player1.send(JSON.stringify({
             type: GAME_OVER,
             payload: {
                 winner: this.board.turn() === "w" ? "black" : "white"
             }
         }))
-        // this.player1.close();
         this.player2.send(JSON.stringify({
             type: GAME_OVER,
             payload: {
                 winner: this.board.turn() === "w" ? "black" : "white"
             }
         }))
-        // this.player2.close();
-        console.log("game over")
     }
 
     setTimer(timer: NodeJS.Timeout) {
-        console.log("setting timer")
         this.timer = timer;
     }
 
     clearTimer(){
-        console.log("clearing timer")
         if (this.timer) clearTimeout(this.timer);
     }
 }
