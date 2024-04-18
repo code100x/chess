@@ -122,7 +122,7 @@ export const ChessBoard = ({ chess, board, socket, setBoard }: {
                                  >
                                       <div className="w-full justify-center flex h-full">
                                         <div className="h-full justify-center flex flex-col">
-                                             {square ? <img className="w-4 scale-[4.5]" src={`/${square?.color === "b" ? `b${square?.type}` : `w${square?.type}`}.png`} /> : null} 
+                                             {square ? <img className="w-4" style={{scale:`${boardSize*3/480}`}} src={`/${square?.color === "b" ? `b${square?.type}` : `w${square?.type}`}.png`} /> : null} 
                                         </div>
                                       </div>
                                  </div>
