@@ -113,14 +113,14 @@ export class Game {
         if (this.board.isGameOver()) {
             // Send the game over message to both players
             if (this.player1)
-                this.player1.emit(JSON.stringify({
+                this.player1.send(JSON.stringify({
                     type: GAME_OVER,
                     payload: {
                         winner: this.board.turn() === "w" ? "black" : "white"
                     }
                 }))
             if (this.player2)
-                this.player2.emit(JSON.stringify({
+                this.player2.send(JSON.stringify({
                     type: GAME_OVER,
                     payload: {
                         winner: this.board.turn() === "w" ? "black" : "white"
