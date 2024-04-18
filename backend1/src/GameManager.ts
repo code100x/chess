@@ -64,7 +64,7 @@ export class GameManager {
                             game.gameOver(socket);
                             this.removeGame(game);
                         }
-                    },5000)
+                    },60000)
                     game.setTimer(timer);
                 }
             }
