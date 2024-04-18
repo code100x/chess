@@ -44,17 +44,19 @@ export const Game = () => {
 
     return <div className="justify-center flex">
         <div className="pt-8 max-w-screen-lg w-full">
-            <div className="grid grid-cols-6 gap-4 w-full">
+            <div className="flex gap-10 items-center w-full">
                 <div className="col-span-4 w-full flex justify-center">
                     <ChessBoard chess={chess} setBoard={setBoard} socket={socket} board={board} />
                 </div>
-                <div className="col-span-2 bg-slate-900 w-full flex justify-center">
+                <div className="col-span-2 bg-[#262522] h-[55vh] w-[45vw] flex justify-center">
                     <div className="pt-8">
-                        {!started && <Button onClick={() => {
+                        {!started && <Button 
+                        onClick={() => {
                             socket.send(JSON.stringify({
                                 type: INIT_GAME
                             }))
-                        }} >
+                        }}
+                        >
                             Play
                         </Button>}
                     </div>
