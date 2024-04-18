@@ -11,6 +11,7 @@ export const GAME_OVER = "game_over";
 
 export const Game = () => {
     const socket = useSocket();
+    const [gameOver, setGameOver] = useState(true);
     const [chess, setChess] = useState(new Chess());
     const [board, setBoard] = useState(chess.board());
     const [started, setStarted] = useState(false)
@@ -21,6 +22,7 @@ export const Game = () => {
         }
         socket.onmessage = (event) => {
             const message = JSON.parse(event.data);
+            console.log(message);
 
             switch (message.type) {
                 case INIT_GAME:
@@ -34,6 +36,7 @@ export const Game = () => {
                     console.log("Move made");
                     break;
                 case GAME_OVER:
+                    setGameOver(true);
                     console.log("Game over");
                     break;
             }
@@ -43,7 +46,15 @@ export const Game = () => {
     if (!socket) return <div>Connecting...</div>
 
     return <div className="justify-center flex">
-        <div className="pt-8 max-w-screen-lg w-full">
+        {
+            gameOver ? <div className="flex flex-col items-center gap-6 mt-10">
+                <h1 className="text-white text-lg">Game Over</h1>
+                <Button onClick={() => {
+                    window.location.reload();
+                }} >
+                Play Again
+                </Button>
+            </div> : <div className="pt-8 max-w-screen-lg w-full">
             <div className="grid grid-cols-6 gap-4 w-full">
                 <div className="col-span-4 w-full flex justify-center">
                     <ChessBoard chess={chess} setBoard={setBoard} socket={socket} board={board} />
@@ -61,5 +72,6 @@ export const Game = () => {
                 </div>
             </div>
         </div>
+        }
     </div>
 }
