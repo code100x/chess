@@ -8,5 +8,8 @@ const gameManager = new GameManager();
 
 wss.on('connection', function connection(ws) {
   gameManager.addUser(ws)
-  ws.on("disconnect", () => gameManager.removeUser(ws))
+
+  ws.on("close", () => {
+    gameManager.removeUser(ws)
+  })
 });
