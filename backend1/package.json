@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prettier": "prettier --write \"src/**/*.js\"",
+    "build": "npm run prettier && npm run build"
   },
   "keywords": [],
   "author": "",
@@ -13,5 +15,8 @@
     "@types/ws": "^8.5.10",
     "chess.js": "^1.0.0-beta.8",
     "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5"
   }
 }
