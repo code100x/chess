@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-
+import {Square} from "chess.js";
 interface Move {
-  from: string;
-  to: string;
+  from: Square;
+  to: Square;
 }
 
 interface MovesTableProps {
