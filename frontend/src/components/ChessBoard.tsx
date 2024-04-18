@@ -22,7 +22,11 @@ export const ChessBoard = ({ chess, board, socket, setBoard }: {
     const [moves, setMoves] = useState<{ from: Square; to: Square }[]>([]);
 
     return (
-    <div className="text-white-200">
+    <div className="flex">
+        <div className="mr-10">
+            {moves.length > 0 && <div className="mt-4"><MoveTable moves={moves} /></div>}
+        </div>   
+    <div className="text-white-200 mr-10">
         {board.map((row, i) => {
             return <div key={i} className="flex">
                 {row.map((square, j) => {
@@ -64,8 +68,8 @@ export const ChessBoard = ({ chess, board, socket, setBoard }: {
                 })}
             </div>
         })}
-            {moves.length > 0 && <div className="mt-4"><MoveTable moves={moves} /></div>}
-
     </div>
+   
+        </div>
     )
 }
