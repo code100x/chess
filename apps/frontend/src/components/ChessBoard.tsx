@@ -26,11 +26,11 @@ export const ChessBoard = ({ chess, board, socket, setBoard,}: {
     e.dataTransfer.setData("text/plain", square);
     setFrom(square);
   };
-  const audio = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
+  const audio = new Audio("https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/capture.mp3");
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    audio.play();
+    
   };
 
   const handleDrop = (e: React.DragEvent, to: Square) => {
@@ -52,6 +52,10 @@ export const ChessBoard = ({ chess, board, socket, setBoard,}: {
         from,
         to,
       });
+
+    audio.play().then(() => {
+      console.log("audio played");
+    });
       setBoard(chess.board());
       setFrom(null);
     }
