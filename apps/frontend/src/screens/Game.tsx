@@ -37,6 +37,7 @@ export const Game = () => {
       new Audio(GameStartSound).play();
     };
     const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null)
+    const [result, setResult] = useState<"WHITE_WINS" | "BLACK_WINS" | "DRAW">(false);
 
     useEffect(() => {
         if (!socket) {
@@ -63,7 +64,7 @@ export const Game = () => {
                     playGameStartedSound()
                     break;
                 case GAME_OVER:
-                    console.log("Game over");
+                    setResult(message.payload.result);
                     break;
             }
         }
@@ -75,6 +76,9 @@ export const Game = () => {
         <div className="justify-center flex pt-4 text-white">
             {gameMetadata?.blackPlayer} vs {gameMetadata?.whitePlayer}
         </div>
+        {result && <div className="justify-center flex pt-4 text-white">
+            {result}    
+        </div>}
         <div className="justify-center flex">
             <div className="pt-8 max-w-screen-lg w-full">
                 <div className="grid grid-cols-6 gap-4 w-full">
