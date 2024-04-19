@@ -11,19 +11,21 @@ const app = express();
 
 dotenv.config();
 app.use(session({
-    secret: 'keyboard cat',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false, maxAge: 360000}
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false, maxAge: 360000 }
 }));
 
 initPassport();
 app.use(passport.initialize());
 app.use(passport.authenticate('session'));
 
+const allowedHosts = process.env.ALLOWED_HOSTS ? process.env.ALLOWED_HOSTS.split(",") : [];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: allowedHosts,
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
   })
