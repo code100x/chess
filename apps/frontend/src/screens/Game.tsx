@@ -8,12 +8,12 @@ import { Chess, Square } from 'chess.js'
 import { useNavigate, useParams } from "react-router-dom";
 import MovesTable from "../components/MovesTable";
 import { useUser } from "@repo/store/useUser";
-
+import {INIT_GAME, MOVE, OPPONENT_DISCONNECTED, GAME_OVER} from "@repo/common"
 // TODO: Move together, there's code repetition here
-export const INIT_GAME = "init_game";
-export const MOVE = "move";
-export const OPPONENT_DISCONNECTED = "opponent_disconnected";
-export const GAME_OVER = "game_over";
+// export const INIT_GAME = "init_game";
+// export const MOVE = "move";
+// export const OPPONENT_DISCONNECTED = "opponent_disconnected";
+// export const GAME_OVER = "game_over";
 
 export interface IMove {
     from: Square; to: Square

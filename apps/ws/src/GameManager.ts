@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { INIT_GAME, JOIN_GAME, MOVE, OPPONENT_DISCONNECTED } from "./messages";
+import { INIT_GAME, JOIN_GAME, MOVE, OPPONENT_DISCONNECTED } from "@repo/common";
 import { Game } from "./Game";
 import { db } from "./db";
 
