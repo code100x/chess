@@ -128,9 +128,23 @@ export const Game = () => {
         <div className="justify-center flex">
             <div className="pt-8 max-w-screen-lg w-full">
                 <div className="grid grid-cols-6 gap-4 w-full">
-                    <div className="col-span-4 w-full flex justify-center text-white">
-                        <ChessBoard started={started} gameId={gameId ?? ""} myColor={user.id === gameMetadata?.blackPlayer?.id ? "b" : "w"} setMoves={setMoves} moves={moves} chess={chess} setBoard={setBoard} socket={socket} board={board} />
-                    </div>
+                    {result !== OPPONENT_DISCONNECTED && result !== USER_TIMEOUT && (
+                        <div className="col-span-4 w-full flex justify-center text-white">
+                            <ChessBoard
+                            started={started}
+                            gameId={gameId ?? ""}
+                            myColor={
+                                user.id === gameMetadata?.blackPlayer?.id ? "b" : "w"
+                            }
+                            setMoves={setMoves}
+                            moves={moves}
+                            chess={chess}
+                            setBoard={setBoard}
+                            socket={socket}
+                            board={board}
+                            />
+                        </div>
+                    )}
                     <div className="col-span-2 bg-slate-900 w-full flex justify-center">
                         <div className="pt-8">
                             {!started && gameId === "random" && <Button onClick={() => {
