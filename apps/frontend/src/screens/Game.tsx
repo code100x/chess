@@ -57,6 +57,9 @@ export const Game = () => {
                     break;
                 case MOVE:
                     const move = message.payload;
+                    const moves = chess.moves({verbose: true});
+                    //TODO: Fix later
+                    if (moves.map(x => JSON.stringify(x)).includes(JSON.stringify(move))) return;
                     chess.move(move);
                     setBoard(chess.board());
                     setMoves(moves => [...moves, move])
@@ -85,7 +88,7 @@ export const Game = () => {
             <div className="pt-8 max-w-screen-lg w-full">
                 <div className="grid grid-cols-6 gap-4 w-full">
                     <div className="col-span-4 w-full flex justify-center">
-                        <ChessBoard myColor={user.id === gameMetadata?.blackPlayer?.id ? "b" : "w"} setMoves={setMoves} moves={moves} chess={chess} setBoard={setBoard} socket={socket} board={board} />
+                        <ChessBoard gameId={gameId} myColor={user.id === gameMetadata?.blackPlayer?.id ? "b" : "w"} setMoves={setMoves} moves={moves} chess={chess} setBoard={setBoard} socket={socket} board={board} />
                     </div>
                     <div className="col-span-2 bg-slate-900 w-full flex justify-center">
                         <div className="pt-8">
