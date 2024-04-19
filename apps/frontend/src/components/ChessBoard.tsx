@@ -1,6 +1,8 @@
 import { Chess, Color, PieceSymbol, Square } from "chess.js";
 import { useState } from "react";
 import { MOVE } from "../screens/Game";
+import MoveTable from "./MovesTable";
+
 
 export const ChessBoard = ({ chess, board, socket, setBoard }: {
     chess: Chess;
@@ -17,8 +19,14 @@ export const ChessBoard = ({ chess, board, socket, setBoard }: {
     socket: WebSocket;
 }) => {
     const [from, setFrom] = useState<null | Square>(null);
+    const [moves, setMoves] = useState<{ from: Square; to: Square }[]>([]);
 
-    return <div className="text-white-200">
+    return (
+        <div className="flex">
+        <div className="mr-10">            
+            {moves.length > 0 && <div className="mt-4"><MoveTable moves={moves} /></div>}
+        </div>
+         <div className="text-white-200 mr-10">
         {board.map((row, i) => {
             return <div key={i} className="flex">
                 {row.map((square, j) => {
@@ -48,6 +56,7 @@ export const ChessBoard = ({ chess, board, socket, setBoard }: {
                                 from,
                                 to: squareRepresentation
                             })
+                            setMoves([...moves, { from, to: squareRepresentation }]);
                         }
                     }} key={j} className={`w-16 h-16 ${(i+j)%2 === 0 ? 'bg-green-500' : 'bg-slate-500'}`}>
                         <div className="w-full justify-center flex h-full">
@@ -56,8 +65,10 @@ export const ChessBoard = ({ chess, board, socket, setBoard }: {
                             </div>
                         </div>
                     </div>
-                })} 
+                })}
             </div>
         })}
     </div>
+    </div>
+    )
 }
