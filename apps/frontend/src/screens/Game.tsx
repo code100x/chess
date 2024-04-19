@@ -17,6 +17,7 @@ export const GAME_OVER = "game_over";
 export const JOIN_ROOM = "join_room";
 export const GAME_JOINED = "game_joined"
 export const GAME_ALERT = "game_alert"
+export const GAME_ADDED = "game_added"
 
 export interface IMove {
     from: Square; to: Square
@@ -36,6 +37,7 @@ export const Game = () => {
     // Todo move to store/context
     const [chess, _setChess] = useState(new Chess());
     const [board, setBoard] = useState(chess.board());
+    const [added, setAdded] = useState(false)
     const [started, setStarted] = useState(false)
     const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null)
     const [result, setResult] = useState<"WHITE_WINS" | "BLACK_WINS" | "DRAW" | typeof OPPONENT_DISCONNECTED | null>(null);
@@ -55,6 +57,9 @@ export const Game = () => {
             const message = JSON.parse(event.data);
 
             switch (message.type) {
+                case GAME_ADDED:
+                    setAdded(true)
+                    break;
                 case INIT_GAME:
                     setBoard(chess.board());
                     setStarted(true)
@@ -139,7 +144,7 @@ export const Game = () => {
                     </div>
                     <div className="col-span-2 bg-slate-900 w-full flex justify-center">
                         <div className="pt-8">
-                            {!started && gameId === "random" && <Button onClick={() => {
+                            {added ? <div className="text-white">Waiting</div> :gameId === "random" && <Button onClick={() => {
                                 socket.send(JSON.stringify({
                                     type: INIT_GAME
                                 }))
