@@ -1,6 +1,7 @@
 import { Chess, Color, Move, PieceSymbol, Square } from "chess.js";
 import { useState } from "react";
 import { IMove, MOVE, } from "../screens/Game";
+import MoveSound from '../../public/MoveSound.mp3'
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
     if (!from) {
@@ -50,7 +51,8 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
     const isMyTurn = myColor === chess.turn();
     const [legalMoves, setLegalMoves] = useState<string[]>([]);
     const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-
+    const audio = new Audio(MoveSound);
+ 
     return (
         <div className="flex">
             <div className="text-white-200 mr-10">
@@ -63,6 +65,7 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
                         const squareRepresentation = String.fromCharCode(97 + (j % 8)) + "" + (8 - i) as Square;
 
                         return <div onClick={() => {
+                            
                             if (!started) {
                                 return;
                             }
@@ -83,11 +86,13 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
                                             to: squareRepresentation,
                                             promotion: 'q'
                                         });
+                                        audio.play();
                                     } else {
                                         chess.move({
                                             from,
                                             to: squareRepresentation,
                                         });
+                                        audio.play();
                                     }
                                     socket.send(JSON.stringify({
                                         type: MOVE,
