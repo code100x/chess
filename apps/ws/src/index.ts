@@ -2,9 +2,9 @@
 import { WebSocketServer } from 'ws';
 import { GameManager } from './GameManager';
 import { Game } from './Game';
-import { MessageType, WsMessageParser } from './types/valid';
 import http from "http";
 import express from "express";
+import { MessageType, WsMessageParser } from '@chess-monorepo/common';
 
 const app = express();
 app.use(express.json());
@@ -26,7 +26,10 @@ wss.on('connection', async function connection(ws) {
   ws.on("message", async (message) => {
     const data = WsMessageParser.parse(JSON.parse(message.toString()));
 
-
+    //todo: get random match
+    if (data.type === MessageType.GET_MATCH) {
+      // await GameManager.getInstance().getMatch(data.payload.userId, ws);
+    }
     if (data.type === MessageType.JOIN_GAME) {
       await GameManager.getInstance().subscribe(data.payload.gameId, data.payload.userId, data.payload.role, ws)
     }

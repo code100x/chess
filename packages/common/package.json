@@ -1,0 +1,16 @@
+{
+  "name": "@chess-monorepo/common",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "private": "true",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "yarn build -- --watch"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^3.22.5"
+  }
+}

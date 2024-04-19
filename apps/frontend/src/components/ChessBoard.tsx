@@ -1,6 +1,6 @@
+import { MessageType } from "@chess-monorepo/common";
 import { Chess, Color, PieceSymbol, Square } from "chess.js";
 import { useState } from "react";
-import { MOVE } from "../screens/Game";
 
 export const ChessBoard = ({
   chess,
@@ -42,7 +42,7 @@ export const ChessBoard = ({
     if (from) {
       socket.send(
         JSON.stringify({
-          type: MOVE,
+          type: MessageType.MOVE,
           payload: {
             move: {
               from,

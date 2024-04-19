@@ -3,7 +3,7 @@ import db from "./db"
 import { RedisClientType, createClient } from "redis";
 import { REDIS_URL } from "./config";
 import { GameRole } from "./types/enums";
-import { MessageType } from "./types/valid";
+import { MessageType } from "@chess-monorepo/common";
 
 export class Game {
     private chess: Chess;

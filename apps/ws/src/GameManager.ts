@@ -1,9 +1,9 @@
 import { RedisClientType, createClient } from "redis";
 import db from "./db";
-import { MessageType, WsMessageParser } from "./types/valid";
 import { GameRole, GameStatus } from "./types/enums";
 import { Game } from "./Game";
 import { DEFAULT_FEN, REDIS_URL } from "./config";
+import { MessageType, WsMessageParser } from "@chess-monorepo/common";
 
 export class GameManager {
     public static instance: GameManager;

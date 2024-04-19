@@ -9,5 +9,4 @@ export enum GameStatus {
     ABANDONED,
     MATCHED,
     NO_MATCH,
-   
 }

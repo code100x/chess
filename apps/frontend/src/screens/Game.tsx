@@ -2,12 +2,9 @@ import { useEffect, useState } from "react";
 import { Button } from "../components/Button"
 import { ChessBoard } from "../components/ChessBoard"
 import { useSocket } from "../hooks/useSocket";
-import { Chess } from 'chess.js'
+import { Chess } from 'chess.js';
+import { MessageType, WsMessageParser } from "@chess-monorepo/common";
 
-// TODO: Move together, there's code repetition here
-export const INIT_GAME = "init_game";
-export const MOVE = "move";
-export const GAME_OVER = "game_over";
 
 export const Game = () => {
     const socket = useSocket();
@@ -20,20 +17,20 @@ export const Game = () => {
             return;
         }
         socket.onmessage = (event) => {
-            const message = JSON.parse(event.data);
+            const message = WsMessageParser.parse(JSON.parse(event.data));
 
             switch (message.type) {
-                case INIT_GAME:
+                case MessageType.INIT_GAME:
                     setBoard(chess.board());
                     setStarted(true)
                     break;
-                case MOVE:
+                case MessageType.MOVE:
                     const move = message.payload;
                     chess.move(move);
                     setBoard(chess.board());
                     console.log("Move made");
                     break;
-                case GAME_OVER:
+                case MessageType.GAME_OVER:
                     console.log("Game over");
                     break;
             }
@@ -52,7 +49,7 @@ export const Game = () => {
                     <div className="pt-8">
                         {!started && <Button onClick={() => {
                             socket.send(JSON.stringify({
-                                type: INIT_GAME
+                                type: MessageType.INIT_GAME
                             }))
                         }} >
                             Play
