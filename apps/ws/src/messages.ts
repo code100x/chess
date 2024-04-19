@@ -8,3 +8,4 @@ export const JOIN_ROOM = "join_room";
 export const GAME_NOT_FOUND = "game_not_found";
 export const GAME_JOINED = "game_joined"
 export const GAME_ALERT = "game_alert"
+export const GAME_ADDED = "game_added"
