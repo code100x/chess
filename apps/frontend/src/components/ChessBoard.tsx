@@ -2,10 +2,35 @@ import { Chess, Color, Move, PieceSymbol, Square } from "chess.js";
 import { useState } from "react";
 import { IMove, MOVE, } from "../screens/Game";
 
+export function isPromoting(chess: Chess, from: Square, to: Square) {
+    if (!from) {
+        return false;
+    }
 
-export const ChessBoard = ({ gameId, myColor, chess, board, socket, setBoard, moves, setMoves }: {
+    const piece = chess.get(from);
+  
+    if (piece?.type !== "p") {
+      return false;
+    }
+  
+    if (piece.color !== chess.turn()) {
+      return false;
+    }
+  
+    if (!["1", "8"].some((it) => to.endsWith(it))) {
+      return false;
+    }
+  
+    return chess
+      .moves({ square: from, verbose: true })
+      .map((it) => it.to)
+      .includes(to);
+}
+
+export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, setBoard, moves, setMoves }: {
     myColor: Color, 
     gameId: string,
+    started: boolean,
     chess: Chess;
     moves: IMove[];
     setMoves: React.Dispatch<React.SetStateAction<IMove[]>>;
@@ -34,6 +59,9 @@ export const ChessBoard = ({ gameId, myColor, chess, board, socket, setBoard, mo
                         const squareRepresentation = String.fromCharCode(97 + (j % 8)) + "" + (8 - i) as Square;
 
                         return <div onClick={() => {
+                            if (!started) {
+                                return;
+                            }
                             if (!from && square?.color !== chess.turn()) return;
                             if (!isMyTurn) return;
                             if (from === squareRepresentation) {
@@ -45,10 +73,18 @@ export const ChessBoard = ({ gameId, myColor, chess, board, socket, setBoard, mo
                                 setLegalMoves(chess.moves({ square: squareRepresentation }))
                         } else {
                                 try {
-                                    chess.move({
-                                        from,
-                                        to: squareRepresentation
-                                    });
+                                    if (isPromoting(chess, from ,squareRepresentation))  {
+                                        chess.move({
+                                            from,
+                                            to: squareRepresentation,
+                                            promotion: 'q'
+                                        });
+                                    } else {
+                                        chess.move({
+                                            from,
+                                            to: squareRepresentation,
+                                        });
+                                    }
                                     socket.send(JSON.stringify({
                                         type: MOVE,
                                         payload: {
@@ -71,11 +107,10 @@ export const ChessBoard = ({ gameId, myColor, chess, board, socket, setBoard, mo
 
                                 }
                             }
-                        }} key={j} className={`w-16 h-16 ${includeBox(legalMoves,j,i) ? `${(i+j)%2 === 0 ? 'bg-green_legal' : 'bg-slate_legal'}` : `${(i+j)%2 === 0 ? 'bg-green-500' : 'bg-slate-500'}`}`}>
+                        }} key={j} className={`w-16 h-16 ${includeBox([from || ""], j, i) ? "bg-red-400" : includeBox(legalMoves,j,i) ? `${(i+j)%2 === 0 ? 'bg-green_legal' : 'bg-slate_legal'}` : `${(i+j)%2 === 0 ? 'bg-green-500' : 'bg-slate-500'}`}`}>
                             <div className="w-full justify-center flex h-full">
                                 <div className="h-full justify-center flex flex-col">
                                     {square ? <img className="w-4" src={`/${square?.color === "b" ? square?.type : `${square?.type?.toUpperCase()} copy`}.png`} /> : null} 
-
                                 </div>
                             </div>
                         </div>
