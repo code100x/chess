@@ -6,13 +6,13 @@ import { randomUUID } from "crypto";
 
 export class Game {
     public gameId: string;
-    public player1: { id: string; socket: WebSocket };
-    public player2: { id: string; socket: WebSocket };
+    public player1: { id: string; socket: WebSocket } | null;
+    public player2: { id: string; socket: WebSocket } | null;
     public board: Chess
     private startTime: Date;
     private moveCount = 0;
 
-    constructor(player1: { id: string; socket: WebSocket }, player2: { id: string; socket: WebSocket }) {
+    constructor(player1: { id: string; socket: WebSocket }, player2: { id: string; socket: WebSocket } | null) {
         this.player1 = player1;
         this.player2 = player2;
         this.board = new Chess();
@@ -31,7 +31,7 @@ export class Game {
         const users = await db.user.findMany({
             where: {
                 id: {
-                    in: [this.player1.id, this.player2.id]
+                    in: [this.player1?.id!, this.player2?.id!]
                 }
             }
         });
@@ -42,10 +42,9 @@ export class Game {
                 payload: {
                     color: "white",
                     gameId: this.gameId,
-                    whitePlayer: users.find(user => user.id === this.player1.id)?.name,
-                    blackPlayer: users.find(user => user.id === this.player1.id)?.name,
-                    fen: this.board.fen(),
-                    moves: []
+                    whitePlayer: users.find(user => user.id === this.player1?.id)?.name,
+                    blackPlayer: users.find(user => user.id === this.player1?.id)?.name,
+                    fen: this.board.fen()
                 }
             }));
         if (this.player2)
@@ -54,10 +53,9 @@ export class Game {
                 payload: {
                     color: "black",
                     gameId: this.gameId,
-                    whitePlayer: users.find(user => user.id === this.player1.id)?.name,
-                    blackPlayer: users.find(user => user.id === this.player1.id)?.name,
-                    fen: this.board.fen(),
-                    moves: []
+                    whitePlayer: users.find(user => user.id === this.player1?.id)?.name,
+                    blackPlayer: users.find(user => user.id === this.player1?.id)?.name,
+                    fen: this.board.fen()
                 }
             }));
     }
@@ -71,12 +69,12 @@ export class Game {
                 currentFen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
                 whitePlayer: {
                     connect: {
-                        id: this.player1.id
+                        id: this.player1?.id
                     }
                 },
                 blackPlayer: {
                     connect: {
-                        id: this.player2.id
+                        id: this.player2?.id
                     }
                 },
             },
@@ -87,7 +85,6 @@ export class Game {
         })
         this.gameId = game.id;
     }
-
     async addMoveToDb(move: {
         from: string;
         to: string;
@@ -121,10 +118,10 @@ export class Game {
         to: string;
     }) {
         // validate the type of move using zod
-        if (this.moveCount % 2 === 0 && socket !== this.player1.socket) {
+        if (this.moveCount % 2 === 0 && socket !== this.player1?.socket) {
             return
         }
-        if (this.moveCount % 2 === 1 && socket !== this.player2.socket) {
+        if (this.moveCount % 2 === 1 && socket !== this.player2?.socket) {
 
             return;
         }
@@ -136,6 +133,28 @@ export class Game {
         }
 
         await this.addMoveToDb(move);
+
+        if (this.board.isGameOver()) {
+            // Send the game over message to both players
+            if (this.player1) {
+                this.player1.socket.send(JSON.stringify({
+                    type: GAME_OVER,
+                    payload: {
+                        winner: this.board.turn() === "w" ? "black" : "white"
+                    }
+                }))
+            }
+
+            if (this.player2) {
+                this.player2.socket.send(JSON.stringify({
+                    type: GAME_OVER,
+                    payload: {
+                        winner: this.board.turn() === "w" ? "black" : "white"
+                    }
+                }))
+            }
+            return;
+        }
 
         if (this.moveCount % 2 === 0) {
             if (this.player2)
@@ -150,37 +169,6 @@ export class Game {
                     payload: move
                 }))
         }
-
-        if (this.board.isGameOver()) {
-            const result = this.board.isDraw() ? "DRAW" : this.board.turn() === "b" ? "WHITE_WINS" : "BLACK_WINS";
-
-            // Send the game over message to both players
-            // Needs to propogate better each user can connect via various sockets
-            this.player1.socket.send(JSON.stringify({
-                type: GAME_OVER,
-                payload: {
-                    result
-                }
-            }))
-
-            this.player2.socket.send(JSON.stringify({
-                type: GAME_OVER,
-                payload: {
-                    result
-                }
-            }))
-
-            await db.game.update({
-                data: {
-                    result,
-                    status: "COMPLETED"
-                },
-                where: {
-                    id: this.gameId,
-                }
-            })
-        }
-
         this.moveCount++;
     }
 }

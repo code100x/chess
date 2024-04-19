@@ -25,23 +25,23 @@ export class GameManager {
     }
 
     removeUser(socket: WebSocket, userId: string) {
-        this.users = this.users.filter(user => user.userId !== userId);
-        const gameIndex = this.games.findIndex(game => game.player1 === socket || game.player2 === socket);
+        this.users = this.users.filter(user => user.id !== userId);
+        const gameIndex = this.games.findIndex(game => game.player1?.socket === socket || game.player2?.socket === socket);
         if (gameIndex !== -1) {
             const game = this.games[gameIndex];
-            if (game.player1 === socket) {
+            if (game.player1?.socket === socket) {
                 game.player1 = null;
                 if (game.player2) {
-                    game.player2.send(JSON.stringify({ type: OPPONENT_DISCONNECTED }));
+                    game.player2.socket.send(JSON.stringify({ type: OPPONENT_DISCONNECTED }));
                 } else {
                     this.games.splice(gameIndex, 1);
                 }
             }
 
-            else if (game.player2 === socket) {
+            else if (game.player2?.socket === socket) {
                 game.player2 = null;
                 if (game.player1) {
-                    game.player1.send(JSON.stringify({ type: OPPONENT_DISCONNECTED }));
+                    game.player1.socket.send(JSON.stringify({ type: OPPONENT_DISCONNECTED }));
                 } else {
                     this.games.splice(gameIndex, 1);
                 }
@@ -82,12 +82,12 @@ export class GameManager {
                             return;
                         }
                         if (!player1) {
-                            availableGame.player1 = socket
-                            player2?.send(JSON.stringify({ type: "OPPONENT_JOINED" }))
+                            availableGame.player1 = { id , socket}
+                            player2?.socket.send(JSON.stringify({ type: "OPPONENT_JOINED" }))
                         }
                         else if (!player2) {
-                            availableGame.player2 = socket
-                            player1?.send(JSON.stringify({ type: "OPPONENT_JOINED" }))
+                            availableGame.player2 = { id, socket}
+                            player1?.socket.send(JSON.stringify({ type: "OPPONENT_JOINED" }))
                         }
                         socket.send(JSON.stringify({
                             type: "GAME_JOINED",
@@ -107,7 +107,7 @@ export class GameManager {
                                 },
                             }
                         })
-                        const game = new Game(socket, null);
+                        const game = new Game({id: id,socket:socket }, null);
                         gameFromDb?.moves.forEach((move) => {
                             game.board.move(move)
                         })
