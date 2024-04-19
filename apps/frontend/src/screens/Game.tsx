@@ -7,6 +7,7 @@ import { useSocket } from "../hooks/useSocket";
 import { Chess, Square } from 'chess.js'
 import { useNavigate, useParams } from "react-router-dom";
 import MovesTable from "../components/MovesTable";
+import { useUser } from "@repo/store/useUser";
 
 // TODO: Move together, there's code repetition here
 export const INIT_GAME = "init_game";
@@ -19,13 +20,14 @@ export interface IMove {
 }
 
 interface Metadata {
-    blackPlayer: string;
-    whitePlayer: string;
+    blackPlayer: { id: string, name: string };
+    whitePlayer: {id: string, name: string };
 }
 
 export const Game = () => {
     const socket = useSocket();
     const { gameId } = useParams();
+    const user = useUser();
 
     const navigate = useNavigate();
     // Todo move to store/context
@@ -74,7 +76,7 @@ export const Game = () => {
 
     return <div className="">
         <div className="justify-center flex pt-4 text-white">
-            {gameMetadata?.blackPlayer} vs {gameMetadata?.whitePlayer}
+            {gameMetadata?.blackPlayer?.name} vs {gameMetadata?.whitePlayer?.name}
         </div>
         {result && <div className="justify-center flex pt-4 text-white">
             {result}    
@@ -83,7 +85,7 @@ export const Game = () => {
             <div className="pt-8 max-w-screen-lg w-full">
                 <div className="grid grid-cols-6 gap-4 w-full">
                     <div className="col-span-4 w-full flex justify-center">
-                        <ChessBoard setMoves={setMoves} moves={moves} chess={chess} setBoard={setBoard} socket={socket} board={board} />
+                        <ChessBoard myColor={user.id === gameMetadata?.blackPlayer?.id ? "b" : "w"} setMoves={setMoves} moves={moves} chess={chess} setBoard={setBoard} socket={socket} board={board} />
                     </div>
                     <div className="col-span-2 bg-slate-900 w-full flex justify-center">
                         <div className="pt-8">
