@@ -70,6 +70,7 @@ export class GameManager {
                 }
             }
 
+            // Todo
             if (message.type === JOIN_GAME) {
                 if (message.payload?.gameId) {
                     const { payload: { gameId } } = message
@@ -81,12 +82,12 @@ export class GameManager {
                             return;
                         }
                         if (!player1) {
-                            availableGame.player1 = socket
-                            player2?.send(JSON.stringify({ type: "OPPONENT_JOINED" }))
+                            availableGame.player1.socket = socket
+                            player2?.socket.send(JSON.stringify({ type: "OPPONENT_JOINED" }))
                         }
                         else if (!player2) {
-                            availableGame.player2 = socket
-                            player1?.send(JSON.stringify({ type: "OPPONENT_JOINED" }))
+                            availableGame.player2.socket = socket
+                            player1?.socket.send(JSON.stringify({ type: "OPPONENT_JOINED" }))
                         }
                         socket.send(JSON.stringify({
                             type: "GAME_JOINED",
