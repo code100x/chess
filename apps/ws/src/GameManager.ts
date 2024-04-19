@@ -1,12 +1,17 @@
 import { WebSocket } from "ws";
-import { INIT_GAME, JOIN_GAME, MOVE } from "./messages";
+import { INIT_GAME, JOIN_GAME, MOVE, OPPONENT_DISCONNECTED } from "./messages";
 import { Game } from "./Game";
-import db from "./db"
+import { db } from "./db";
+
+export interface SocketWithId {
+    id: string;
+    socket: WebSocket;
+}
 
 export class GameManager {
     private games: Game[];
-    private pendingUser: WebSocket | null;
-    private users: WebSocket[];
+    private pendingUser: { id: string; socket: WebSocket }  | null;
+    private users: SocketWithId[];
 
     constructor() {
         this.games = [];
@@ -14,20 +19,20 @@ export class GameManager {
         this.users = [];
     }
 
-    addUser(socket: WebSocket) {
-        this.users.push(socket);
-        this.addHandler(socket)
+    addUser(user: SocketWithId) {
+        this.users.push(user);
+        this.addHandler(user)
     }
 
-    removeUser(socket: WebSocket) {
-        this.users = this.users.filter(user => user !== socket);
+    removeUser(socket: WebSocket, userId: string) {
+        this.users = this.users.filter(user => user.userId !== userId);
         const gameIndex = this.games.findIndex(game => game.player1 === socket || game.player2 === socket);
         if (gameIndex !== -1) {
             const game = this.games[gameIndex];
             if (game.player1 === socket) {
                 game.player1 = null;
                 if (game.player2) {
-                    game.player2.send(JSON.stringify({ type: "OPPONENT_DISCONNECTED" }));
+                    game.player2.send(JSON.stringify({ type: OPPONENT_DISCONNECTED }));
                 } else {
                     this.games.splice(gameIndex, 1);
                 }
@@ -36,7 +41,7 @@ export class GameManager {
             else if (game.player2 === socket) {
                 game.player2 = null;
                 if (game.player1) {
-                    game.player1.send(JSON.stringify({ type: "OPPONENT_DISCONNECTED" }));
+                    game.player1.send(JSON.stringify({ type: OPPONENT_DISCONNECTED }));
                 } else {
                     this.games.splice(gameIndex, 1);
                 }
@@ -44,26 +49,24 @@ export class GameManager {
         }
     }
 
-    private addHandler(socket: WebSocket) {
+    private addHandler({ socket, id }: SocketWithId) {
         socket.on("message", async (data) => {
             const message = JSON.parse(data.toString());
             if (message.type === INIT_GAME) {
 
                 if (this.pendingUser) {
-                    const game = new Game(this.pendingUser, socket);
+                    const game = new Game(this.pendingUser, { socket, id });
                     await game.createGameHandler();
                     this.games.push(game);
                     this.pendingUser = null;
                 } else {
-                    this.pendingUser = socket;
+                    this.pendingUser = { socket, id };
                 }
             }
 
             if (message.type === MOVE) {
-                console.log("inside move")
-                const game = this.games.find(game => game.player1 === socket || game.player2 === socket);
+                const game = this.games.find(game => game.player1?.id === id || game.player2?.id === id);
                 if (game) {
-                    console.log("inside makemove")
                     game.makeMove(socket, message.payload.move);
                 }
             }
