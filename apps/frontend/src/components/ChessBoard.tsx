@@ -1,6 +1,7 @@
 import { Chess, Color, Move, PieceSymbol, Square } from "chess.js";
 import { useState } from "react";
 import { IMove, MOVE, } from "../screens/Game";
+import { GoDotFill } from "react-icons/go";
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
     if (!from) {
@@ -111,12 +112,13 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
 
                                 }
                             }
-                        }} key={j} className={`w-16 h-16 ${includeBox([from || ""], j, i) ? "bg-red-400" : includeBox(legalMoves,j,i) ? `${(i+j)%2 === 0 ? 'bg-green_legal' : 'bg-slate_legal'}` : `${(i+j)%2 === 0 ? 'bg-green-500' : 'bg-slate-500'}`}`}>
+                        }} key={j} className={`w-16 h-16 relative ${(i+j)%2 === 0 ? 'bg-green-500' : 'bg-slate-500'}`}>
                             <div className="w-full justify-center flex h-full">
                                 <div className="h-full justify-center flex flex-col">
                                     {square ? <img className="w-4" src={`/${square?.color === "b" ? square?.type : `${square?.type?.toUpperCase()} copy`}.png`} /> : null} 
                                 </div>
                             </div>
+                            {includeBox(legalMoves, i, j) && <div className="absolute opacity-50"><GoDotFill size={"1rem"} color="#476566"/></div>}
                         </div>
                     })}
                 </div>
@@ -136,66 +138,12 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
 }
 
 const includeBox = (legalMoves: string[], i:number,j:number) => {
-    let first,second
+    let first;
+    const letters: string[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
-    switch (i) {
-        case 0:
-            first = 'a'
-            break;
-        case 1:
-            first = 'b'
-            break;
-        case 2:
-            first = 'c'
-            break;
-        case 3:
-            first = 'd'
-            break;
-        case 4:
-            first = 'e'
-            break;
-        case 5:
-            first = 'f'
-            break;
-        case 6:
-            first = 'g'
-            break;
-        case 7:
-            first = 'h'
-            break;
-        default:
-            break;
+    if (i >= 0 && i < letters.length) {
+        first = letters[i];
     }
-
-    switch (j) {
-        case 0:
-            second = '8'
-            break;
-        case 1:
-            second = '7'
-            break;
-        case 2:
-            second = '6'
-            break;
-        case 3:
-            second = '5'
-            break;
-        case 4:
-            second = '4'
-            break;
-        case 5:
-            second = '3'
-            break;
-        case 6:
-            second = '2'
-            break;
-        case 7:
-            second = '1'
-            break;
-        default:
-            break;
-    }
-
-    return legalMoves.includes(first! + second!)
+    return legalMoves.includes(first! + (8-j!))
 }
 
