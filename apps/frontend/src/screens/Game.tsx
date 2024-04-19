@@ -15,6 +15,11 @@ export const INIT_GAME = "init_game";
 export const MOVE = "move";
 export const GAME_OVER = "game_over";
 
+interface Metadata {
+    blackPlayer: string;
+    whitePlayer: string;
+}
+
 export const Game = () => {
     const socket = useSocket();
     const { gameId } = useParams();
@@ -31,6 +36,7 @@ export const Game = () => {
     const playGameStartedSound = () => {
       new Audio(GameStartSound).play();
     };
+    const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null)
 
     useEffect(() => {
         if (!socket) {
@@ -45,6 +51,10 @@ export const Game = () => {
                     setStarted(true)
                     navigate(`/game/${message.payload.gameId}`)
                     playMoveMadeSound();
+                    setGameMetadata({
+                        blackPlayer: message.payload.blackPlayer,
+                        whitePlayer: message.payload.whitePlayer
+                    })
                     break;
                 case MOVE:
                     const move = message.payload;
@@ -61,21 +71,26 @@ export const Game = () => {
 
     if (!socket) return <div>Connecting...</div>
 
-    return <div className="justify-center flex">
-        <div className="pt-8 max-w-screen-lg w-full">
-            <div className="grid grid-cols-6 gap-4 w-full">
-                <div className="col-span-4 w-full flex justify-center">
-                    <ChessBoard chess={chess} setBoard={setBoard} socket={socket} board={board} />
-                </div>
-                <div className="col-span-2 bg-slate-900 w-full flex justify-center">
-                    <div className="pt-8">
-                        {!started && gameId === "random" && <Button onClick={() => {
-                            socket.send(JSON.stringify({
-                                type: INIT_GAME
-                            }))
-                        }} >
-                            Play
-                        </Button>}
+    return <div className="">
+        <div className="justify-center flex pt-4 text-white">
+            {gameMetadata?.blackPlayer} vs {gameMetadata?.whitePlayer}
+        </div>
+        <div className="justify-center flex">
+            <div className="pt-8 max-w-screen-lg w-full">
+                <div className="grid grid-cols-6 gap-4 w-full">
+                    <div className="col-span-4 w-full flex justify-center">
+                        <ChessBoard chess={chess} setBoard={setBoard} socket={socket} board={board} />
+                    </div>
+                    <div className="col-span-2 bg-slate-900 w-full flex justify-center">
+                        <div className="pt-8">
+                            {!started && gameId === "random" && <Button onClick={() => {
+                                socket.send(JSON.stringify({
+                                    type: INIT_GAME
+                                }))
+                            }} >
+                                Play
+                            </Button>}
+                        </div>
                     </div>
                 </div>
             </div>

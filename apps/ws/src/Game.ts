@@ -28,12 +28,23 @@ export class Game {
             return;
         }
 
+        const users = await db.user.findMany({
+            where: {
+                id: {
+                    in: [this.player1.id, this.player2.id]
+                }
+            }
+        });
+
         if (this.player1)
             this.player1.socket.send(JSON.stringify({
                 type: INIT_GAME,
                 payload: {
                     color: "white",
-                    gameId: this.gameId
+                    gameId: this.gameId,
+                    whitePlayer: users.find(user => user.id === this.player1.id)?.name,
+                    blackPlayer: users.find(user => user.id === this.player1.id)?.name,
+                    fen: this.board.fen()
                 }
             }));
         if (this.player2)
@@ -41,7 +52,10 @@ export class Game {
                 type: INIT_GAME,
                 payload: {
                     color: "black",
-                    gameId: this.gameId
+                    gameId: this.gameId,
+                    whitePlayer: users.find(user => user.id === this.player1.id)?.name,
+                    blackPlayer: users.find(user => user.id === this.player1.id)?.name,
+                    fen: this.board.fen()
                 }
             }));
     }
