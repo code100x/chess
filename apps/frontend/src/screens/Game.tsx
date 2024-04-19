@@ -6,6 +6,9 @@ import { ChessBoard } from "../components/ChessBoard"
 import { useSocket } from "../hooks/useSocket";
 import { Chess } from 'chess.js'
 import { useNavigate, useParams } from "react-router-dom";
+import MoveMadeSound from "../../public/MoveMadeSound.mp3";
+import GameStartSound from "../../public/GameStartSound.mp3";
+
 
 // TODO: Move together, there's code repetition here
 export const INIT_GAME = "init_game";
@@ -22,6 +25,13 @@ export const Game = () => {
     const [board, setBoard] = useState(chess.board());
     const [started, setStarted] = useState(false)
 
+    const playMoveMadeSound = () => {
+      new Audio(MoveMadeSound).play();
+    };
+    const playGameStartedSound = () => {
+      new Audio(GameStartSound).play();
+    };
+
     useEffect(() => {
         if (!socket) {
             return;
@@ -34,11 +44,13 @@ export const Game = () => {
                     setBoard(chess.board());
                     setStarted(true)
                     navigate(`/game/${message.payload.gameId}`)
+                    playMoveMadeSound();
                     break;
                 case MOVE:
                     const move = message.payload;
                     chess.move(move);
                     setBoard(chess.board());
+                    playGameStartedSound()
                     break;
                 case GAME_OVER:
                     console.log("Game over");
