@@ -1,18 +1,18 @@
 import { WebSocket } from "ws";
 import { Chess } from 'chess.js'
 import { GAME_OVER, INIT_GAME, MOVE } from "./messages";
-import db from "./db"
+import { db } from "./db";
 import { randomUUID } from "crypto";
 
 export class Game {
     public gameId: string;
-    public player1: WebSocket | null;
-    public player2: WebSocket | null;
+    public player1: { id: string; socket: WebSocket };
+    public player2: { id: string; socket: WebSocket };
     public board: Chess
     private startTime: Date;
     private moveCount = 0;
 
-    constructor(player1: WebSocket, player2: WebSocket | null) {
+    constructor(player1: { id: string; socket: WebSocket }, player2: { id: string; socket: WebSocket }) {
         this.player1 = player1;
         this.player2 = player2;
         this.board = new Chess();
@@ -29,7 +29,7 @@ export class Game {
         }
 
         if (this.player1)
-            this.player1.send(JSON.stringify({
+            this.player1.socket.send(JSON.stringify({
                 type: INIT_GAME,
                 payload: {
                     color: "white",
@@ -37,7 +37,7 @@ export class Game {
                 }
             }));
         if (this.player2)
-            this.player2.send(JSON.stringify({
+            this.player2.socket.send(JSON.stringify({
                 type: INIT_GAME,
                 payload: {
                     color: "black",
@@ -48,17 +48,20 @@ export class Game {
 
     async createGameInDb() {
         const game = await db.game.create({
-            // TODO: Add user detials when auth is complete
             data: {
                 id: this.gameId,
                 timeControl: "CLASSICAL",
                 status: "IN_PROGRESS",
                 currentFen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
                 whitePlayer: {
-                    create: {},
+                    connect: {
+                        id: this.player1.id
+                    }
                 },
                 blackPlayer: {
-                    create: {},
+                    connect: {
+                        id: this.player2.id
+                    }
                 },
             },
             include: {
@@ -77,10 +80,12 @@ export class Game {
                 data: {
                     gameId: this.gameId,
                     moveNumber: this.moveCount + 1,
-                    startFen: move.from,
-                    endFen: move.to,
+                    from: move.from,
+                    to: move.to,
+                    // Todo: Fix start fen
+                    startFen: this.board.fen(),
+                    endFen: this.board.fen(),
                     createdAt: new Date(Date.now()),
-                    notation: this.board.fen()
                 },
             }), 
             db.game.update({
@@ -99,11 +104,10 @@ export class Game {
         to: string;
     }) {
         // validate the type of move using zod
-        if (this.moveCount % 2 === 0 && socket !== this.player1) {
-
+        if (this.moveCount % 2 === 0 && socket !== this.player1.socket) {
             return
         }
-        if (this.moveCount % 2 === 1 && socket !== this.player2) {
+        if (this.moveCount % 2 === 1 && socket !== this.player2.socket) {
 
             return;
         }
@@ -119,7 +123,7 @@ export class Game {
         if (this.board.isGameOver()) {
             // Send the game over message to both players
             if (this.player1) {
-                this.player1.send(JSON.stringify({
+                this.player1.socket.send(JSON.stringify({
                     type: GAME_OVER,
                     payload: {
                         winner: this.board.turn() === "w" ? "black" : "white"
@@ -128,7 +132,7 @@ export class Game {
             }
 
             if (this.player2) {
-                this.player2.send(JSON.stringify({
+                this.player2.socket.send(JSON.stringify({
                     type: GAME_OVER,
                     payload: {
                         winner: this.board.turn() === "w" ? "black" : "white"
@@ -140,13 +144,13 @@ export class Game {
 
         if (this.moveCount % 2 === 0) {
             if (this.player2)
-                this.player2.send(JSON.stringify({
+                this.player2.socket.send(JSON.stringify({
                     type: MOVE,
                     payload: move
                 }))
         } else {
             if (this.player1)
-                this.player1.send(JSON.stringify({
+                this.player1.socket.send(JSON.stringify({
                     type: MOVE,
                     payload: move
                 }))
