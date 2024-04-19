@@ -46,7 +46,8 @@ export class GameManager {
             where: {
                 id: gameId,
             },
-            include: {
+            select: {
+                id: true,
                 status: true,
                 blackPlayerId: true,
                 whitePlayerId: true,
@@ -62,8 +63,8 @@ export class GameManager {
                 }
             }));
         }
-        switch (gameState.status as GameStatus) {
-            case GameStatus.MATCHED:
+        switch (gameState.status) {
+            case "MATCHED":
                 return ws.send(JSON.stringify({
                     type: MessageType.JOIN_GAME,
                     payload: {
@@ -72,7 +73,7 @@ export class GameManager {
                     }
                 }));
             //todo: handle cases for game in progress, completed, abandoned
-            case GameStatus.IN_PROGRESS:
+            case "IN_PROGRESS":
                 return ws.send(JSON.stringify({
                     type: MessageType.JOIN_GAME,
                     payload: {
@@ -81,7 +82,7 @@ export class GameManager {
                     }
                 }));
 
-            case GameStatus.COMPLETED:
+            case "COMPLETED":
                 return ws.send(JSON.stringify({
                     type: MessageType.JOIN_GAME,
                     payload: {
@@ -108,7 +109,7 @@ export class GameManager {
                     id: gameId,
                 },
                 data: {
-                    status: GameStatus.NO_MATCH,
+                    status: "NO_MATCH",
                     ...playerUpdate,
                 }
             });
@@ -142,7 +143,7 @@ export class GameManager {
                     id: gameId,
                 },
                 data: {
-                    status: GameStatus.MATCHED,
+                    status: "MATCHED",
                     ...playerUpdate,
                 }
             });
