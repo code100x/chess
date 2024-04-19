@@ -16,6 +16,7 @@ export const OPPONENT_DISCONNECTED = "opponent_disconnected";
 export const GAME_OVER = "game_over";
 export const JOIN_ROOM = "join_room";
 export const GAME_JOINED = "game_joined"
+export const USER_TIMEOUT = "user_timeout"
 
 export interface IMove {
     from: Square; to: Square
@@ -37,7 +38,7 @@ export const Game = () => {
     const [board, setBoard] = useState(chess.board());
     const [started, setStarted] = useState(false)
     const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null)
-    const [result, setResult] = useState<"WHITE_WINS" | "BLACK_WINS" | "DRAW" | typeof OPPONENT_DISCONNECTED | null>(null);
+    const [result, setResult] = useState<"WHITE_WINS" | "BLACK_WINS" | "DRAW" | typeof OPPONENT_DISCONNECTED | typeof USER_TIMEOUT | null>(null);
     const [moves, setMoves] = useState<IMove[]>([]);
 
     useEffect(() => {
@@ -80,6 +81,10 @@ export const Game = () => {
 
                 case OPPONENT_DISCONNECTED:
                     setResult(OPPONENT_DISCONNECTED)
+                    break;
+                
+                case USER_TIMEOUT:
+                    setResult(USER_TIMEOUT)
                     break;
 
                 case GAME_JOINED:

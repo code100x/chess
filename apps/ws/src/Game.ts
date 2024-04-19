@@ -1,6 +1,6 @@
 import { WebSocket } from "ws";
 import { Chess, Square } from 'chess.js'
-import { GAME_OVER, INIT_GAME, MOVE } from "./messages";
+import { GAME_OVER, INIT_GAME, MOVE, OPPONENT_DISCONNECTED } from "./messages";
 import { db } from "./db";
 import { randomUUID } from "crypto";
 import { SocketManager, User } from "./SocketManager";
@@ -193,7 +193,13 @@ export class Game {
     }
             
     async endGame() {
-        SocketManager.getInstance().broadcast(this.gameId, JSON.stringify({ type: GAME_OVER }))
+        SocketManager.getInstance().broadcast(
+            this.gameId,
+            JSON.stringify({
+                type: USER_TIMEOUT,
+                payload: { result: USER_TIMEOUT },
+            })
+        );
         await db.game.update({
             data: {
                 status: "ABANDONED",
