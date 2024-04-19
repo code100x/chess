@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  username      String?   @unique
+  name          String?
+  email         String   @unique
+  provider      AuthProvider
+  password      String?
+  rating        Int      @default(1200)
+  gamesAsWhite  Game[]   @relation("GamesAsWhite")
+  gamesAsBlack  Game[]   @relation("GamesAsBlack")
+  createdAt     DateTime @default(now())
+  lastLogin     DateTime?
+
+  @@index([rating])
+}
+
+model Game {
+  id            String     @id @default(uuid())
+  whitePlayerId String
+  blackPlayerId String
+  whitePlayer   User       @relation("GamesAsWhite", fields: [whitePlayerId], references: [id])
+  blackPlayer   User       @relation("GamesAsBlack", fields: [blackPlayerId], references: [id])
+  status        GameStatus
+  result        GameResult?
+  timeControl   TimeControl
+  startingFen   String     @default("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") // default value for the startingFen
+  currentFen    String?
+  startAt       DateTime   @default(now())
+  endAt         DateTime?
+  moves         Move[]
+  opening       String?
+  event         String?
+
+  @@index([status, result])
+}
+
+model Move {
+  id          String   @id @default(uuid())
+  gameId      String
+  game        Game     @relation(fields: [gameId], references: [id])
+  moveNumber  Int
+  from        String
+  to          String
+  comments    String?
+  startFen    String
+  endFen      String
+  timeTaken   Int?     @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([gameId])
+}
+
+enum GameStatus {
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+
+enum GameResult {
+  WHITE_WINS
+  BLACK_WINS
+  DRAW
+}
+
+enum TimeControl {
+  CLASSICAL
+  RAPID
+  BLITZ
+  BULLET
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  FACEBOOK
+  GITHUB
+}
