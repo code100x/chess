@@ -45,7 +45,6 @@ model Move {
   id          String   @id @default(uuid())
   gameId      String
   game        Game     @relation(fields: [gameId], references: [id])
-  moveNumber  Int
   notation    String
   comments    String?
   startFen    String
@@ -60,6 +59,8 @@ enum GameStatus {
   IN_PROGRESS
   COMPLETED
   ABANDONED
+  MATCHED
+  NO_MATCH
 }
 
 enum GameResult {
