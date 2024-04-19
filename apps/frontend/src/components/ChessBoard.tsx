@@ -49,12 +49,16 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
     const [from, setFrom] = useState<null | Square>(null);
     const isMyTurn = myColor === chess.turn();
     const [legalMoves, setLegalMoves] = useState<string[]>([]);
+    const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
     return (
         <div className="flex">
             <div className="text-white-200 mr-10">
             {board.map((row, i) => {
                 return <div key={i} className="flex">
+                            <div className="w-16 h-16 flex justify-center items-center text-cyan-100">
+                                {8 - i} {/* Vertical labels */}
+                            </div>  
                     {row.map((square, j) => {
                         const squareRepresentation = String.fromCharCode(97 + (j % 8)) + "" + (8 - i) as Square;
 
@@ -117,8 +121,17 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
                     })}
                 </div>
             })}
+             <div className="flex">
+                    <div className="w-16 h-8"></div> 
+                        {labels.map((label, i) => (
+                            <div key={i} className="w-16 h-8 flex justify-center items-center text-cyan-100">
+                                {label} {/* Horizontal labels */}
+                            </div>
+                        ))}
+                    </div>
+            </div>
         </div>
-    </div>
+   
     )
 }
 
