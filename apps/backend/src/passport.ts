@@ -13,6 +13,9 @@ const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET || "your_github_cl
 const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID || "your_facebook_app_id";
 const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET || "your_facebook_app_secret";
 
+if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GITHUB_CLIENT_ID || !GITHUB_CLIENT_SECRET || !FACEBOOK_APP_ID || !FACEBOOK_APP_SECRET) {
+  throw new Error('Missing environment variables for authentication providers');
+}
 passport.use(
   new GoogleStrategy(
     {
