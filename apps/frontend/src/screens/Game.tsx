@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
 import { Button } from "../components/Button"
-import { ChessBoard } from "../components/ChessBoard"
+import { ChessBoard, isPromoting } from "../components/ChessBoard"
 import { useSocket } from "../hooks/useSocket";
 import { Chess, Square } from 'chess.js'
 import { useNavigate, useParams } from "react-router-dom";
@@ -14,6 +14,8 @@ export const INIT_GAME = "init_game";
 export const MOVE = "move";
 export const OPPONENT_DISCONNECTED = "opponent_disconnected";
 export const GAME_OVER = "game_over";
+export const JOIN_ROOM = "join_room";
+export const GAME_JOINED = "game_joined"
 
 export interface IMove {
     from: Square; to: Square
@@ -60,7 +62,15 @@ export const Game = () => {
                     const moves = chess.moves({verbose: true});
                     //TODO: Fix later
                     if (moves.map(x => JSON.stringify(x)).includes(JSON.stringify(move))) return;
-                    chess.move(move);
+                    if (isPromoting(chess, move.from, move.to))  {
+                        chess.move({
+                            from: move.from,
+                            to: move.to,
+                            promotion: 'q'
+                        });
+                    } else {
+                        chess.move(move);
+                    }
                     setBoard(chess.board());
                     setMoves(moves => [...moves, move])
                     break;
@@ -71,7 +81,33 @@ export const Game = () => {
                 case OPPONENT_DISCONNECTED:
                     setResult(OPPONENT_DISCONNECTED)
                     break;
+
+                case GAME_JOINED:
+                    setGameMetadata({
+                        blackPlayer: message.payload.blackPlayer,
+                        whitePlayer: message.payload.whitePlayer
+                    })
+                    setStarted(true)
+                    setMoves(message.payload.moves);
+                    message.payload.moves.map(x => {
+                        if (isPromoting(chess, x.from, x.to)) {
+                            chess.move({...x,  promotion: 'q' })
+                        } else {
+                            chess.move(x)
+                        }
+                    })
+                    setBoard(chess.board());
+                    break;
             }
+        }
+
+        if (gameId !== "random") {
+            socket.send(JSON.stringify({
+                type: JOIN_ROOM, 
+                payload: {
+                    gameId
+                }
+            }))
         }
     }, [chess, socket]);
 
@@ -87,8 +123,8 @@ export const Game = () => {
         <div className="justify-center flex">
             <div className="pt-8 max-w-screen-lg w-full">
                 <div className="grid grid-cols-6 gap-4 w-full">
-                    <div className="col-span-4 w-full flex justify-center">
-                        <ChessBoard gameId={gameId} myColor={user.id === gameMetadata?.blackPlayer?.id ? "b" : "w"} setMoves={setMoves} moves={moves} chess={chess} setBoard={setBoard} socket={socket} board={board} />
+                    <div className="col-span-4 w-full flex justify-center text-white">
+                        <ChessBoard started={started} gameId={gameId ?? ""} myColor={user.id === gameMetadata?.blackPlayer?.id ? "b" : "w"} setMoves={setMoves} moves={moves} chess={chess} setBoard={setBoard} socket={socket} board={board} />
                     </div>
                     <div className="col-span-2 bg-slate-900 w-full flex justify-center">
                         <div className="pt-8">
