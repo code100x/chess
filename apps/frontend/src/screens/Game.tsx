@@ -126,7 +126,7 @@ export const Game = () => {
                     <div className="col-span-4 w-full flex justify-center text-white">
                         <ChessBoard started={started} gameId={gameId ?? ""} myColor={user.id === gameMetadata?.blackPlayer?.id ? "b" : "w"} setMoves={setMoves} moves={moves} chess={chess} setBoard={setBoard} socket={socket} board={board} />
                     </div>
-                    <div className="col-span-2 bg-slate-900 w-full flex justify-center h-[90vh] max-h-[60rem overflow-y-auto">
+                    <div className="col-span-2 bg-slate-900 w-full flex justify-center h-[70vh] max-h-[40rem] overflow-y-auto">
                         {!started && gameId === "random" && 
                         <div className="pt-8"> 
                             <Button onClick={() => {
