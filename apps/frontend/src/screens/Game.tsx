@@ -16,6 +16,7 @@ export const OPPONENT_DISCONNECTED = "opponent_disconnected";
 export const GAME_OVER = "game_over";
 export const JOIN_ROOM = "join_room";
 export const GAME_JOINED = "game_joined"
+export const GAME_ALERT = "game_alert"
 
 export interface IMove {
     from: Square; to: Square
@@ -103,6 +104,10 @@ export const Game = () => {
                         }
                     })
                     setBoard(chess.board());
+                    break;
+                
+                default:
+                    alert(message.payload.message);
                     break;
             }
         }
