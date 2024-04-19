@@ -3,19 +3,21 @@ import Facebook from "../assets/facebook.png";
 import Github from "../assets/github.png";
 import { useNavigate } from 'react-router-dom';
 
+const BACKEND_URL = "http://localhost:3000";
+
 const Login = () => {
   const navigate = useNavigate();
 
   const google = () => {
-    window.open("http://localhost:5173/auth/google", "_self");
+    window.open(`${BACKEND_URL}/auth/google`, "_self");
   };
 
   const github = () => {
-    window.open("http://localhost:5173/auth/github", "_self");
+    window.open(`${BACKEND_URL}/auth/github`, "_self");
   };
 
   const facebook = () => {
-    window.open("http://localhost:5173/auth/facebook", "_self");
+    window.open(`${BACKEND_URL}/auth/facebook`, "_self");
   };
 
   return (

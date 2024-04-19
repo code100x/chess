@@ -1,7 +1,7 @@
 import { WebSocket } from "ws";
 import { Chess } from 'chess.js'
 import { GAME_OVER, INIT_GAME, MOVE } from "./messages";
-import db from "@repo/db"
+import db from "@repo/db/client"
 import { randomUUID } from "crypto";
 
 export class Game {
