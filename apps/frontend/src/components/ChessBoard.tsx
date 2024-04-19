@@ -3,8 +3,9 @@ import { useState } from "react";
 import { IMove, MOVE, } from "../screens/Game";
 
 
-export const ChessBoard = ({ myColor, chess, board, socket, setBoard, moves, setMoves }: {
+export const ChessBoard = ({ gameId, myColor, chess, board, socket, setBoard, moves, setMoves }: {
     myColor: Color, 
+    gameId: string,
     chess: Chess;
     moves: IMove[];
     setMoves: React.Dispatch<React.SetStateAction<IMove[]>>;
@@ -49,6 +50,7 @@ export const ChessBoard = ({ myColor, chess, board, socket, setBoard, moves, set
                                     socket.send(JSON.stringify({
                                         type: MOVE,
                                         payload: {
+                                            gameId,
                                             move: {
                                                 from,
                                                 to: squareRepresentation
