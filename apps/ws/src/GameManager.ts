@@ -64,17 +64,15 @@ export class GameManager {
                 }
             }
 
-            if (message.type === GAME_OVER){
-                const gameId = message.payload.gameId;
-                const game = this.games.find(game => game.gameId === gameId);
-                if (game) {
-                    game.clearTimer();
-                    const timer = setTimeout(() => {
-                        game.endGame();
-                        this.removeGame(game.gameId);
-                    },60 * 1000)
-                    game.setTimer(timer);
-                }
+            const gameId = message.payload.gameId;
+            const game = this.games.find(game => game.gameId === gameId);
+            if (game) {
+                game.clearTimer();
+                const timer = setTimeout(() => {
+                    game.endGame();
+                    this.removeGame(game.gameId);
+                },60 * 1000)
+                game.setTimer(timer);
             }
 
             if (message.type === JOIN_ROOM) {
