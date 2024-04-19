@@ -143,15 +143,16 @@ export const Game = () => {
                         <ChessBoard started={started} gameId={gameId ?? ""} myColor={user.id === gameMetadata?.blackPlayer?.id ? "b" : "w"} setMoves={setMoves} moves={moves} chess={chess} setBoard={setBoard} socket={socket} board={board} />
                     </div>
                     <div className="col-span-2 bg-slate-900 w-full flex justify-center">
+                        {!started &&
                         <div className="pt-8">
-                            {added ? <div className="text-white">Waiting</div> :gameId === "random" && <Button onClick={() => {
-                                socket.send(JSON.stringify({
-                                    type: INIT_GAME
-                                }))
-                            }} >
-                                Play
-                            </Button>}
-                        </div>
+                        {added ? <div className="text-white">Waiting</div> : gameId === "random" && <Button onClick={() => {
+                            socket.send(JSON.stringify({
+                                type: INIT_GAME
+                            }))
+                        }} >
+                            Play
+                        </Button>}
+                        </div>}
                         <div className="mr-10">            
                             {moves.length > 0 && <div className="mt-4"><MovesTable moves={moves} /></div>}
                         </div>
