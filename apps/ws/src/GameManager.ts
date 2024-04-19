@@ -1,7 +1,7 @@
 import { WebSocket } from "ws";
 import { INIT_GAME, JOIN_GAME, MOVE } from "./messages";
 import { Game } from "./Game";
-import db from "@repo/db"
+import db from "@repo/db/client"
 
 export class GameManager {
     private games: Game[];

@@ -10,12 +10,16 @@ interface User {
   _id: string;
 }
 
-router.get('/login/success', (req: Request, res: Response) => {
+router.get('/auth/refresh', (req: Request, res: Response) => {
   if (req.user) {
     const user = req.user as User;
+
+    // Token is issued so it can be shared b/w HTTP and ws server
+    // Todo: Make this temporary and add refresh logic here
     const token = jwt.sign({ userId: user._id }, JWT_SECRET);
-    res.cookie('jwt', token, { httpOnly: true, sameSite: 'strict' });
-    res.status(200).json({ success: true, message: 'successful' });
+    res.json({
+      token
+    });
   } else {
     res.status(401).json({ success: false, message: 'Unauthorized' });
   }
@@ -37,14 +41,14 @@ router.get('/logout', (req: Request, res: Response) => {
   });
 });
 
-router.get('/google', passport.authenticate('google', { scope: ['profile'] }));
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/google/callback', passport.authenticate('google', {
   successRedirect: CLIENT_URL,
   failureRedirect: '/login/failed',
 }));
 
-router.get('/github', passport.authenticate('github', { scope: ['profile'] }));
+router.get('/github', passport.authenticate('github', { scope: ['profile', 'email'] }));
 
 router.get('/github/callback', passport.authenticate('github', {
   successRedirect: CLIENT_URL,

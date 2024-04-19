@@ -14,7 +14,8 @@
     "@prisma/client": "^5.12.1",
     "@types/ws": "^8.5.10",
     "chess.js": "^1.0.0-beta.8",
-    "ws": "^8.16.0"
+    "ws": "^8.16.0",
+    "@repo/db": "*"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",
