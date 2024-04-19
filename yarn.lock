@@ -521,12 +521,7 @@
   resolved "https://registry.npmjs.org/@pkgr/core/-/core-0.1.1.tgz"
   integrity sha512-cq8o4cWH0ibXh9VGi5P20Tu9XF/0fFXl9EUinr9QfTM7a7p0oTA4iJRCQWppXR1Pg8dSM0UCItCkPwsk9qWWYA==
 
-"@prisma/client@5.12.0":
-  version "5.12.0"
-  resolved "https://registry.npmjs.org/@prisma/client/-/client-5.12.0.tgz"
-  integrity sha512-bk/+KPpRm0+IzqFCtAxrj+/TNiHzulspnO+OkysaYY/atc/eX0Gx8V3tTLxbHKVX0LKD4Hi8KKCcSbU1U72n7Q==
-
-"@prisma/client@^5.12.1":
+"@prisma/client@5.12.1", "@prisma/client@^5.12.1":
   version "5.12.1"
   resolved "https://registry.npmjs.org/@prisma/client/-/client-5.12.1.tgz"
   integrity sha512-6/JnizEdlSBxDIdiLbrBdMW5NqDxOmhXAJaNXiPpgzAPr/nLZResT6MMpbOHLo5yAbQ1Vv5UU8PTPRzb0WIxdA==
@@ -3048,6 +3043,11 @@ graphemer@^1.4.0:
   resolved "https://registry.npmjs.org/graphemer/-/graphemer-1.4.0.tgz"
   integrity sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==
 
+hamt_plus@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/hamt_plus/-/hamt_plus-1.0.2.tgz"
+  integrity sha512-t2JXKaehnMb9paaYA7J0BX8QQAY8lwfQ9Gjf4pg/mk4krt+cmwmU652HOoWonf+7+EQV97ARPMhhVgU1ra2GhA==
+
 handlebars@^4.4.3:
   version "4.7.8"
   resolved "https://registry.npmjs.org/handlebars/-/handlebars-4.7.8.tgz"
@@ -3624,7 +3624,7 @@ jsonfile@^6.0.1:
 
 jsonwebtoken@^9.0.2:
   version "9.0.2"
-  resolved "https://registry.npmjs.org/jsonwebtoken/-/jsonwebtoken-9.0.2.tgz"
+  resolved "https://registry.yarnpkg.com/jsonwebtoken/-/jsonwebtoken-9.0.2.tgz#65ff91f4abef1784697d40952bb1998c504caaf3"
   integrity sha512-PRp66vJ865SSqOlgqS8hujT5U4AOgMfhrwYIuIhfKaoSCZcirrmASQr8CX7cUg+RMih+hgznrjp99o+W4pJLHQ==
   dependencies:
     jws "^3.2.2"
@@ -4697,6 +4697,13 @@ readdirp@~3.6.0:
   integrity sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==
   dependencies:
     picomatch "^2.2.1"
+
+recoil@^0.7.7:
+  version "0.7.7"
+  resolved "https://registry.npmjs.org/recoil/-/recoil-0.7.7.tgz"
+  integrity sha512-8Og5KPQW9LwC577Vc7Ug2P0vQshkv1y3zG3tSSkWMqkWSwHmE+by06L8JtnGocjW6gcCvfwB3YtrJG6/tWivNQ==
+  dependencies:
+    hamt_plus "1.0.2"
 
 reflect.getprototypeof@^1.0.4:
   version "1.0.6"

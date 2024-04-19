@@ -4,18 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/index.ts"
+    "dev": "esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js --sourcemap && node dist/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.12.1",
+    "@repo/db": "*",
     "@types/ws": "^8.5.10",
     "chess.js": "^1.0.0-beta.8",
-    "ws": "^8.16.0",
-    "@repo/db": "*"
+    "jsonwebtoken": "^9.0.2",
+    "ws": "^8.16.0"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",

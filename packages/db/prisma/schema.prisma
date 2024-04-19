@@ -48,7 +48,8 @@ model Move {
   gameId      String
   game        Game     @relation(fields: [gameId], references: [id])
   moveNumber  Int
-  notation    String
+  from        String
+  to          String
   comments    String?
   startFen    String
   endFen      String
