@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { db } from '../db';
 const router = Router();
 
-const CLIENT_URL = 'http://localhost:5173/game';
+const CLIENT_URL = 'http://localhost:5173/game/random';
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
 interface User {
