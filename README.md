@@ -12,3 +12,13 @@ Let's keep it simple
 3. Typescript as the language
 4. Saparate Websocket servers for handling real time games
 5. Redis for storing all moves of a game in a queue
+
+
+## STEPS TO START LOCALLY 
+
+1. yarn install
+2. Add DATABASE_URL env varibale in apps/packages/db/prisma dir
+3. cd apps/packages/db - run `yarn primsa migrate dev`
+4. cd apps/frontend   - run `npm run dev`
+5. cd apps/backend   - run `npm run dev`
+6. You're All set
