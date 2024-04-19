@@ -42,8 +42,8 @@ export class Game {
                 payload: {
                     color: "white",
                     gameId: this.gameId,
-                    whitePlayer: users.find(user => user.id === this.player1.id)?.name,
-                    blackPlayer: users.find(user => user.id === this.player1.id)?.name,
+                    whitePlayer: { name: users.find(user => user.id === this.player1.id)?.name, id: this.player1.id },
+                    blackPlayer: { name: users.find(user => user.id === this.player2.id)?.name, id: this.player2.id },
                     fen: this.board.fen(),
                     moves: []
                 }
@@ -54,8 +54,8 @@ export class Game {
                 payload: {
                     color: "black",
                     gameId: this.gameId,
-                    whitePlayer: users.find(user => user.id === this.player1.id)?.name,
-                    blackPlayer: users.find(user => user.id === this.player1.id)?.name,
+                    whitePlayer: { name: users.find(user => user.id === this.player1.id)?.name, id: this.player1.id },
+                    blackPlayer: { name: users.find(user => user.id === this.player2.id)?.name, id: this.player2.id },
                     fen: this.board.fen(),
                     moves: []
                 }
@@ -125,18 +125,15 @@ export class Game {
             return
         }
         if (this.moveCount % 2 === 1 && socket !== this.player2.socket) {
-
             return;
         }
         try {
             this.board.move(move);
         } catch (e) {
-            console.log(e);
             return;
         }
 
         await this.addMoveToDb(move);
-
         if (this.moveCount % 2 === 0) {
             if (this.player2)
                 this.player2.socket.send(JSON.stringify({
