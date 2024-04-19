@@ -24,60 +24,71 @@ export const ChessBoard = ({ myColor, chess, board, socket, setBoard, moves, set
   const isMyTurn = myColor === chess.turn();
 
   return (
-    <div className="flex">
+    <div className="flex flex-col">
       <div className="text-white-200 mr-10">
         {board.map((row, i) => {
-          return <div key={i} className="flex">
-            {row.map((square, j) => {
-              const squareRepresentation = String.fromCharCode(97 + (j % 8)) + "" + (8 - i) as Square;
+          return <div className="flex gap-2">
+            <div className="text-white flex justify-center items-center ">{8 - i}</div>
+            <div className="flex flex-col">
 
-              return <div onClick={() => {
-                if (!from && square?.color !== chess.turn()) return;
-                if (!isMyTurn) return;
-                if (from === squareRepresentation) {
-                  setFrom(null);
-                }
+              <div key={i} className="flex">
+                {row.map((square, j) => {
+                  const squareRepresentation = String.fromCharCode(97 + (j % 8)) + "" + (8 - i) as Square;
 
-                if (!from) {
-                  setFrom(squareRepresentation);
-                } else {
-                  try {
-                    chess.move({
-                      from,
-                      to: squareRepresentation
-                    });
-                    socket.send(JSON.stringify({
-                      type: MOVE,
-                      payload: {
-                        move: {
+                  return <div onClick={() => {
+                    if (!from && square?.color !== chess.turn()) return;
+                    if (!isMyTurn) return;
+                    if (from === squareRepresentation) {
+                      setFrom(null);
+                    }
+
+                    if (!from) {
+                      setFrom(squareRepresentation);
+                    } else {
+                      try {
+                        chess.move({
                           from,
                           to: squareRepresentation
-                        }
-                      }
-                    }))
-                    setFrom(null)
-                    setBoard(chess.board());
-                    console.log({
-                      from,
-                      to: squareRepresentation
-                    })
-                    setMoves(moves => [...moves, { from, to: squareRepresentation }]);
-                  } catch (e) {
+                        });
+                        socket.send(JSON.stringify({
+                          type: MOVE,
+                          payload: {
+                            move: {
+                              from,
+                              to: squareRepresentation
+                            }
+                          }
+                        }))
+                        setFrom(null)
+                        setBoard(chess.board());
+                        console.log({
+                          from,
+                          to: squareRepresentation
+                        })
+                        setMoves(moves => [...moves, { from, to: squareRepresentation }]);
+                      } catch (e) {
 
-                  }
-                }
-              }} key={j} className={`w-16 h-16 ${(i + j) % 2 === 0 ? 'bg-green-500' : 'bg-slate-500'}`}>
-                {from}
-                <div className="w-full justify-center flex h-full">
-                  <div className="h-full justify-center flex flex-col">
-                    {square ? <img className="w-full" src={`/${square?.color === "b" ? square?.type : `${square?.type?.toUpperCase()} copy`}.png`} /> : null}
+                      }
+                    }
+                  }} key={j} className={`w-16 h-16 ${(i + j) % 2 === 0 ? 'bg-green-500' : 'bg-slate-500'}`}>
+                    {from}
+                    <div className="w-full justify-center flex h-full">
+                      <div className="h-full justify-center flex flex-col">
+                        {square ? <img className="w-full" src={`/${square?.color === "b" ? square?.type : `${square?.type?.toUpperCase()} copy`}.png`} /> : null}
+                      </div>
+                    </div>
+                    <div className="text-white text-center ">{["a", "b", "c", "d", "e", "f", "g", "h"][j]}</div>
                   </div>
-                </div>
+                })}
               </div>
-            })}
+            </div>
+
+
           </div>
+
         })}
       </div>
+
     </div>
   )
 }
