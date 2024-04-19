@@ -1,6 +1,6 @@
 import { WebSocket } from "ws";
 import { Chess, Square } from 'chess.js'
-import { GAME_OVER, INIT_GAME, MOVE, OPPONENT_DISCONNECTED } from "./messages";
+import { GAME_OVER, INIT_GAME, MOVE, OPPONENT_DISCONNECTED ,USER_TIMEOUT} from "./messages";
 import { db } from "./db";
 import { randomUUID } from "crypto";
 import { SocketManager, User } from "./SocketManager";
