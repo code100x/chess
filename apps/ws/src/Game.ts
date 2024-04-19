@@ -12,6 +12,7 @@ export class Game {
     public board: Chess
     private startTime: Date;
     private moveCount = 0;
+    private timer: NodeJS.Timeout | null = null;
 
     constructor(player1UserId: string, player2UserId: string | null) {
         this.player1UserId = player1UserId;
@@ -151,5 +152,26 @@ export class Game {
         }
 
         this.moveCount++;
+    }
+            
+    async endGame() {
+        SocketManager.getInstance().broadcast(this.gameId, JSON.stringify({ type: GAME_OVER }))
+        await db.game.update({
+            data: {
+                status: "ABANDONED",
+                result: this.board.turn() === "b" ? "WHITE_WINS" : "BLACK_WINS"
+            },
+            where: {
+                id: this.gameId
+            }
+        })
+    }
+
+    setTimer(timer: NodeJS.Timeout) {
+        this.timer = timer;
+    }
+
+    clearTimer(){
+        if (this.timer) clearTimeout(this.timer);
     }
 }
