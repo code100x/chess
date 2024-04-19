@@ -44,7 +44,8 @@ export class Game {
                     gameId: this.gameId,
                     whitePlayer: users.find(user => user.id === this.player1.id)?.name,
                     blackPlayer: users.find(user => user.id === this.player1.id)?.name,
-                    fen: this.board.fen()
+                    fen: this.board.fen(),
+                    moves: []
                 }
             }));
         if (this.player2)
@@ -55,7 +56,8 @@ export class Game {
                     gameId: this.gameId,
                     whitePlayer: users.find(user => user.id === this.player1.id)?.name,
                     blackPlayer: users.find(user => user.id === this.player1.id)?.name,
-                    fen: this.board.fen()
+                    fen: this.board.fen(),
+                    moves: []
                 }
             }));
     }
@@ -85,6 +87,7 @@ export class Game {
         })
         this.gameId = game.id;
     }
+
     async addMoveToDb(move: {
         from: string;
         to: string;
@@ -134,28 +137,6 @@ export class Game {
 
         await this.addMoveToDb(move);
 
-        if (this.board.isGameOver()) {
-            // Send the game over message to both players
-            if (this.player1) {
-                this.player1.socket.send(JSON.stringify({
-                    type: GAME_OVER,
-                    payload: {
-                        winner: this.board.turn() === "w" ? "black" : "white"
-                    }
-                }))
-            }
-
-            if (this.player2) {
-                this.player2.socket.send(JSON.stringify({
-                    type: GAME_OVER,
-                    payload: {
-                        winner: this.board.turn() === "w" ? "black" : "white"
-                    }
-                }))
-            }
-            return;
-        }
-
         if (this.moveCount % 2 === 0) {
             if (this.player2)
                 this.player2.socket.send(JSON.stringify({
@@ -169,6 +150,37 @@ export class Game {
                     payload: move
                 }))
         }
+
+        if (this.board.isGameOver()) {
+            const result = this.board.isDraw() ? "DRAW" : this.board.turn() === "b" ? "WHITE_WINS" : "BLACK_WINS";
+
+            // Send the game over message to both players
+            // Needs to propogate better each user can connect via various sockets
+            this.player1.socket.send(JSON.stringify({
+                type: GAME_OVER,
+                payload: {
+                    result
+                }
+            }))
+
+            this.player2.socket.send(JSON.stringify({
+                type: GAME_OVER,
+                payload: {
+                    result
+                }
+            }))
+
+            await db.game.update({
+                data: {
+                    result,
+                    status: "COMPLETED"
+                },
+                where: {
+                    id: this.gameId,
+                }
+            })
+        }
+
         this.moveCount++;
     }
 }
