@@ -1,24 +1,34 @@
 import { Request, Response, Router } from 'express';
-const router = Router();
-const passport = require('passport');
+import passport from 'passport';
 import jwt from 'jsonwebtoken';
+import { db } from '../db';
+const router = Router();
 
 const CLIENT_URL = 'http://localhost:5173/game';
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
 interface User {
-  _id: string;
+  id: string;
 }
 
-router.get('/auth/refresh', (req: Request, res: Response) => {
+router.get('/refresh', async (req: Request, res: Response) => {
   if (req.user) {
     const user = req.user as User;
 
     // Token is issued so it can be shared b/w HTTP and ws server
     // Todo: Make this temporary and add refresh logic here
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET);
+
+    const userDb = await db.user.findFirst({
+      where: {
+        id: user.id
+      }
+    });
+
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET);
     res.json({
-      token
+      token,
+      id: user.id,
+      name: userDb?.name
     });
   } else {
     res.status(401).json({ success: false, message: 'Unauthorized' });
