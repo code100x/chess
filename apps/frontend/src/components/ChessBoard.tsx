@@ -72,7 +72,6 @@ export const ChessBoard = ({ gameId, myColor, chess, board, socket, setBoard, mo
                                 }
                             }
                         }} key={j} className={`w-16 h-16 ${includeBox(legalMoves,j,i) ? `${(i+j)%2 === 0 ? 'bg-green_legal' : 'bg-slate_legal'}` : `${(i+j)%2 === 0 ? 'bg-green-500' : 'bg-slate-500'}`}`}>
-                            {from}
                             <div className="w-full justify-center flex h-full">
                                 <div className="h-full justify-center flex flex-col">
                                     {square ? <img className="w-4" src={`/${square?.color === "b" ? square?.type : `${square?.type?.toUpperCase()} copy`}.png`} /> : null} 
