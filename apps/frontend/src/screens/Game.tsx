@@ -6,11 +6,8 @@ import { ChessBoard } from "../components/ChessBoard"
 import { useSocket } from "../hooks/useSocket";
 import { Chess } from 'chess.js'
 import { useNavigate, useParams } from "react-router-dom";
+import { INIT_GAME, MOVE, GAME_OVER } from '../../../shared';
 
-// TODO: Move together, there's code repetition here
-export const INIT_GAME = "init_game";
-export const MOVE = "move";
-export const GAME_OVER = "game_over";
 
 interface Metadata {
     blackPlayer: string;

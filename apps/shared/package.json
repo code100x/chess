@@ -1,0 +1,12 @@
+{
+  "name": "shared-constants",
+  "version": "1.0.0",
+  "description": "Shared constants for frontend and backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "chess.js": "^1.0.0-beta.8"
+  }
+}
