@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.animate-strokedasharray {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: dash 15s ease-in-out forwards;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-glow {
+  animation: glow 3s ease infinite
+}
+
+@keyframes glow {
+  50% {
+    filter: drop-shadow(0px 0px 0px rgba(249, 155, 22, 0.25));
+  }
+  0%, 100% {
+    filter: drop-shadow(0px 0px 50px rgba(249, 155, 22, 0.5));
+  }
+}
