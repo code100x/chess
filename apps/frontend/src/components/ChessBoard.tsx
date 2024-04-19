@@ -1,6 +1,7 @@
 import { Chess, Color, PieceSymbol, Square } from "chess.js";
 import { useState } from "react";
 import { MOVE } from "../screens/Game";
+import moveSound from '../../public/moveSound.mp3'
 
 export const ChessBoard = ({ chess, board, socket, setBoard,}: {
   chess: Chess;
@@ -26,7 +27,7 @@ export const ChessBoard = ({ chess, board, socket, setBoard,}: {
     e.dataTransfer.setData("text/plain", square);
     setFrom(square);
   };
-  const audio = new Audio("https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/capture.mp3");
+  const audio = new Audio(moveSound);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
