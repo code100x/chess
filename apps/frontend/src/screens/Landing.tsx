@@ -14,11 +14,17 @@ export const Landing = () => {
                         <h1 className="text-4xl font-bold text-white">Play chess online on the #2 Site!</h1>
                     </div>
 
-                    <div className="mt-8 flex justify-center">
+                    <div className="mt-8 flex space-x-5 justify-center">
                         <Button onClick={() => {
                             navigate("/game")
                         }} >
                             Play Online
+                        </Button>
+                   
+                          <Button  onClick={() => {
+                            navigate("/login")
+                        }} >
+                            Login
                         </Button>
                     </div>    
                 </div>

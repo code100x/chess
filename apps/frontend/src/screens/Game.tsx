@@ -1,3 +1,5 @@
+/* eslint-disable no-case-declarations */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
 import { Button } from "../components/Button"
 import { ChessBoard } from "../components/ChessBoard"
@@ -38,7 +40,7 @@ export const Game = () => {
                     break;
             }
         }
-    }, [socket]);
+    }, [chess, socket]);
 
     if (!socket) return <div>Connecting...</div>
 
