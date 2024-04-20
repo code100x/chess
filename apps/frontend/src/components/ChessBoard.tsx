@@ -7,7 +7,6 @@ import LegalMoveIndicator from "./chess-board/LegalMoveIndicator";
 import ChessSquare from "./chess-board/ChessSquare";
 import NumberNotation from "./chess-board/NumberNotation";
 import { drawArrow } from "../utils/canvas";
-import { useState } from "react";
 import MoveSound from '../../public/MoveSound.mp3'
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
