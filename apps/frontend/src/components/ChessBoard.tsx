@@ -7,7 +7,7 @@ import LegalMoveIndicator from "./chess-board/LegalMoveIndicator";
 import ChessSquare from "./chess-board/ChessSquare";
 import NumberNotation from "./chess-board/NumberNotation";
 import { drawArrow } from "../utils/canvas";
-import MoveSound from '../../public/MoveSound.mp3'
+import useWindowSize from "../hooks/useWindowSize";
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
     if (!from) {
@@ -67,6 +67,7 @@ export const ChessBoard = ({
     } | null)[][];
     socket: WebSocket;
 }) => {
+    const { height, width } = useWindowSize();
     const [lastMoveFrom, lastMoveTo] = [moves?.at(-1)?.from || "", moves?.at(-1)?.to || ""];
     const [rightClickedSquares, setRightClickedSquares] = useState<string[]>([]);
     const [arrowStart, setArrowStart] = useState<string | null>(null);
@@ -78,7 +79,8 @@ export const ChessBoard = ({
     const labels = ["a", "b", "c", "d", "e", "f", "g", "h"];
     const isFlipped = myColor === "b";
     const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
-    const audio = new Audio(MoveSound);
+    const OFFSET = 100;
+    const boxSize = width > height ? Math.floor((height - OFFSET) / 8) : Math.floor((width - OFFSET) / 8);
 
     const handleMouseDown = (e: MouseEvent<HTMLDivElement>, squareRep: string) => {
         e.preventDefault();
@@ -215,8 +217,12 @@ export const ChessBoard = ({
                                                     } catch (e) {}
                                                 }
                                             }}
+                                            style={{
+                                                width: boxSize,
+                                                height: boxSize
+                                            }}
                                             key={j}
-                                            className={`w-16 h-16 ${isRightClickedSquare ? (isMainBoxColor ? "bg-[#CF664E]" : "bg-[#E87764]") : isHighlightedSquare ? `${isMainBoxColor ? "bg-[#BBCB45]" : "bg-[#F4F687]"}` : isMainBoxColor ? "bg-[#739552]" : "bg-[#EBEDD0]"} ${""}`}
+                                            className={`${isRightClickedSquare ? (isMainBoxColor ? "bg-[#CF664E]" : "bg-[#E87764]") : isHighlightedSquare ? `${isMainBoxColor ? "bg-[#BBCB45]" : "bg-[#F4F687]"}` : isMainBoxColor ? "bg-[#739552]" : "bg-[#EBEDD0]"} ${""}`}
                                             onContextMenu={(e) => {
                                                 e.preventDefault();
                                             }}
@@ -229,7 +235,6 @@ export const ChessBoard = ({
                                         >
                                             <div className="w-full justify-center flex h-full relative">
                                                 {square && <ChessSquare square={square} />}
-
                                                 {isFlipped
                                                     ? i === 8 && (
                                                           <LetterNotation
