@@ -35,7 +35,7 @@ export class Game {
     public player1UserId: string;
     public player2UserId: string | null;
     public board: Chess
-    private startTime: Date;
+    public startTime: Date;
     private moveCount = 0;
 
     constructor(player1UserId: string, player2UserId: string | null) {

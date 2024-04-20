@@ -16,6 +16,7 @@ export const OPPONENT_DISCONNECTED = "opponent_disconnected";
 export const GAME_OVER = "game_over";
 export const JOIN_ROOM = "join_room";
 export const GAME_JOINED = "game_joined"
+export const MATCH_NOT_FOUND = "match_not_found"
 
 export interface IMove {
     from: Square; to: Square
@@ -23,7 +24,7 @@ export interface IMove {
 
 interface Metadata {
     blackPlayer: { id: string, name: string };
-    whitePlayer: {id: string, name: string };
+    whitePlayer: { id: string, name: string };
 }
 
 export const Game = () => {
@@ -39,12 +40,13 @@ export const Game = () => {
     const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null)
     const [result, setResult] = useState<"WHITE_WINS" | "BLACK_WINS" | "DRAW" | typeof OPPONENT_DISCONNECTED | null>(null);
     const [moves, setMoves] = useState<IMove[]>([]);
+    const [seraching, setSearching] = useState(false)
 
-    useEffect(()=>{
+    useEffect(() => {
         window.addEventListener('beforeunload', function (e) {
             e.preventDefault();
-          });  
-    },[]);
+        });
+    }, []);
 
     useEffect(() => {
         if (!socket) {
@@ -65,10 +67,10 @@ export const Game = () => {
                     break;
                 case MOVE:
                     const move = message.payload;
-                    const moves = chess.moves({verbose: true});
+                    const moves = chess.moves({ verbose: true });
                     //TODO: Fix later
                     if (moves.map(x => JSON.stringify(x)).includes(JSON.stringify(move))) return;
-                    if (isPromoting(chess, move.from, move.to))  {
+                    if (isPromoting(chess, move.from, move.to)) {
                         chess.move({
                             from: move.from,
                             to: move.to,
@@ -95,21 +97,25 @@ export const Game = () => {
                     })
                     setStarted(true)
                     setMoves(message.payload.moves);
+                    setSearching(false)
                     message.payload.moves.map(x => {
                         if (isPromoting(chess, x.from, x.to)) {
-                            chess.move({...x,  promotion: 'q' })
+                            chess.move({ ...x, promotion: 'q' })
                         } else {
                             chess.move(x)
                         }
                     })
                     setBoard(chess.board());
                     break;
+                case MATCH_NOT_FOUND:
+                    setSearching(false)
+                    alert("No Match Found")
             }
         }
 
         if (gameId !== "random") {
             socket.send(JSON.stringify({
-                type: JOIN_ROOM, 
+                type: JOIN_ROOM,
                 payload: {
                     gameId
                 }
@@ -124,7 +130,7 @@ export const Game = () => {
             {gameMetadata?.blackPlayer?.name} vs {gameMetadata?.whitePlayer?.name}
         </div>
         {result && <div className="justify-center flex pt-4 text-white">
-            {result}    
+            {result}
         </div>}
         <div className="justify-center flex">
             <div className="pt-8 max-w-screen-lg w-full">
@@ -134,15 +140,16 @@ export const Game = () => {
                     </div>
                     <div className="col-span-2 bg-slate-900 w-full flex justify-center">
                         <div className="pt-8">
-                            {!started && gameId === "random" && <Button onClick={() => {
+                            {!started && gameId === "random" && <Button className={seraching? 'cursor-not-allowed':''} onClick={() => {
+                                setSearching(true)
                                 socket.send(JSON.stringify({
                                     type: INIT_GAME
                                 }))
                             }} >
-                                Play
+                                {seraching ? "Searching..." : "Play"}
                             </Button>}
                         </div>
-                        <div className="mr-10">            
+                        <div className="mr-10">
                             {moves.length > 0 && <div className="mt-4"><MovesTable moves={moves} /></div>}
                         </div>
                     </div>
