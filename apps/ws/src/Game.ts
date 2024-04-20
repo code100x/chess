@@ -1,26 +1,62 @@
 import { WebSocket } from "ws";
-import { Chess } from 'chess.js'
+import { Chess, Square } from 'chess.js'
 import { GAME_OVER, INIT_GAME, MOVE } from "./messages";
-import db from "./db"
+import { db } from "./db";
 import { randomUUID } from "crypto";
+import { SocketManager, User } from "./SocketManager";
+
+export function isPromoting(chess: Chess, from: Square, to: Square) {
+    if (!from) {
+        return false;
+    }
+
+    const piece = chess.get(from);
+  
+    if (piece?.type !== "p") {
+      return false;
+    }
+  
+    if (piece.color !== chess.turn()) {
+      return false;
+    }
+  
+    if (!["1", "8"].some((it) => to.endsWith(it))) {
+      return false;
+    }
+  
+    return chess
+      .moves({ square: from, verbose: true })
+      .map((it) => it.to)
+      .includes(to);
+}
 
 export class Game {
     public gameId: string;
-    public player1: WebSocket | null;
-    public player2: WebSocket | null;
+    public player1UserId: string;
+    public player2UserId: string | null;
     public board: Chess
     private startTime: Date;
     private moveCount = 0;
 
-    constructor(player1: WebSocket, player2: WebSocket | null) {
-        this.player1 = player1;
-        this.player2 = player2;
+    constructor(player1UserId: string, player2UserId: string | null) {
+        this.player1UserId = player1UserId;
+        this.player2UserId = player2UserId;
         this.board = new Chess();
         this.startTime = new Date();
         this.gameId = randomUUID();
     }
 
-    async createGameHandler() {
+    async updateSecondPlayer(player2UserId: string) {
+        this.player2UserId = player2UserId;
+        
+        const users = await db.user.findMany({
+            where: {
+                id: {
+                    in: [this.player1UserId, this.player2UserId ?? ""]
+                }
+            }
+        });
+
         try {
             await this.createGameInDb(); 
         } catch(e) {
@@ -28,37 +64,36 @@ export class Game {
             return;
         }
 
-        if (this.player1)
-            this.player1.send(JSON.stringify({
-                type: INIT_GAME,
-                payload: {
-                    color: "white",
-                    gameId: this.gameId
-                }
-            }));
-        if (this.player2)
-            this.player2.send(JSON.stringify({
-                type: INIT_GAME,
-                payload: {
-                    color: "black",
-                    gameId: this.gameId
-                }
-            }));
+        SocketManager.getInstance().broadcast(this.gameId, JSON.stringify({
+            type: INIT_GAME,
+            payload: {
+                gameId: this.gameId,
+                whitePlayer: { name: users.find(user => user.id === this.player1UserId)?.name, id: this.player1UserId },
+                blackPlayer: { name: users.find(user => user.id === this.player2UserId)?.name, id: this.player2UserId },
+                fen: this.board.fen(),
+                moves: []
+            }
+        }));
     }
+
+    
 
     async createGameInDb() {
         const game = await db.game.create({
-            // TODO: Add user detials when auth is complete
             data: {
                 id: this.gameId,
                 timeControl: "CLASSICAL",
                 status: "IN_PROGRESS",
                 currentFen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
                 whitePlayer: {
-                    create: {},
+                    connect: {
+                        id: this.player1UserId
+                    }
                 },
                 blackPlayer: {
-                    create: {},
+                    connect: {
+                        id: this.player2UserId ?? ""
+                    }
                 },
             },
             include: {
@@ -68,6 +103,7 @@ export class Game {
         })
         this.gameId = game.id;
     }
+
     async addMoveToDb(move: {
         from: string;
         to: string;
@@ -77,10 +113,12 @@ export class Game {
                 data: {
                     gameId: this.gameId,
                     moveNumber: this.moveCount + 1,
-                    startFen: move.from,
-                    endFen: move.to,
+                    from: move.from,
+                    to: move.to,
+                    // Todo: Fix start fen
+                    startFen: this.board.fen(),
+                    endFen: this.board.fen(),
                     createdAt: new Date(Date.now()),
-                    notation: this.board.fen()
                 },
             }), 
             db.game.update({
@@ -94,63 +132,62 @@ export class Game {
         ])
     }
 
-    async makeMove(socket: WebSocket, move: {
-        from: string;
-        to: string;
+    async makeMove(user: User, move: {
+        from: Square;
+        to: Square;
     }) {
         // validate the type of move using zod
-        if (this.moveCount % 2 === 0 && socket !== this.player1) {
-
+        if (this.moveCount % 2 === 0 && user.userId !== this.player1UserId) {
             return
         }
-        if (this.moveCount % 2 === 1 && socket !== this.player2) {
-
+        if (this.moveCount % 2 === 1 && user.userId !== this.player2UserId) {
             return;
         }
+
         try {
-            this.board.move(move);
+            if (isPromoting(this.board, move.from, move.to))  {
+                this.board.move({
+                    from: move.from,
+                    to: move.to,
+                    promotion: 'q'
+                });
+            } else {
+                this.board.move({
+                    from: move.from,
+                    to: move.to,
+                });
+            }
         } catch (e) {
-            console.log(e);
             return;
         }
 
         await this.addMoveToDb(move);
+        SocketManager.getInstance().broadcast(this.gameId, JSON.stringify({
+            type: MOVE,
+            payload: move
+        }))
 
         if (this.board.isGameOver()) {
-            // Send the game over message to both players
-            if (this.player1) {
-                this.player1.send(JSON.stringify({
-                    type: GAME_OVER,
-                    payload: {
-                        winner: this.board.turn() === "w" ? "black" : "white"
-                    }
-                }))
-            }
+            const result = this.board.isDraw() ? "DRAW" : this.board.turn() === "b" ? "WHITE_WINS" : "BLACK_WINS";
 
-            if (this.player2) {
-                this.player2.send(JSON.stringify({
-                    type: GAME_OVER,
-                    payload: {
-                        winner: this.board.turn() === "w" ? "black" : "white"
-                    }
-                }))
-            }
-            return;
+            SocketManager.getInstance().broadcast(this.gameId, JSON.stringify({
+                type: GAME_OVER,
+                payload: {
+                    result
+                }
+            }))
+
+            await db.game.update({
+                data: {
+                    result,
+                    status: "COMPLETED"
+                },
+                where: {
+                    id: this.gameId,
+                }
+            })
         }
 
-        if (this.moveCount % 2 === 0) {
-            if (this.player2)
-                this.player2.send(JSON.stringify({
-                    type: MOVE,
-                    payload: move
-                }))
-        } else {
-            if (this.player1)
-                this.player1.send(JSON.stringify({
-                    type: MOVE,
-                    payload: move
-                }))
-        }
         this.moveCount++;
     }
 }

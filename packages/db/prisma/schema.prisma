@@ -9,9 +9,11 @@ datasource db {
 
 model User {
   id            String   @id @default(uuid())
-  username      String   @unique
+  username      String?   @unique
+  name          String?
   email         String   @unique
-  password      String
+  provider      AuthProvider
+  password      String?
   rating        Int      @default(1200)
   gamesAsWhite  Game[]   @relation("GamesAsWhite")
   gamesAsBlack  Game[]   @relation("GamesAsBlack")
@@ -46,7 +48,8 @@ model Move {
   gameId      String
   game        Game     @relation(fields: [gameId], references: [id])
   moveNumber  Int
-  notation    String
+  from        String
+  to          String
   comments    String?
   startFen    String
   endFen      String
@@ -73,4 +76,11 @@ enum TimeControl {
   RAPID
   BLITZ
   BULLET
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  FACEBOOK
+  GITHUB
 }
