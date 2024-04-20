@@ -1,0 +1,33 @@
+{
+  "name": "chessnative",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@types/react": "~18.2.45",
+    "chess.js": "^0.12.0",
+    "expo": "~50.0.14",
+    "expo-constants": "~15.4.6",
+    "expo-linking": "~6.2.2",
+    "expo-router": "~3.4.8",
+    "expo-status-bar": "~1.11.1",
+    "react": "18.2.0",
+    "react-native": "0.73.6",
+    "react-native-gesture-handler": "~2.14.0",
+    "react-native-reanimated": "~3.6.2",
+    "react-native-safe-area-context": "4.8.2",
+    "react-native-screens": "~3.29.0",
+    "react-native-webview": "^13.8.6",
+    "typescript": "^5.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@types/chess.js": "^0.11.2"
+  },
+  "private": true
+}
