@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useNavigate, Link } from "react-router-dom";
 import BackgroundSvg from "../components/BackgroundSvg";
 import { Button } from "../components/Button";
@@ -49,7 +49,7 @@ const Navbar = ({ navigate }) => {
     return (
         <nav className="bg-black text-white p-4">
             <div className="max-w-screen-xl mx-auto flex justify-between items-center">
-                <Link to="/" className="text-xl font-bold">ChessMaster</Link>
+                <Link to="/" className="text-xl font-bold">100xChess</Link>
                 <Button className="text-white bg-transparent hover:bg-white hover:text-black transition duration-300 px-4 py-2 rounded" onClick={() => navigate("/login")}>Login</Button>
             </div>
         </nav>
@@ -94,10 +94,10 @@ const Footer = ({ navigate }) => {
     return (
         <footer className="bg-gray-800 text-white py-10">
             <div className="max-w-screen-xl mx-auto text-center">
-                <h3 className="text-2xl font-bold mb-5">Join the ChessMaster Community</h3>
+                <h3 className="text-2xl font-bold mb-5">Join the 100xChess Community</h3>
                 <p className="mb-6">Enhance your skills, learn new strategies, and connect with other chess enthusiasts. Keep up with all things chess by following us on our social platforms.</p>
                 <button className="bg-white hover:bg-blue-800 text-black font-bold py-2 px-6 rounded-lg transition-colors duration-300" onClick={() => navigate("/login")}>Login</button>
-                <p className="mt-8 text-sm">© 2024 ChessMaster. All rights reserved.</p>
+                <p className="mt-8 text-sm">© 2024 100xChess. All rights reserved.</p>
             </div>
         </footer>
     );
