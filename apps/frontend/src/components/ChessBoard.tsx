@@ -61,6 +61,7 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
                             <div className={`w-16 h-16 flex justify-center items-center text-cyan-100 ${myColor === "b" && "rotate-180"}`}>
                                 {8 - i} {/* Vertical labels */}
                             </div>  
+                    <div className="flex ">
                     {row.map((square, j) => {
                         const squareRepresentation = String.fromCharCode(97 + (j % 8)) + "" + (8 - i) as Square;
 
@@ -123,17 +124,21 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
                             {includeBox(legalMoves, j, i) && <div className="absolute opacity-100 z-30 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"><GoDotFill size={"2rem"} color="#476566"/></div>}
                         </div>
                     })}
+                    </div>
                 </div>
             })}
             </div>
             <div className={`flex ${myColor === "b" ? "flex-row" : ""}`}>
                     <div className="w-16 h-8"></div> 
-                        {labels.map((label, i) => (
-                            <div key={i} className="w-16 h-8 flex justify-center items-center text-cyan-100">
-                                {label} {/* Horizontal labels */}
-                            </div>
-                        ))}
-                    {/* {myColor === "w" ? <div className="w-16 h-8"></div> : "" } */}
+                    {
+                        <div className={`flex ${myColor === "b" ? "flex-row-reverse": ""}`}>
+                            {labels.map((label, i) => (
+                                <div key={i} className="w-16 h-8 flex justify-center items-center text-cyan-100">
+                                    {label} 
+                                </div>
+                            ))}
+                        </div>
+                    }
                     </div>
             </div>
         </div>
