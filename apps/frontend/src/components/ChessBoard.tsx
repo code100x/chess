@@ -67,17 +67,23 @@ export const ChessBoard = ({
 
     return (
         <div className="flex">
-            <div className="text-white-200 mr-10">
+            <div className="text-white-200 mr-10 rounded-md overflow-hidden">
                 {(isFlipped ? board.slice().reverse() : board).map((row, i) => {
                     i = isFlipped ? i + 1 : 8 - i;
                     return (
-                        <div key={i} className="flex">
-                            <div className="w-16 h-16 flex justify-center items-center text-cyan-100">
-                                {i} {/* Vertical labels */}
+                        <div key={i} className="flex relative">
+                            <div
+                                className={`font-bold absolute ${i % 2 === 0 ? "text-[#739552]" : "text-[#EBEDD0]"} left-0.5`}
+                            >
+                                {i}
                             </div>
+
                             {(isFlipped ? row.slice().reverse() : row).map((square, j) => {
                                 j = isFlipped ? 7 - (j % 8) : j % 8;
+
+                                const isMainBoxColor = isFlipped ? (i + j) % 2 === 0 : (i + j) % 2 !== 0;
                                 const squareRepresentation = (String.fromCharCode(97 + j) + "" + i) as Square;
+
                                 return (
                                     <div
                                         onClick={() => {
@@ -135,23 +141,39 @@ export const ChessBoard = ({
                                             }
                                         }}
                                         key={j}
-                                        className={`w-16 h-16  ${from === squareRepresentation ? "bg-red-500" : (i + j) % 2 === 0 ? "bg-green-500" : "bg-slate-500"}`}
+                                        className={`w-16 h-16  ${from === squareRepresentation ? "bg-red-500" : isMainBoxColor ? "bg-[#739552]" : "bg-[#EBEDD0]"}`}
                                     >
                                         <div className="w-full justify-center flex h-full relative">
                                             <div className="h-full justify-center flex flex-col ">
                                                 {square ? (
                                                     <img
-                                                        className="w-4"
-                                                        src={`/${square?.color === "b" ? square?.type : `${square?.type?.toUpperCase()} copy`}.png`}
+                                                        className="w-14"
+                                                        src={`/${square?.color === "b" ? `b${square.type}` : `w${square.type}`}.png`}
                                                     />
                                                 ) : null}
                                             </div>
+
+                                            {isFlipped
+                                                ? i === 8 && (
+                                                      <div
+                                                          className={`font-bold absolute ${j % 2 !== 0 ? "text-[#739552]" : "text-[#EBEDD0]"} right-0.5 bottom-0`}
+                                                      >
+                                                          {labels[j]}
+                                                      </div>
+                                                  )
+                                                : i === 1 && (
+                                                      <div
+                                                          className={`font-bold absolute ${j % 2 !== 0 ? "text-[#739552]" : "text-[#EBEDD0]"} right-0.5 bottom-0`}
+                                                      >
+                                                          {labels[j]}
+                                                      </div>
+                                                  )}
                                             {!!from && legalMoves.includes(squareRepresentation) && (
                                                 <div className="absolute z-[100] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                                                     {square?.type ? (
-                                                        <div className="w-14 h-14 border-red-400 border-4 rounded-full" />
+                                                        <div className="w-[60px] h-[60px] border-[#C8CAB2] border-4 rounded-full" />
                                                     ) : (
-                                                        <div className="w-3.5 h-3.5 bg-red-400 rounded-full" />
+                                                        <div className="w-4 h-4 bg-[#C8CAB2] rounded-full" />
                                                     )}
                                                 </div>
                                             )}
@@ -162,14 +184,6 @@ export const ChessBoard = ({
                         </div>
                     );
                 })}
-                <div className="flex">
-                    <div className="w-16 h-8"></div>
-                    {(isFlipped ? labels.slice().reverse() : labels).map((label, i) => (
-                        <div key={i} className="w-16 h-8 flex justify-center items-center text-cyan-100">
-                            {label} {/* Horizontal labels */}
-                        </div>
-                    ))}
-                </div>
             </div>
         </div>
     );
