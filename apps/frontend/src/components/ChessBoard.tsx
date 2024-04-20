@@ -72,6 +72,7 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
                             if (!isMyTurn) return;
                             if (from === squareRepresentation) {
                                 setFrom(null);
+                                setLegalMoves([]);
                             }
                             
                             if (!from) {
