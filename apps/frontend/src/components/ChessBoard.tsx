@@ -40,6 +40,7 @@ export const ChessBoard = ({
     socket,
     setBoard,
     setMoves,
+    moves,
 }: {
     myColor: Color;
     gameId: string;
@@ -63,9 +64,13 @@ export const ChessBoard = ({
     } | null)[][];
     socket: WebSocket;
 }) => {
+    const [lastMoveFrom, lastMoveTo] = [moves?.at(-1)?.from || "", moves?.at(-1)?.to || ""];
+
+
     const [from, setFrom] = useState<null | Square>(null);
     const isMyTurn = myColor === chess.turn();
     const [legalMoves, setLegalMoves] = useState<string[]>([]);
+
     const labels = ["a", "b", "c", "d", "e", "f", "g", "h"];
     const isFlipped = myColor === "b";
 
@@ -76,13 +81,14 @@ export const ChessBoard = ({
                     i = isFlipped ? i + 1 : 8 - i;
                     return (
                         <div key={i} className="flex relative">
-                            <NumberNotation isMainBoxColor={i%2===0} label={i.toString()}/>
+                            <NumberNotation isMainBoxColor={i % 2 === 0} label={i.toString()} />
                             {(isFlipped ? row.slice().reverse() : row).map((square, j) => {
                                 j = isFlipped ? 7 - (j % 8) : j % 8;
 
                                 const isMainBoxColor = isFlipped ? (i + j) % 2 === 0 : (i + j) % 2 !== 0;
                                 const squareRepresentation = (String.fromCharCode(97 + j) + "" + i) as Square;
-
+                                const isHighlightedSquare = from === squareRepresentation || squareRepresentation === lastMoveFrom || squareRepresentation === lastMoveTo
+                            
                                 return (
                                     <div
                                         onClick={() => {
@@ -140,21 +146,22 @@ export const ChessBoard = ({
                                             }
                                         }}
                                         key={j}
-                                        className={`w-16 h-16  ${from === squareRepresentation ? `${isMainBoxColor ? "bg-[#BBCB45]" : "bg-[#F4F687]"}` : isMainBoxColor ? "bg-[#739552]" : "bg-[#EBEDD0]"}`}
+                                        className={`w-16 h-16  ${isHighlightedSquare ? `${isMainBoxColor ? "bg-[#BBCB45]" : "bg-[#F4F687]"}` : isMainBoxColor ? "bg-[#739552]" : "bg-[#EBEDD0]"}`}
                                     >
                                         <div className="w-full justify-center flex h-full relative">
-                                            {square && <ChessSquare square={square}/>}
+                                            {square && <ChessSquare square={square} />}
 
                                             {isFlipped
                                                 ? i === 8 && (
                                                       <LetterNotation label={labels[j]} isMainBoxColor={j % 2 !== 0} />
                                                   )
                                                 : i === 1 && (
-                                                    <LetterNotation label={labels[j]} isMainBoxColor={j % 2 !== 0} />
+                                                      <LetterNotation label={labels[j]} isMainBoxColor={j % 2 !== 0} />
                                                   )}
                                             {!!from && legalMoves.includes(squareRepresentation) && (
-                                                <LegalMoveIndicator isMainBoxColor={isMainBoxColor}
-                                                isPiece={!!square?.type}
+                                                <LegalMoveIndicator
+                                                    isMainBoxColor={isMainBoxColor}
+                                                    isPiece={!!square?.type}
                                                 />
                                             )}
                                         </div>
