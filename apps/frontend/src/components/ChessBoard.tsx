@@ -1,3 +1,4 @@
+
 import { Chess, Color, PieceSymbol, Square } from "chess.js";
 import { MouseEvent, useEffect, useState } from "react";
 import { IMove, MOVE } from "../screens/Game";
@@ -6,6 +7,8 @@ import LegalMoveIndicator from "./chess-board/LegalMoveIndicator";
 import ChessSquare from "./chess-board/ChessSquare";
 import NumberNotation from "./chess-board/NumberNotation";
 import { drawArrow } from "../utils/canvas";
+import { useState } from "react";
+import MoveSound from '../../public/MoveSound.mp3'
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
     if (!from) {
@@ -76,6 +79,7 @@ export const ChessBoard = ({
     const labels = ["a", "b", "c", "d", "e", "f", "g", "h"];
     const isFlipped = myColor === "b";
     const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
+    const audio = new Audio(MoveSound);
 
     const handleMouseDown = (e: MouseEvent<HTMLDivElement>, squareRep: string) => {
         e.preventDefault();
@@ -129,11 +133,10 @@ export const ChessBoard = ({
         }
     };
    
-    
-
     useEffect(() => {
         clearCanvas();
     }, [moves]);
+
     return (
         <>
             <div className="flex relative">
@@ -256,7 +259,6 @@ export const ChessBoard = ({
                     })}
                 </div>
 
-                {/* Canvas */}
                 <canvas
                     ref={(ref) => setCanvas(ref)}
                     width={512}
