@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "../components/Button"
 import { ChessBoard, isPromoting } from "../components/ChessBoard"
 import { useSocket } from "../hooks/useSocket";
-import { Chess, Square } from 'chess.js'
+import { Chess, Move, Square } from 'chess.js'
 import { useNavigate, useParams } from "react-router-dom";
 import MovesTable from "../components/MovesTable";
 import { useUser } from "@repo/store/useUser";
@@ -16,6 +16,8 @@ export const OPPONENT_DISCONNECTED = "opponent_disconnected";
 export const GAME_OVER = "game_over";
 export const JOIN_ROOM = "join_room";
 export const GAME_JOINED = "game_joined"
+export const GAME_ALERT = "game_alert"
+export const GAME_ADDED = "game_added"
 
 export interface IMove {
     from: Square; to: Square
@@ -35,16 +37,11 @@ export const Game = () => {
     // Todo move to store/context
     const [chess, _setChess] = useState(new Chess());
     const [board, setBoard] = useState(chess.board());
+    const [added, setAdded] = useState(false)
     const [started, setStarted] = useState(false)
     const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null)
     const [result, setResult] = useState<"WHITE_WINS" | "BLACK_WINS" | "DRAW" | typeof OPPONENT_DISCONNECTED | null>(null);
     const [moves, setMoves] = useState<IMove[]>([]);
-
-    useEffect(()=>{
-        window.addEventListener('beforeunload', function (e) {
-            e.preventDefault();
-          });  
-    },[]);
 
     useEffect(() => {
         if (!socket) {
@@ -54,6 +51,9 @@ export const Game = () => {
             const message = JSON.parse(event.data);
 
             switch (message.type) {
+                case GAME_ADDED:
+                    setAdded(true)
+                    break;
                 case INIT_GAME:
                     setBoard(chess.board());
                     setStarted(true)
@@ -75,7 +75,7 @@ export const Game = () => {
                             promotion: 'q'
                         });
                     } else {
-                        chess.move(move);
+                        chess.move({from:move.from, to: move.to});
                     }
                     setBoard(chess.board());
                     setMoves(moves => [...moves, move])
@@ -95,7 +95,7 @@ export const Game = () => {
                     })
                     setStarted(true)
                     setMoves(message.payload.moves);
-                    message.payload.moves.map(x => {
+                    message.payload.moves.map((x: Move) => {
                         if (isPromoting(chess, x.from, x.to)) {
                             chess.move({...x,  promotion: 'q' })
                         } else {
@@ -103,6 +103,10 @@ export const Game = () => {
                         }
                     })
                     setBoard(chess.board());
+                    break;
+                
+                default:
+                    alert(message.payload.message);
                     break;
             }
         }
@@ -124,7 +128,7 @@ export const Game = () => {
             {gameMetadata?.blackPlayer?.name} vs {gameMetadata?.whitePlayer?.name}
         </div>
         {result && <div className="justify-center flex pt-4 text-white">
-            {result}    
+            {result}    z
         </div>}
         <div className="justify-center flex">
             <div className="pt-8 max-w-screen-lg w-full">
@@ -133,15 +137,16 @@ export const Game = () => {
                         <ChessBoard started={started} gameId={gameId ?? ""} myColor={user.id === gameMetadata?.blackPlayer?.id ? "b" : "w"} setMoves={setMoves} moves={moves} chess={chess} setBoard={setBoard} socket={socket} board={board} />
                     </div>
                     <div className="col-span-2 bg-slate-900 w-full flex justify-center">
+                        {!started &&
                         <div className="pt-8">
-                            {!started && gameId === "random" && <Button onClick={() => {
-                                socket.send(JSON.stringify({
-                                    type: INIT_GAME
-                                }))
-                            }} >
-                                Play
-                            </Button>}
-                        </div>
+                        {added ? <div className="text-white">Waiting</div> : gameId === "random" && <Button onClick={() => {
+                            socket.send(JSON.stringify({
+                                type: INIT_GAME
+                            }))
+                        }} >
+                            Play
+                        </Button>}
+                        </div>}
                         <div className="mr-10">            
                             {moves.length > 0 && <div className="mt-4"><MovesTable moves={moves} /></div>}
                         </div>
