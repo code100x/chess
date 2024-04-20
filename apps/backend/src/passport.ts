@@ -57,8 +57,7 @@ export function initPassport() {
       async function (accessToken: string, refreshToken: string, profile: any, done: (error: any, user?: any) => void) {
         const user = await db.user.upsert({
           create: {
-            email: `harshkeshri1234567${Math.random()}@gmail.com`,
-            // email: profile.emails[0].value,
+            email: profile.emails[0].value,
             name: profile.displayName,
             provider: "GITHUB",
           },
@@ -66,8 +65,7 @@ export function initPassport() {
             name: profile.displayName,
           },
           where: {
-            email: `harshkeshri1234567${Math.random()}@gmail.com`,
-            // email: profile.emails[0].value,
+            email: profile.emails[0].value,
           }
         });
 
