@@ -122,6 +122,11 @@ export const Game = () => {
     return <div className="">
         <div className="justify-center flex pt-4 text-white">
             {gameMetadata?.blackPlayer?.name} vs {gameMetadata?.whitePlayer?.name}
+            {started &&  
+                <div className="justify-center flex pt-4 text-white">
+                    {(user.id === gameMetadata?.blackPlayer?.id ? "b" : "w" ) === chess.turn() ? "Your turn" : "Opponent's turn"}
+                </div>
+            }
         </div>
         {result && <div className="justify-center flex pt-4 text-white">
             {result}    
