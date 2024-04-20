@@ -55,9 +55,10 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
     return (
         <div className="flex">
             <div className="text-white-200 mr-10">
+            <div className={`${myColor === "b" ? "rotate-180" : ""}`}>
             {board.map((row, i) => {
-                return <div key={i} className="flex">
-                            <div className="w-16 h-16 flex justify-center items-center text-cyan-100">
+                return <div key={i} className={`flex ${myColor === "b" ? "flex-row-reverse" : ""}`}>
+                            <div className={`w-16 h-16 flex justify-center items-center text-cyan-100 ${myColor === "b" && "rotate-180"}`}>
                                 {8 - i} {/* Vertical labels */}
                             </div>  
                     {row.map((square, j) => {
@@ -114,22 +115,24 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
                             }
                         }} key={j} className={`w-16 h-16 relative ${(i+j)%2 === 0 ? 'bg-green-500' : 'bg-slate-500'}`}>
                             <div className="w-full justify-center flex h-full">
-                                <div className="h-full justify-center flex flex-col">
+                                <div className={`h-full justify-center flex flex-col ${myColor === "b" ? "rotate-180" : ""}`}>
                                     {square ? <img className="w-4" src={`/${square?.color === "b" ? square?.type : `${square?.type?.toUpperCase()} copy`}.png`} /> : null} 
                                 </div>
                             </div>
-                            {includeBox(legalMoves, i, j) && <div className="absolute opacity-50"><GoDotFill size={"1rem"} color="#476566"/></div>}
+                            {includeBox(legalMoves, j, i) && <div className="absolute opacity-100 z-30 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"><GoDotFill size={"2rem"} color="#476566"/></div>}
                         </div>
                     })}
                 </div>
             })}
-             <div className="flex">
+            </div>
+            <div className={`flex ${myColor === "b" ? "flex-row" : ""}`}>
                     <div className="w-16 h-8"></div> 
                         {labels.map((label, i) => (
                             <div key={i} className="w-16 h-8 flex justify-center items-center text-cyan-100">
                                 {label} {/* Horizontal labels */}
                             </div>
                         ))}
+                    {/* {myColor === "w" ? <div className="w-16 h-8"></div> : "" } */}
                     </div>
             </div>
         </div>
