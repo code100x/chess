@@ -43,12 +43,6 @@ export const Game = () => {
     const [result, setResult] = useState<"WHITE_WINS" | "BLACK_WINS" | "DRAW" | typeof OPPONENT_DISCONNECTED | null>(null);
     const [moves, setMoves] = useState<IMove[]>([]);
 
-    useEffect(()=>{
-        window.addEventListener('beforeunload', function (e) {
-            e.preventDefault();
-          });  
-    },[]);
-
     useEffect(() => {
         if (!socket) {
             return;
