@@ -265,8 +265,8 @@ export const ChessBoard = ({
 
                 <canvas
                     ref={(ref) => setCanvas(ref)}
-                    width={512}
-                    height={512}
+                    width={boxSize * 8}
+                    height={boxSize * 8}
                     style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none" }}
                     onContextMenu={(e) => e.preventDefault()}
                     onMouseDown={(e) => {
