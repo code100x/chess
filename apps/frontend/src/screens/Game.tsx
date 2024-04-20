@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "../components/Button"
 import { ChessBoard, isPromoting } from "../components/ChessBoard"
 import { useSocket } from "../hooks/useSocket";
-import { Chess, Square } from 'chess.js'
+import { Chess, Move, Square } from 'chess.js'
 import { useNavigate, useParams } from "react-router-dom";
 import MovesTable from "../components/MovesTable";
 import { useUser } from "@repo/store/useUser";
@@ -75,7 +75,7 @@ export const Game = () => {
                             promotion: 'q'
                         });
                     } else {
-                        chess.move(move);
+                        chess.move({from:move.from, to: move.to});
                     }
                     setBoard(chess.board());
                     setMoves(moves => [...moves, move])
@@ -95,7 +95,7 @@ export const Game = () => {
                     })
                     setStarted(true)
                     setMoves(message.payload.moves);
-                    message.payload.moves.map(x => {
+                    message.payload.moves.map((x: Move) => {
                         if (isPromoting(chess, x.from, x.to)) {
                             chess.move({...x,  promotion: 'q' })
                         } else {
@@ -128,7 +128,7 @@ export const Game = () => {
             {gameMetadata?.blackPlayer?.name} vs {gameMetadata?.whitePlayer?.name}
         </div>
         {result && <div className="justify-center flex pt-4 text-white">
-            {result}    
+            {result}    z
         </div>}
         <div className="justify-center flex">
             <div className="pt-8 max-w-screen-lg w-full">

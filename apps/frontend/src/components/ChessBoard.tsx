@@ -1,6 +1,13 @@
-import { Chess, Color, Move, PieceSymbol, Square } from "chess.js";
+
+import { Chess, Color, PieceSymbol, Square } from "chess.js";
+import { MouseEvent, useEffect, useState } from "react";
+import { IMove, MOVE } from "../screens/Game";
+import LetterNotation from "./chess-board/LetterNotation";
+import LegalMoveIndicator from "./chess-board/LegalMoveIndicator";
+import ChessSquare from "./chess-board/ChessSquare";
+import NumberNotation from "./chess-board/NumberNotation";
+import { drawArrow } from "../utils/canvas";
 import { useState } from "react";
-import { IMove, MOVE, } from "../screens/Game";
 import MoveSound from '../../public/MoveSound.mp3'
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
@@ -9,37 +16,51 @@ export function isPromoting(chess: Chess, from: Square, to: Square) {
     }
 
     const piece = chess.get(from);
-  
+
     if (piece?.type !== "p") {
-      return false;
+        return false;
     }
-  
+
     if (piece.color !== chess.turn()) {
-      return false;
+        return false;
     }
-  
+
     if (!["1", "8"].some((it) => to.endsWith(it))) {
-      return false;
+        return false;
     }
-  
+
     return chess
-      .moves({ square: from, verbose: true })
-      .map((it) => it.to)
-      .includes(to);
+        .moves({ square: from, verbose: true })
+        .map((it) => it.to)
+        .includes(to);
 }
 
-export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, setBoard, moves, setMoves }: {
-    myColor: Color, 
-    gameId: string,
-    started: boolean,
+export const ChessBoard = ({
+    gameId,
+    started,
+    myColor,
+    chess,
+    board,
+    socket,
+    setBoard,
+    setMoves,
+    moves,
+}: {
+    myColor: Color;
+    gameId: string;
+    started: boolean;
     chess: Chess;
     moves: IMove[];
     setMoves: React.Dispatch<React.SetStateAction<IMove[]>>;
-    setBoard: React.Dispatch<React.SetStateAction<({
-        square: Square;
-        type: PieceSymbol;
-        color: Color;
-    } | null)[][]>>;
+    setBoard: React.Dispatch<
+        React.SetStateAction<
+            ({
+                square: Square;
+                type: PieceSymbol;
+                color: Color;
+            } | null)[][]
+        >
+    >;
     board: ({
         square: Square;
         type: PieceSymbol;
@@ -47,160 +68,209 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
     } | null)[][];
     socket: WebSocket;
 }) => {
+    const [lastMoveFrom, lastMoveTo] = [moves?.at(-1)?.from || "", moves?.at(-1)?.to || ""];
+    const [rightClickedSquares, setRightClickedSquares] = useState<string[]>([]);
+    const [arrowStart, setArrowStart] = useState<string | null>(null);
+
     const [from, setFrom] = useState<null | Square>(null);
     const isMyTurn = myColor === chess.turn();
     const [legalMoves, setLegalMoves] = useState<string[]>([]);
-    const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+    const labels = ["a", "b", "c", "d", "e", "f", "g", "h"];
+    const isFlipped = myColor === "b";
+    const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
     const audio = new Audio(MoveSound);
- 
+
+    const handleMouseDown = (e: MouseEvent<HTMLDivElement>, squareRep: string) => {
+        e.preventDefault();
+        if (e.button === 2) {
+            setArrowStart(squareRep);
+        }
+    };
+
+    const clearCanvas = () => {
+        setRightClickedSquares([]);
+        if (canvas) {
+            const ctx = canvas.getContext("2d");
+            ctx?.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    };
+
+    const handleRightClick = (squareRep:string) => {
+        if (rightClickedSquares.includes(squareRep)) {
+            setRightClickedSquares((prev) => prev.filter((sq) => sq !== squareRep));
+        } else {
+            setRightClickedSquares((prev) => [...prev, squareRep]);
+        }
+    }
+
+    const handleDrawArrow = (squareRep: string) => {
+        if (arrowStart) {
+            const stoppedAtSquare = squareRep;
+            if (canvas) {
+                const ctx = canvas.getContext("2d");
+                if (ctx) {
+                    drawArrow(ctx, arrowStart, stoppedAtSquare, isFlipped);
+                }
+            }
+            setArrowStart(null);
+        }
+    }
+
+    const handleMouseUp = (e: MouseEvent<HTMLDivElement>, squareRep: string) => {
+        e.preventDefault();
+        if (!started) {
+            return;
+        }
+        if (e.button === 2) {
+            if (arrowStart === squareRep) {
+               handleRightClick(squareRep)
+            } else {
+                handleDrawArrow(squareRep)
+            }
+        } else {
+            clearCanvas();
+        }
+    };
+   
+    useEffect(() => {
+        clearCanvas();
+    }, [moves]);
+
     return (
-        <div className="flex">
-            <div className="text-white-200 mr-10">
-            {board.map((row, i) => {
-                return <div key={i} className="flex">
-                            <div className="w-16 h-16 flex justify-center items-center text-cyan-100">
-                                {8 - i} {/* Vertical labels */}
-                            </div>  
-                    {row.map((square, j) => {
-                        const squareRepresentation = String.fromCharCode(97 + (j % 8)) + "" + (8 - i) as Square;
+        <>
+            <div className="flex relative">
+                <div className="text-white-200 mr-10 rounded-md overflow-hidden">
+                    {(isFlipped ? board.slice().reverse() : board).map((row, i) => {
+                        i = isFlipped ? i + 1 : 8 - i;
+                        return (
+                            <div key={i} className="flex relative">
+                                <NumberNotation isMainBoxColor={i % 2 === 0} label={i.toString()} />
+                                {(isFlipped ? row.slice().reverse() : row).map((square, j) => {
+                                    j = isFlipped ? 7 - (j % 8) : j % 8;
 
-                        return <div onClick={() => {
-                            
-                            if (!started) {
-                                return;
-                            }
-                            if (!from && square?.color !== chess.turn()) return;
-                            if (!isMyTurn) return;
-                            if (from === squareRepresentation) {
-                                setFrom(null);
-                            }
-                            
-                            if (!from) {
-                                setFrom(squareRepresentation);
-                                setLegalMoves(chess.moves({ square: squareRepresentation }))
-                        } else {
-                                try {
-                                    if (isPromoting(chess, from ,squareRepresentation))  {
-                                        chess.move({
-                                            from,
-                                            to: squareRepresentation,
-                                            promotion: 'q'
-                                        });
-                                        audio.play();
-                                    } else {
-                                        chess.move({
-                                            from,
-                                            to: squareRepresentation,
-                                        });
-                                        audio.play();
-                                    }
-                                    socket.send(JSON.stringify({
-                                        type: MOVE,
-                                        payload: {
-                                            gameId,
-                                            move: {
-                                                from,
-                                                to: squareRepresentation
-                                            }
-                                        }
-                                    }))
-                                    setFrom(null)
-                                    setLegalMoves([])
-                                    setBoard(chess.board());
-                                    console.log({
-                                        from,
-                                        to: squareRepresentation
-                                    })
-                                    setMoves(moves =>[...moves, { from, to: squareRepresentation }]);
-                                } catch(e) {
+                                    const isMainBoxColor = isFlipped ? (i + j) % 2 === 0 : (i + j) % 2 !== 0;
+                                    const squareRepresentation = (String.fromCharCode(97 + j) + "" + i) as Square;
+                                    const isHighlightedSquare =
+                                        from === squareRepresentation ||
+                                        squareRepresentation === lastMoveFrom ||
+                                        squareRepresentation === lastMoveTo;
+                                    const isRightClickedSquare = rightClickedSquares.includes(squareRepresentation);
 
-                                }
-                            }
-                        }} key={j} className={`w-16 h-16 ${includeBox([from || ""], j, i) ? "bg-red-400" : includeBox(legalMoves,j,i) ? `${(i+j)%2 === 0 ? 'bg-green_legal' : 'bg-slate_legal'}` : `${(i+j)%2 === 0 ? 'bg-green-500' : 'bg-slate-500'}`}`}>
-                            <div className="w-full justify-center flex h-full">
-                                <div className="h-full justify-center flex flex-col">
-                                    {square ? <img className="w-4" src={`/${square?.color === "b" ? square?.type : `${square?.type?.toUpperCase()} copy`}.png`} /> : null} 
-                                </div>
+                                    return (
+                                        <div
+                                            onClick={() => {
+                                                if (!started) {
+                                                    return;
+                                                }
+                                                if (!from && square?.color !== chess.turn()) return;
+                                                if (!isMyTurn) return;
+                                                if (from === squareRepresentation) {
+                                                    setFrom(null);
+                                                }
+
+                                                if (!from) {
+                                                    setFrom(squareRepresentation);
+                                                    setLegalMoves(
+                                                        chess
+                                                            .moves({ verbose: true, square: square?.square })
+                                                            .map((move) => move.to),
+                                                    );
+                                                } else {
+                                                    try {
+                                                        if (isPromoting(chess, from, squareRepresentation)) {
+                                                            chess.move({
+                                                                from,
+                                                                to: squareRepresentation,
+                                                                promotion: "q",
+                                                            });
+                                                        } else {
+                                                            chess.move({
+                                                                from,
+                                                                to: squareRepresentation,
+                                                            });
+                                                        }
+                                                        socket.send(
+                                                            JSON.stringify({
+                                                                type: MOVE,
+                                                                payload: {
+                                                                    gameId,
+                                                                    move: {
+                                                                        from,
+                                                                        to: squareRepresentation,
+                                                                    },
+                                                                },
+                                                            }),
+                                                        );
+                                                        setFrom(null);
+                                                        setLegalMoves([]);
+                                                        setBoard(chess.board());
+                                                        console.log({
+                                                            from,
+                                                            to: squareRepresentation,
+                                                        });
+                                                        setMoves((moves) => [
+                                                            ...moves,
+                                                            { from, to: squareRepresentation },
+                                                        ]);
+                                                    } catch (e) {}
+                                                }
+                                            }}
+                                            key={j}
+                                            className={`w-16 h-16 ${isRightClickedSquare ? (isMainBoxColor ? "bg-[#CF664E]" : "bg-[#E87764]") : isHighlightedSquare ? `${isMainBoxColor ? "bg-[#BBCB45]" : "bg-[#F4F687]"}` : isMainBoxColor ? "bg-[#739552]" : "bg-[#EBEDD0]"} ${""}`}
+                                            onContextMenu={(e) => {
+                                                e.preventDefault();
+                                            }}
+                                            onMouseDown={(e) => {
+                                                handleMouseDown(e, squareRepresentation);
+                                            }}
+                                            onMouseUp={(e) => {
+                                                handleMouseUp(e, squareRepresentation);
+                                            }}
+                                        >
+                                            <div className="w-full justify-center flex h-full relative">
+                                                {square && <ChessSquare square={square} />}
+
+                                                {isFlipped
+                                                    ? i === 8 && (
+                                                          <LetterNotation
+                                                              label={labels[j]}
+                                                              isMainBoxColor={j % 2 !== 0}
+                                                          />
+                                                      )
+                                                    : i === 1 && (
+                                                          <LetterNotation
+                                                              label={labels[j]}
+                                                              isMainBoxColor={j % 2 !== 0}
+                                                          />
+                                                      )}
+                                                {!!from && legalMoves.includes(squareRepresentation) && (
+                                                    <LegalMoveIndicator
+                                                        isMainBoxColor={isMainBoxColor}
+                                                        isPiece={!!square?.type}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
-                        </div>
+                        );
                     })}
                 </div>
-            })}
-             <div className="flex">
-                    <div className="w-16 h-8"></div> 
-                        {labels.map((label, i) => (
-                            <div key={i} className="w-16 h-8 flex justify-center items-center text-cyan-100">
-                                {label} {/* Horizontal labels */}
-                            </div>
-                        ))}
-                    </div>
+
+                <canvas
+                    ref={(ref) => setCanvas(ref)}
+                    width={512}
+                    height={512}
+                    style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none" }}
+                    onContextMenu={(e) => e.preventDefault()}
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                    }}
+                    onMouseUp={(e) => e.preventDefault()}
+                ></canvas>
             </div>
-        </div>
-   
-    )
-}
-
-const includeBox = (legalMoves: string[], i:number,j:number) => {
-    let first,second
-
-    switch (i) {
-        case 0:
-            first = 'a'
-            break;
-        case 1:
-            first = 'b'
-            break;
-        case 2:
-            first = 'c'
-            break;
-        case 3:
-            first = 'd'
-            break;
-        case 4:
-            first = 'e'
-            break;
-        case 5:
-            first = 'f'
-            break;
-        case 6:
-            first = 'g'
-            break;
-        case 7:
-            first = 'h'
-            break;
-        default:
-            break;
-    }
-
-    switch (j) {
-        case 0:
-            second = '8'
-            break;
-        case 1:
-            second = '7'
-            break;
-        case 2:
-            second = '6'
-            break;
-        case 3:
-            second = '5'
-            break;
-        case 4:
-            second = '4'
-            break;
-        case 5:
-            second = '3'
-            break;
-        case 6:
-            second = '2'
-            break;
-        case 7:
-            second = '1'
-            break;
-        default:
-            break;
-    }
-
-    return legalMoves.includes(first! + second!)
-}
-
+        </>
+    );
+};
