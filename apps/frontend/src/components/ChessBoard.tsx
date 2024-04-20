@@ -1,6 +1,6 @@
-import { Chess, Color, Move, PieceSymbol, Square } from "chess.js";
+import { Chess, Color, PieceSymbol, Square } from "chess.js";
 import { useState } from "react";
-import { IMove, MOVE, } from "../screens/Game";
+import { IMove, MOVE } from "../screens/Game";
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
     if (!from) {
@@ -27,7 +27,7 @@ export function isPromoting(chess: Chess, from: Square, to: Square) {
       .includes(to);
 }
 
-export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, setBoard, moves, setMoves }: {
+export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, setBoard, setMoves }: {
     myColor: Color, 
     gameId: string,
     started: boolean,
@@ -54,13 +54,13 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
     return (
         <div className="flex">
             <div className="text-white-200 mr-10">
-            {board.map((row, i) => {
+            {(myColor==="b"?[...board].reverse():board).map((row, i) => {
                 return <div key={i} className="flex">
                             <div className="w-16 h-16 flex justify-center items-center text-cyan-100">
-                                {8 - i} {/* Vertical labels */}
+                                {myColor==='b'?i+1:8-i} {/* Vertical labels */}
                             </div>  
-                    {row.map((square, j) => {
-                        const squareRepresentation = String.fromCharCode(97 + (j % 8)) + "" + (8 - i) as Square;
+                    {(myColor==='b'?[...row].reverse():row).map((square, j) => {
+                       const squareRepresentation = String.fromCharCode(97 + (myColor === 'b' ? 7 - j % 8 : j % 8)) + "" + (myColor==='b'? i+1:8-i) as Square;
 
                         return <div onClick={() => {
                             if (!started) {
@@ -111,7 +111,7 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
 
                                 }
                             }
-                        }} key={j} className={`w-16 h-16 ${includeBox([from || ""], j, i) ? "bg-red-400" : includeBox(legalMoves,j,i) ? `${(i+j)%2 === 0 ? 'bg-green_legal' : 'bg-slate_legal'}` : `${(i+j)%2 === 0 ? 'bg-green-500' : 'bg-slate-500'}`}`}>
+                        }} key={j} className={`w-16 h-16 ${includeBox([from || ""], j, i,myColor) ? "bg-red-400" : includeBox(legalMoves,j,i,myColor) ? `${(i+j)%2 === 0 ? 'bg-green_legal' : 'bg-slate_legal'}` : `${(i+j)%2 === 0 ? 'bg-green-500' : 'bg-slate-500'}`}`}>
                             <div className="w-full justify-center flex h-full">
                                 <div className="h-full justify-center flex flex-col">
                                     {square ? <img className="w-4" src={`/${square?.color === "b" ? square?.type : `${square?.type?.toUpperCase()} copy`}.png`} /> : null} 
@@ -123,7 +123,7 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
             })}
              <div className="flex">
                     <div className="w-16 h-8"></div> 
-                        {labels.map((label, i) => (
+                        {(myColor==='b'?[...labels].reverse():labels).map((label, i) => (
                             <div key={i} className="w-16 h-8 flex justify-center items-center text-cyan-100">
                                 {label} {/* Horizontal labels */}
                             </div>
@@ -135,66 +135,127 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
     )
 }
 
-const includeBox = (legalMoves: string[], i:number,j:number) => {
+const includeBox = (legalMoves: string[], i:number,j:number,myColor:Color) => {
     let first,second
 
-    switch (i) {
-        case 0:
-            first = 'a'
-            break;
-        case 1:
-            first = 'b'
-            break;
-        case 2:
-            first = 'c'
-            break;
-        case 3:
-            first = 'd'
-            break;
-        case 4:
-            first = 'e'
-            break;
-        case 5:
-            first = 'f'
-            break;
-        case 6:
-            first = 'g'
-            break;
-        case 7:
-            first = 'h'
-            break;
-        default:
-            break;
+    if (myColor === 'b') {
+        switch (i) {
+            case 0:
+                first = 'h';
+                break;
+            case 1:
+                first = 'g';
+                break;
+            case 2:
+                first = 'f';
+                break;
+            case 3:
+                first = 'e';
+                break;
+            case 4:
+                first = 'd';
+                break;
+            case 5:
+                first = 'c';
+                break;
+            case 6:
+                first = 'b';
+                break;
+            case 7:
+                first = 'a';
+                break;
+            default:
+                break;
+        }
+    
+        switch (j) {
+            case 0:
+                second = '1';
+                break;
+            case 1:
+                second = '2';
+                break;
+            case 2:
+                second = '3';
+                break;
+            case 3:
+                second = '4';
+                break;
+            case 4:
+                second = '5';
+                break;
+            case 5:
+                second = '6';
+                break;
+            case 6:
+                second = '7';
+                break;
+            case 7:
+                second = '8';
+                break;
+            default:
+                break;
+        }
+    } else {
+        switch (i) {
+            case 0:
+                first = 'a'
+                break;
+            case 1:
+                first = 'b'
+                break;
+            case 2:
+                first = 'c'
+                break;
+            case 3:
+                first = 'd'
+                break;
+            case 4:
+                first = 'e'
+                break;
+            case 5:
+                first = 'f'
+                break;
+            case 6:
+                first = 'g'
+                break;
+            case 7:
+                first = 'h'
+                break;
+            default:
+                break;
+        }
+    
+        switch (j) {
+            case 0:
+                second = '8'
+                break;
+            case 1:
+                second = '7'
+                break;
+            case 2:
+                second = '6'
+                break;
+            case 3:
+                second = '5'
+                break;
+            case 4:
+                second = '4'
+                break;
+            case 5:
+                second = '3'
+                break;
+            case 6:
+                second = '2'
+                break;
+            case 7:
+                second = '1'
+                break;
+            default:
+                break;
+        }
     }
-
-    switch (j) {
-        case 0:
-            second = '8'
-            break;
-        case 1:
-            second = '7'
-            break;
-        case 2:
-            second = '6'
-            break;
-        case 3:
-            second = '5'
-            break;
-        case 4:
-            second = '4'
-            break;
-        case 5:
-            second = '3'
-            break;
-        case 6:
-            second = '2'
-            break;
-        case 7:
-            second = '1'
-            break;
-        default:
-            break;
-    }
+    
 
     return legalMoves.includes(first! + second!)
 }
