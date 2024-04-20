@@ -10,6 +10,7 @@ import passport from "passport";
 const app = express();
 
 dotenv.config();
+app.use(express.json());
 app.use(session({
     secret: 'keyboard cat',
     resave: false,

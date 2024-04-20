@@ -4,6 +4,7 @@ import { GAME_OVER, INIT_GAME, MOVE } from "./messages";
 import { db } from "./db";
 import { randomUUID } from "crypto";
 import { SocketManager, User } from "./SocketManager";
+import { isGuest } from "./auth";
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
     if (!from) {
@@ -30,46 +31,56 @@ export function isPromoting(chess: Chess, from: Square, to: Square) {
       .includes(to);
 }
 
+export interface Player {
+    id?: string
+    userId: string
+    name: string
+}
+
 export class Game {
     public gameId: string;
-    public player1UserId: string;
-    public player2UserId: string | null;
+    public player1: Player;
+    public player2: Player | null;
     public board: Chess
     private startTime: Date;
     private moveCount = 0;
 
-    constructor(player1UserId: string, player2UserId: string | null) {
-        this.player1UserId = player1UserId;
-        this.player2UserId = player2UserId;
+    constructor(player1: Player, player2: Player | null) {
+        this.player1 = player1;
+        this.player2 = player2;
         this.board = new Chess();
         this.startTime = new Date();
         this.gameId = randomUUID();
     }
 
-    async updateSecondPlayer(player2UserId: string) {
-        this.player2UserId = player2UserId;
-        
-        const users = await db.user.findMany({
-            where: {
-                id: {
-                    in: [this.player1UserId, this.player2UserId ?? ""]
-                }
-            }
-        });
+    isGuestGame() {
+        if (isGuest(this.player1) || isGuest(this.player2)) {
+            return true
+        }
+        return false
+    }
 
-        try {
-            await this.createGameInDb(); 
-        } catch(e) {
-            console.error(e)
-            return;
+    async updateSecondPlayer(player2: Player) {
+        this.player2 = player2;
+        let player1Name = this.player1.name
+        let player2Name = this.player2?.name
+
+        // only create the game in db if its not a guest game
+        if (!this.isGuestGame()) {
+            try {
+                await this.createGameInDb(); 
+            } catch(e) {
+                console.error(e)
+                return;
+            }
         }
 
         SocketManager.getInstance().broadcast(this.gameId, JSON.stringify({
             type: INIT_GAME,
             payload: {
                 gameId: this.gameId,
-                whitePlayer: { name: users.find(user => user.id === this.player1UserId)?.name, id: this.player1UserId },
-                blackPlayer: { name: users.find(user => user.id === this.player2UserId)?.name, id: this.player2UserId },
+                whitePlayer: { name: player1Name, id: this.player1.userId },
+                blackPlayer: { name: player2Name, id: this.player2.userId },
                 fen: this.board.fen(),
                 moves: []
             }
@@ -87,12 +98,12 @@ export class Game {
                 currentFen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
                 whitePlayer: {
                     connect: {
-                        id: this.player1UserId
+                        id: this.player1.userId
                     }
                 },
                 blackPlayer: {
                     connect: {
-                        id: this.player2UserId ?? ""
+                        id: this.player2?.userId ?? ""
                     }
                 },
             },
@@ -108,6 +119,9 @@ export class Game {
         from: string;
         to: string;
     }) {
+        if (this.isGuestGame()) {
+            return
+        }
         await db.$transaction([
             db.move.create({
                 data: {
@@ -137,10 +151,10 @@ export class Game {
         to: Square;
     }) {
         // validate the type of move using zod
-        if (this.moveCount % 2 === 0 && user.userId !== this.player1UserId) {
+        if (this.moveCount % 2 === 0 && user.userId !== this.player1.userId) {
             return
         }
-        if (this.moveCount % 2 === 1 && user.userId !== this.player2UserId) {
+        if (this.moveCount % 2 === 1 && user.userId !== this.player2?.userId) {
             return;
         }
 

@@ -1,8 +1,7 @@
 import { WebSocketServer } from 'ws';
 import { GameManager } from './GameManager';
 import url from "url";
-import { extractUserId } from './auth';
-import { User } from './SocketManager';
+import { extractAuthUser } from './auth';
 
 const wss = new WebSocketServer({ port: 8080 });
 
@@ -12,11 +11,11 @@ wss.on('connection', function connection(ws, req) {
 
   //@ts-ignore
   const token: string = url.parse(req.url, true).query.token;
-  const userId = extractUserId(token);
-  gameManager.addUser(new User(ws, userId));
+  const User = extractAuthUser(token, ws);
+  gameManager.addUser(User);
 
   ws.on("close", () => {
-    gameManager.removeUser(ws, userId)
+    gameManager.removeUser(ws)
   })
 });
 

@@ -8,6 +8,7 @@ import { Chess, Square } from 'chess.js'
 import { useNavigate, useParams } from "react-router-dom";
 import MovesTable from "../components/MovesTable";
 import { useUser } from "@repo/store/useUser";
+import { MatchHeading } from "../components/MatchHeading";
 
 // TODO: Move together, there's code repetition here
 export const INIT_GAME = "init_game";
@@ -21,9 +22,14 @@ export interface IMove {
     from: Square; to: Square
 }
 
-interface Metadata {
-    blackPlayer: { id: string, name: string };
-    whitePlayer: {id: string, name: string };
+export interface Player {
+    id: string
+    name: string
+}
+
+export interface Metadata {
+    blackPlayer: Player;
+    whitePlayer: Player;
 }
 
 export const Game = () => {
@@ -95,7 +101,7 @@ export const Game = () => {
                     })
                     setStarted(true)
                     setMoves(message.payload.moves);
-                    message.payload.moves.map(x => {
+                    message.payload.moves.map((x: any) => {
                         if (isPromoting(chess, x.from, x.to)) {
                             chess.move({...x,  promotion: 'q' })
                         } else {
@@ -120,9 +126,7 @@ export const Game = () => {
     if (!socket) return <div>Connecting...</div>
 
     return <div className="">
-        <div className="justify-center flex pt-4 text-white">
-            {gameMetadata?.blackPlayer?.name} vs {gameMetadata?.whitePlayer?.name}
-        </div>
+        <MatchHeading gameMetadata={gameMetadata} />
         {result && <div className="justify-center flex pt-4 text-white">
             {result}    
         </div>}

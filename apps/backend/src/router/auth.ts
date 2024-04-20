@@ -2,6 +2,7 @@ import { Request, Response, Router } from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import { db } from '../db';
+import {v4 as uuidv4} from "uuid"
 const router = Router();
 
 const CLIENT_URL = 'http://localhost:5173/game/random';
@@ -9,7 +10,22 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
 interface User {
   id: string;
+  token?: string
+  name: string
 }
+
+// this route is to be hit when the user wants to login as a guest
+router.post("/guest", (req: Request, res: Response) => {
+  const bodyData = req.body;
+  let guestUUID = "guest-" + uuidv4()
+  let User: User = {
+    id: guestUUID,
+    name: bodyData.name || guestUUID,
+  }
+  const token = jwt.sign({ userId: User.id, name: User.name }, JWT_SECRET);
+  User.token = token
+  res.json(User);
+})
 
 router.get('/refresh', async (req: Request, res: Response) => {
   if (req.user) {
@@ -24,7 +40,7 @@ router.get('/refresh', async (req: Request, res: Response) => {
       }
     });
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET);
+    const token = jwt.sign({ userId: user.id, name: userDb?.name }, JWT_SECRET);
     res.json({
       token,
       id: user.id,

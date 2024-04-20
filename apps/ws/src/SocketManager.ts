@@ -5,11 +5,13 @@ export class User {
     public socket: WebSocket;
     public id: string;
     public userId: string;
+    public name: string
 
-    constructor(socket: WebSocket, userId: string) {
+    constructor(socket: WebSocket, userId: string, name: string) {
         this.socket = socket;
         this.userId = userId;
         this.id = randomUUID();
+        this.name = name
     }
 }
 

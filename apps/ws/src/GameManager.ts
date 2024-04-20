@@ -42,10 +42,10 @@ export class GameManager {
                         return;
                     }
                     SocketManager.getInstance().addUser(user, game.gameId)
-                    await game?.updateSecondPlayer(user.userId);
+                    await game?.updateSecondPlayer(user);
                     this.pendingGameId = null;
                 } else {
-                    const game = new Game(user.userId, null)
+                    const game = new Game(user, null)
                     this.games.push(game);
                     this.pendingGameId = game.gameId;
                     SocketManager.getInstance().addUser(user, game.gameId)
@@ -87,7 +87,7 @@ export class GameManager {
                 }
 
                 if (!availableGame) {
-                    const game = new Game(gameFromDb?.whitePlayerId!, gameFromDb?.blackPlayerId!);
+                    const game = new Game({name: gameFromDb?.whitePlayer?.name || "", userId: gameFromDb?.whitePlayerId!}, {name: gameFromDb?.blackPlayer?.name || "", userId: gameFromDb?.blackPlayerId!});
                     gameFromDb?.moves.forEach((move) => {
                         if (isPromoting(game.board, move.from as Square, move.to as Square))  {
                             game.board.move({
