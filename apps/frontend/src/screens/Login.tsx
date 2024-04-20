@@ -1,34 +1,41 @@
-import Google from "../assets/google.png";
-import Github from "../assets/github.png";
+import Google from '../assets/google.png';
+import Github from '../assets/github.png';
 import { useNavigate } from 'react-router-dom';
-import { useRef } from "react";
-import { useRecoilState } from "recoil";
-import { userAtom } from "@repo/store/userAtom";
+import { useRef } from 'react';
+import { useRecoilState } from 'recoil';
+import { userAtom } from '@repo/store/userAtom';
 
-const BACKEND_URL = "http://localhost:3000";
+const BACKEND_URL =
+  import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
 
 const Login = () => {
   const navigate = useNavigate();
-  const guestName = useRef<HTMLInputElement>(null)
-  const [_, setUser] = useRecoilState(userAtom)
+  const guestName = useRef<HTMLInputElement>(null);
+  const [_, setUser] = useRecoilState(userAtom);
 
   const google = () => {
-    window.open(`${BACKEND_URL}/auth/google`, "_self");
+    window.open(`${BACKEND_URL}/auth/google`, '_self');
   };
 
   const github = () => {
-    window.open(`${BACKEND_URL}/auth/github`, "_self");
+    window.open(`${BACKEND_URL}/auth/github`, '_self');
   };
 
   const loginAsGuest = async () => {
-    const response = await fetch(`${BACKEND_URL}/auth/guest`, {method: "POST", headers: {
-      'Content-Type': 'application/json'
-    }, body: JSON.stringify({name: guestName.current && guestName.current.value || ""})})
+    const response = await fetch(`${BACKEND_URL}/auth/guest`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: (guestName.current && guestName.current.value) || '',
+      }),
+    });
     const user = await response.json();
-    setUser(user)
-    navigate("/game/random")
-  }
-  
+    setUser(user);
+    navigate('/game/random');
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
       <h1 className="text-4xl font-bold mb-8 text-center text-green-500 drop-shadow-lg">

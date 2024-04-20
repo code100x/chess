@@ -1,6 +1,7 @@
 
 import { atom, selector } from "recoil";
 
+// How do you put this in .env? @hkirat
 export const BACKEND_URL = "http://localhost:3000";
 export interface User {
     token: string;
@@ -21,17 +22,16 @@ export const userAtom = atom<User>({
                     },
                     credentials: "include",
                 });
-    
                 if (response.ok) {
                     const data = await response.json();
                     return data;
                 }
-            } catch(e) {
+            } catch (e) {
                 console.error(e);
             }
 
             return null;
         }
-    
+
     }),
 });
