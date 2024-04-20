@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { GAME_OVER, INIT_GAME, JOIN_GAME, MOVE, OPPONENT_DISCONNECTED, JOIN_ROOM, GAME_JOINED, GAME_NOT_FOUND } from "./messages";
+import { GAME_OVER, INIT_GAME, JOIN_GAME, MOVE, OPPONENT_DISCONNECTED, JOIN_ROOM, GAME_JOINED, GAME_NOT_FOUND, GAME_ALERT, GAME_ADDED } from "./messages";
 import { Game, isPromoting } from "./Game";
 import { db } from "./db";
 import { SocketManager, User } from "./SocketManager";
@@ -45,6 +45,15 @@ export class GameManager {
                         console.error("Pending game not found?")
                         return;
                     }
+                    if(user.userId === game.player1UserId) {
+                        SocketManager.getInstance().broadcast(game.gameId, JSON.stringify({
+                            type: GAME_ALERT,
+                            payload: {
+                                message: "Trying to Connect with yourself?"
+                            }
+                        }));
+                        return;
+                    }
                     SocketManager.getInstance().addUser(user, game.gameId)
                     await game?.updateSecondPlayer(user.userId);
                     this.pendingGameId = null;
@@ -53,6 +62,9 @@ export class GameManager {
                     this.games.push(game);
                     this.pendingGameId = game.gameId;
                     SocketManager.getInstance().addUser(user, game.gameId)
+                    SocketManager.getInstance().broadcast(game.gameId, JSON.stringify({
+                        type: GAME_ADDED,
+                    }));
                 }
             }
 
