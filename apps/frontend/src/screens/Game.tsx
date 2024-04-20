@@ -131,7 +131,11 @@ export const Game = () => {
 
     return <div className="">
         {result && <div className="justify-center flex pt-4 text-white">
-            {result}
+            {result === USER_TIMEOUT && <div>
+                {
+                    gameMetadata?.blackPlayer?.id === user.id ? "You lost on time" : "Opponent lost on time"
+                }
+                </div>}
         </div>}
         <div className="justify-center flex">
             <div className="pt-2 max-w-screen-xl w-full">
@@ -143,8 +147,7 @@ export const Game = () => {
                                     <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ""} />
                                 </div>
                                 <div>
-                                {result !== OPPONENT_DISCONNECTED && result !== USER_TIMEOUT && (
-                                    <div className="col-span-4 w-full flex justify-center text-white">
+                                    <div className={`col-span-4 w-full flex justify-center text-white ${(result === OPPONENT_DISCONNECTED || result === USER_TIMEOUT ) && "pointer-events-none"}`} >
                                         <ChessBoard
                                         started={started}
                                         gameId={gameId ?? ""}
@@ -159,7 +162,6 @@ export const Game = () => {
                                         board={board}
                                         />
                                     </div>
-                                )}
                                 </div>
                                 <div className="mt-4 flex justify-between">
                                     <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ""} />
