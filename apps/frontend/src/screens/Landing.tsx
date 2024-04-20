@@ -1,11 +1,8 @@
-
 import { useNavigate, Link } from "react-router-dom";
 import BackgroundSvg from "../components/BackgroundSvg";
 import { Button } from "../components/Button";
-
 export const Landing = () => {
     const navigate = useNavigate();
-
     return (
         <div className="flex flex-col justify-between min-h-screen">
             <Navbar navigate={navigate} />
@@ -44,7 +41,6 @@ export const Landing = () => {
         </div>
     );
 }
-
 const Navbar = ({ navigate }) => {
     return (
         <nav className="bg-black text-white p-4">
@@ -102,8 +98,5 @@ const Footer = ({ navigate }) => {
         </footer>
     );
 };
-
-
-
 
 export default Landing;
