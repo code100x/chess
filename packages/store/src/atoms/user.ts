@@ -1,7 +1,7 @@
 
 import { atom, selector } from "recoil";
-
-export const BACKEND_URL = "http://localhost:3000";
+//@ts-ignore
+export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
 export interface User {
     token: string;
     id: string;

@@ -1,22 +1,19 @@
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const GithubStrategy = require("passport-github2").Strategy;
-const FacebookStrategy = require("passport-facebook").Strategy;
 import passport from "passport";
 import dotenv from "dotenv";
 import { db } from "./db";
 
 dotenv.config();
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "your_google_client_id";
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "your_google_client_secret";
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID || "your_github_client_id";
-const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET || "your_github_client_secret";
-const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID || "your_facebook_app_id";
-const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET || "your_facebook_app_secret";
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID 
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
+const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID 
+const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET
 
 
 export function initPassport() {
 
-  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GITHUB_CLIENT_ID || !GITHUB_CLIENT_SECRET || !FACEBOOK_APP_ID || !FACEBOOK_APP_SECRET) {
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GITHUB_CLIENT_ID || !GITHUB_CLIENT_SECRET) {
     throw new Error('Missing environment variables for authentication providers');
   }
 
