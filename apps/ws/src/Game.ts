@@ -79,8 +79,23 @@ export class Game {
     
 
     async createGameInDb() {
-        const game = await db.game.create({
-            data: {
+        const game = await db.game.upsert({
+            where:{
+                id: this.gameId
+            },
+            update:{
+                whitePlayer: {
+                    connect: {
+                        id: this.player1UserId
+                    }
+                },
+                blackPlayer: {
+                    connect: {
+                        id: this.player2UserId ?? ""
+                    }
+                },
+            },
+            create: {
                 id: this.gameId,
                 timeControl: "CLASSICAL",
                 status: "IN_PROGRESS",
