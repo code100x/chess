@@ -1,6 +1,10 @@
 import { Chess, Color, PieceSymbol, Square } from "chess.js";
 import { useState } from "react";
 import { IMove, MOVE } from "../screens/Game";
+import LetterNotation from "./chess-board/LetterNotation";
+import LegalMoveIndicator from "./chess-board/LegalMoveIndicator";
+import ChessSquare from "./chess-board/ChessSquare";
+import NumberNotation from "./chess-board/NumberNotation";
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
     if (!from) {
@@ -72,12 +76,7 @@ export const ChessBoard = ({
                     i = isFlipped ? i + 1 : 8 - i;
                     return (
                         <div key={i} className="flex relative">
-                            <div
-                                className={`font-bold absolute ${i % 2 === 0 ? "text-[#739552]" : "text-[#EBEDD0]"} left-0.5`}
-                            >
-                                {i}
-                            </div>
-
+                            <NumberNotation isMainBoxColor={i%2===0} label={i.toString()}/>
                             {(isFlipped ? row.slice().reverse() : row).map((square, j) => {
                                 j = isFlipped ? 7 - (j % 8) : j % 8;
 
@@ -141,41 +140,22 @@ export const ChessBoard = ({
                                             }
                                         }}
                                         key={j}
-                                        className={`w-16 h-16  ${from === squareRepresentation ? `${isMainBoxColor? "bg-[#BBCB45]":"bg-[#F4F687]"}` : isMainBoxColor ? "bg-[#739552]" : "bg-[#EBEDD0]"}`}
+                                        className={`w-16 h-16  ${from === squareRepresentation ? `${isMainBoxColor ? "bg-[#BBCB45]" : "bg-[#F4F687]"}` : isMainBoxColor ? "bg-[#739552]" : "bg-[#EBEDD0]"}`}
                                     >
                                         <div className="w-full justify-center flex h-full relative">
-                                            <div className="h-full justify-center flex flex-col ">
-                                                {square ? (
-                                                    <img
-                                                        className="w-14"
-                                                        src={`/${square?.color === "b" ? `b${square.type}` : `w${square.type}`}.png`}
-                                                    />
-                                                ) : null}
-                                            </div>
+                                            {square && <ChessSquare square={square}/>}
 
                                             {isFlipped
                                                 ? i === 8 && (
-                                                      <div
-                                                          className={`font-bold absolute ${j % 2 !== 0 ? "text-[#739552]" : "text-[#EBEDD0]"} right-0.5 bottom-0`}
-                                                      >
-                                                          {labels[j]}
-                                                      </div>
+                                                      <LetterNotation label={labels[j]} isMainBoxColor={j % 2 !== 0} />
                                                   )
                                                 : i === 1 && (
-                                                      <div
-                                                          className={`font-bold absolute ${j % 2 !== 0 ? "text-[#739552]" : "text-[#EBEDD0]"} right-0.5 bottom-0`}
-                                                      >
-                                                          {labels[j]}
-                                                      </div>
+                                                    <LetterNotation label={labels[j]} isMainBoxColor={j % 2 !== 0} />
                                                   )}
                                             {!!from && legalMoves.includes(squareRepresentation) && (
-                                                <div className="absolute z-[100] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                                    {square?.type ? (
-                                                        <div className={`w-[60px] h-[60px] ${isMainBoxColor? "border-[#628047]":"border-[#C8CAB2]"} border-4 rounded-full`} />
-                                                    ) : (
-                                                        <div className={`w-5 h-5 ${isMainBoxColor? "bg-[#628047]":"bg-[#C8CAB2]"} rounded-full`} />
-                                                    )}
-                                                </div>
+                                                <LegalMoveIndicator isMainBoxColor={isMainBoxColor}
+                                                isPiece={!!square?.type}
+                                                />
                                             )}
                                         </div>
                                     </div>
