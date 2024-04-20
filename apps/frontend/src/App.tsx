@@ -3,14 +3,14 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Landing } from './screens/Landing';
 import { Game } from './screens/Game';
 import Login from './screens/Login';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense } from 'react';
 import { RecoilRoot } from 'recoil';
 import { useUser } from "@repo/store/useUser";
 import { Loader } from './components/Loader';
 
 function App() {
   return (
-    <div className="h-screen bg-slate-950">
+    <div className="min-h-screen bg-brown-600">
       <RecoilRoot>
         <Suspense fallback={<Loader />}>
           <AuthApp />
