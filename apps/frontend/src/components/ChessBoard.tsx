@@ -141,7 +141,7 @@ export const ChessBoard = ({
                                             }
                                         }}
                                         key={j}
-                                        className={`w-16 h-16  ${from === squareRepresentation ? "bg-red-500" : isMainBoxColor ? "bg-[#739552]" : "bg-[#EBEDD0]"}`}
+                                        className={`w-16 h-16  ${from === squareRepresentation ? `${isMainBoxColor? "bg-[#BBCB45]":"bg-[#F4F687]"}` : isMainBoxColor ? "bg-[#739552]" : "bg-[#EBEDD0]"}`}
                                     >
                                         <div className="w-full justify-center flex h-full relative">
                                             <div className="h-full justify-center flex flex-col ">
@@ -171,9 +171,9 @@ export const ChessBoard = ({
                                             {!!from && legalMoves.includes(squareRepresentation) && (
                                                 <div className="absolute z-[100] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                                                     {square?.type ? (
-                                                        <div className="w-[60px] h-[60px] border-[#C8CAB2] border-4 rounded-full" />
+                                                        <div className={`w-[60px] h-[60px] ${isMainBoxColor? "border-[#628047]":"border-[#C8CAB2]"} border-4 rounded-full`} />
                                                     ) : (
-                                                        <div className="w-4 h-4 bg-[#C8CAB2] rounded-full" />
+                                                        <div className={`w-5 h-5 ${isMainBoxColor? "bg-[#628047]":"bg-[#C8CAB2]"} rounded-full`} />
                                                     )}
                                                 </div>
                                             )}
