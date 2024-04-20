@@ -15,9 +15,7 @@ wss.on('connection', function connection(ws, req) {
   const userId = extractUserId(token);
   gameManager.addUser(new User(ws, userId));
 
-  ws.on("close", () => {
-    gameManager.removeUser(ws, userId)
-  })
+  ws.on("close", () => gameManager.removeUser(ws)); // Pass WebSocket object instead of userId
 });
 
-console.log("done")
+console.log("done");

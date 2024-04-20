@@ -1,7 +1,8 @@
-import { Chess, Color, Move, PieceSymbol, Square } from "chess.js";
+import { Chess, Color, PieceSymbol, Square } from "chess.js";
 import { useState } from "react";
 import { IMove, MOVE, } from "../screens/Game";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function isPromoting(chess: Chess, from: Square, to: Square) {
     if (!from) {
         return false;
@@ -27,7 +28,7 @@ export function isPromoting(chess: Chess, from: Square, to: Square) {
       .includes(to);
 }
 
-export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, setBoard, moves, setMoves }: {
+export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, setBoard, setMoves }: {
     myColor: Color, 
     gameId: string,
     started: boolean,
@@ -107,9 +108,7 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
                                         to: squareRepresentation
                                     })
                                     setMoves(moves =>[...moves, { from, to: squareRepresentation }]);
-                                } catch(e) {
-
-                                }
+                                } catch(e) { /* empty */ }
                             }
                         }} key={j} className={`w-16 h-16 ${includeBox([from || ""], j, i) ? "bg-red-400" : includeBox(legalMoves,j,i) ? `${(i+j)%2 === 0 ? 'bg-green_legal' : 'bg-slate_legal'}` : `${(i+j)%2 === 0 ? 'bg-green-500' : 'bg-slate-500'}`}`}>
                             <div className="w-full justify-center flex h-full">

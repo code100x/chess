@@ -95,10 +95,10 @@ export const Game = () => {
                     })
                     setStarted(true)
                     setMoves(message.payload.moves);
-                    message.payload.moves.map(x => {
-                        if (isPromoting(chess, x.from, x.to)) {
+                    message.payload.moves.map((x: string | { from: string; to: string; promotion?: string | undefined; }) => {
+                        if (typeof x !== 'string' && isPromoting(chess, x.from as Square, x.to as Square)) {
                             chess.move({...x,  promotion: 'q' })
-                        } else {
+                        } else if (typeof x !== 'string') {
                             chess.move(x)
                         }
                     })
@@ -115,7 +115,7 @@ export const Game = () => {
                 }
             }))
         }
-    }, [chess, socket]);
+    }, [chess, gameId, navigate, socket]);
 
     if (!socket) return <div>Connecting...</div>
 
