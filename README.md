@@ -16,21 +16,33 @@ git clone https://github.com/code100x/chess
 cd chess
 ```
 
-3. Install dependencies:
+3. Install dependencies for both frontend and backend:
 ```bash
+cd frontend
+npm install
+cd ../backend
 npm install
 ```
 
-This command installs all the necessary dependencies required to run the Chess Platform.
+These commands install all the necessary dependencies required to run both the frontend and backend of the Chess Platform.
 
 ## Usage
 
-Once you have installed the dependencies, you can start the servers by running the following command:
+Once you have installed the dependencies, you can start the servers by running the following command in separate terminal windows:
+
+For frontend:
 ```bash
+cd frontend
 npm run dev
 ```
 
-This command builds the TypeScript files and starts the backend server. It's configured to automatically rebuild the code whenever changes are made, making it suitable for development.
+For backend:
+```bash
+cd backend
+npm run dev
+```
+
+These commands build the TypeScript files and starts the backend server. It's configured to automatically rebuild the code whenever changes are made, making it suitable for development.
 
 After starting the servers, open your browser and go to [http://localhost:5173](http://localhost:5173) to access the Chess Platform.
 
