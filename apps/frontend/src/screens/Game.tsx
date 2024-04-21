@@ -20,6 +20,7 @@ export const GAME_JOINED = "game_joined"
 export const GAME_ALERT = "game_alert"
 export const GAME_ADDED = "game_added"
 export const USER_TIMEOUT = "user_timeout"
+export const GAME_TIME = "game_time";
 
 export interface IMove {
     from: Square; to: Square
@@ -44,6 +45,8 @@ export const Game = () => {
     const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null)
     const [result, setResult] = useState<"WHITE_WINS" | "BLACK_WINS" | "DRAW" | typeof OPPONENT_DISCONNECTED | typeof USER_TIMEOUT | null>(null);
     const [moves, setMoves] = useState<IMove[]>([]);
+    const [myTimer, setMyTimer] = useState(10 * 60 * 1000);
+    const [opponentTimer, setOppotentTimer] = useState(10 * 60 * 1000);
 
     useEffect(() => {
         if (!socket) {
@@ -111,6 +114,16 @@ export const Game = () => {
                     setBoard(chess.board());
                     break;
                 
+                case GAME_TIME:
+                    if (message.payload.player2UserId === user.id) {
+                        setMyTimer(message.payload.player2Time)
+                        setOppotentTimer(message.payload.player1Time)
+                    }else{
+                        setMyTimer(message.payload.player1Time)
+                        setOppotentTimer(message.payload.player2Time)
+                    }
+                    break;
+                
                 default:
                     alert(message.payload.message);
                     break;
@@ -126,6 +139,21 @@ export const Game = () => {
             }))
         }
     }, [chess, socket]);
+
+    const getTimer = (tempTime: number) => {
+        const minutes = Math.floor(tempTime / (1000 * 60));
+        const remainingSeconds = Math.floor((tempTime % (1000 * 60)) / 1000);
+        const remainingMilliseconds = tempTime % 1000;
+
+        return (
+            <div className="text-white">
+                Time Left: {minutes < 10 ? '0' : ''}
+                {minutes}:{remainingSeconds < 10 ? '0' : ''}
+                {remainingSeconds}.{remainingMilliseconds < 100 ? '0' : ''}
+                {remainingMilliseconds}
+            </div>
+        );
+    }
 
     if (!socket) return <div>Connecting...</div>
 
@@ -145,6 +173,7 @@ export const Game = () => {
                             <div>
                                 <div className="mb-4 flex justify-between">
                                     <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ""} />
+                                    {getTimer(opponentTimer)}
                                 </div>
                                 <div>
                                     <div className={`col-span-4 w-full flex justify-center text-white ${(result === OPPONENT_DISCONNECTED || result === USER_TIMEOUT ) && "pointer-events-none"}`} >
@@ -165,6 +194,7 @@ export const Game = () => {
                                 </div>
                                 <div className="mt-4 flex justify-between">
                                     <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ""} />
+                                    {getTimer(myTimer)}
                                 </div>
                             </div>
                         </div>
