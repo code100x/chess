@@ -20,7 +20,7 @@ export const GAME_ALERT = "game_alert"
 export const GAME_ADDED = "game_added"
 
 export interface IMove {
-    from: Square; to: Square
+    from: Square; to: Square; piece: String
 }
 
 interface Metadata {
@@ -78,7 +78,8 @@ export const Game = () => {
                         chess.move({from:move.from, to: move.to});
                     }
                     setBoard(chess.board());
-                    setMoves(moves => [...moves, move])
+                    const piece=chess.get(move.to)?.type
+                    setMoves(moves => [...moves,{from:move.from,to:move.to,piece}])
                     break;
                 case GAME_OVER:
                     setResult(message.payload.result);
@@ -147,7 +148,7 @@ export const Game = () => {
                             Play
                         </Button>}
                         </div>}
-                        <div className="mr-10">            
+                        <div className="">            
                             {moves.length > 0 && <div className="mt-4"><MovesTable moves={moves} /></div>}
                         </div>
                     </div>
