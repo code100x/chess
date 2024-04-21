@@ -1,5 +1,6 @@
 import { WebSocket } from 'ws';
 import {
+  GAME_OVER,
   INIT_GAME,
   JOIN_GAME,
   MOVE,
@@ -39,6 +40,10 @@ export class GameManager {
     }
     this.users = this.users.filter((user) => user.socket !== socket);
     SocketManager.getInstance().removeUser(user);
+  }
+
+  removeGame(gameId: string) {
+    this.games = this.games.filter((g) => g.gameId !== gameId);
   }
 
   private addHandler(user: User) {
@@ -85,6 +90,12 @@ export class GameManager {
         const game = this.games.find((game) => game.gameId === gameId);
         if (game) {
           game.makeMove(user, message.payload.move);
+          game.clearTimer();
+          const timer = setTimeout(() => {
+            game.endGame();
+            this.removeGame(game.gameId);
+          }, 60 * 1000);
+          game.setTimer(timer);
         }
       }
 
