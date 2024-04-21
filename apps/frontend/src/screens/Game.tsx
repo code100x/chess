@@ -10,6 +10,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
 import { UserAvatar } from '../components/UserAvatar';
+import { Loader } from '../components/Loader';
 
 // TODO: Move together, there's code repetition here
 export const INIT_GAME = 'init_game';
@@ -134,7 +135,12 @@ export const Game = () => {
     }
   }, [chess, socket]);
 
-  if (!socket) return <div>Connecting...</div>;
+  if (!socket)
+    return (
+      <div>
+        <Loader />
+      </div>
+    );
 
   return (
     <div className="">
