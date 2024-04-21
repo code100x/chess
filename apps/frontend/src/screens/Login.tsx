@@ -7,8 +7,6 @@ import { userAtom } from '@repo/store/userAtom';
 
 const BACKEND_URL =
   import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
-const BACKEND_URL =
-  import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
 
 const Login = () => {
   const navigate = useNavigate();
