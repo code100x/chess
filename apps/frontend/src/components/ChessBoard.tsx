@@ -186,8 +186,17 @@ export const ChessBoard = ({
                         }
                         if (!from && square?.color !== chess.turn()) return;
                         if (!isMyTurn) return;
+
                         if (from === squareRepresentation) {
                           setFrom(null);
+                        } else {
+                          setFrom(squareRepresentation);
+
+                          setLegalMoves(
+                            chess
+                              .moves({ verbose: true, square: square?.square })
+                              .map((move) => move.to),
+                          );
                         }
 
                         if (!from) {
