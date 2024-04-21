@@ -5,7 +5,7 @@ import MoveSound from '../../public/move.wav';
 import { Button } from '../components/Button';
 import { ChessBoard, isPromoting } from '../components/ChessBoard';
 import { useSocket } from '../hooks/useSocket';
-import { Chess, Move, Square } from 'chess.js';
+import { Chess, Color, Move, Square } from 'chess.js';
 import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
@@ -45,6 +45,7 @@ export const Game = () => {
   const [added, setAdded] = useState(false);
   const [started, setStarted] = useState(false);
   const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
+  const [userBoardColor,setUserBoardColor] = useState<Color>('w')
   const [result, setResult] = useState<
     'WHITE_WINS' | 'BLACK_WINS' | 'DRAW' | typeof OPPONENT_DISCONNECTED | null
   >(null);
@@ -69,6 +70,11 @@ export const Game = () => {
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
           });
+          if (user.id == message.payload.blackPlayer.id){
+            setUserBoardColor('b')
+          }else{
+            setUserBoardColor('w')
+          }
           break;
         case MOVE:
           const move = message.payload;
@@ -104,6 +110,11 @@ export const Game = () => {
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
           });
+          if (user.id == message.payload.blackPlayer.id){
+            setUserBoardColor('b')
+          }else{
+            setUserBoardColor('w')
+          }
           setStarted(true);
           setMoves(message.payload.moves);
           message.payload.moves.map((x: Move) => {
@@ -148,14 +159,14 @@ export const Game = () => {
               <div className="flex justify-center">
                 <div>
                   <div className="mb-4 flex justify-between">
-                    <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ''} />
+                    <UserAvatar name={userBoardColor == 'b' ? gameMetadata?.whitePlayer?.name ?? '' : gameMetadata?.blackPlayer?.name ?? ''} />
                   </div>
                   <div>
                     <ChessBoard
                       started={started}
                       gameId={gameId ?? ''}
                       myColor={
-                        user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w'
+                        userBoardColor
                       }
                       setMoves={setMoves}
                       moves={moves}
@@ -166,7 +177,7 @@ export const Game = () => {
                     />
                   </div>
                   <div className="mt-4 flex justify-between">
-                    <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ''} />
+                    <UserAvatar name={userBoardColor == 'b' ? gameMetadata?.blackPlayer?.name ?? '' : gameMetadata?.whitePlayer?.name ?? ''} />
                   </div>
                 </div>
               </div>
