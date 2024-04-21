@@ -8,6 +8,9 @@ import NumberNotation from './chess-board/NumberNotation';
 import { drawArrow } from '../utils/canvas';
 import useWindowSize from '../hooks/useWindowSize';
 import Confetti from 'react-confetti';
+import MoveSound from '../../public/move.wav';
+import CaptureSound from '../../public/capture.wav';
+
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
   if (!from) {
@@ -88,6 +91,8 @@ export const ChessBoard = ({
       ? Math.floor((height - OFFSET) / 8)
       : Math.floor((width - OFFSET) / 8);
   const [gameOver, setGameOver] = useState(false);
+  const moveAudio = new Audio(MoveSound);
+  const captureAudio = new Audio(CaptureSound);
 
   const handleMouseDown = (
     e: MouseEvent<HTMLDivElement>,
@@ -214,9 +219,15 @@ export const ChessBoard = ({
                               });
                             }
                             if (moveResult) {
+                              moveAudio.play();
+                              
+                              if (moveResult?.captured) {
+                                captureAudio.play();
+                              }
+                              
                               if (moveResult.san.includes('#')) {
                                 setGameOver(true);
-                              }
+                              
                             }
                             socket.send(
                               JSON.stringify({

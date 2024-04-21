@@ -64,7 +64,7 @@ const ChessboardContextProviderComponent = React.forwardRef<
 });
 
 const ChessboardContextProvider = React.memo(
-  ChessboardContextProviderComponent
+  ChessboardContextProviderComponent,
 );
 export {
   ChessboardContextProvider,
