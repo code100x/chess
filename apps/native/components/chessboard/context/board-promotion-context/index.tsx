@@ -40,7 +40,7 @@ const BoardPromotionContextProvider: React.FC = React.memo(({ children }) => {
       dialog.onSelect?.(piece);
       setDialog({ isDialogActive: false });
     },
-    [dialog]
+    [dialog],
   );
 
   const value = useMemo(
@@ -48,7 +48,7 @@ const BoardPromotionContextProvider: React.FC = React.memo(({ children }) => {
       showPromotionDialog,
       isPromoting: dialog.isDialogActive,
     }),
-    [dialog.isDialogActive, showPromotionDialog]
+    [dialog.isDialogActive, showPromotionDialog],
   );
 
   return (
