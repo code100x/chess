@@ -1,21 +1,21 @@
-import Google from "../assets/google.png";
-import Github from "../assets/github.png";
+import Google from '../assets/google.png';
+import Github from '../assets/github.png';
 import { useNavigate } from 'react-router-dom';
 
-const BACKEND_URL = "http://localhost:3000";
+const BACKEND_URL =
+  import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
 
 const Login = () => {
   const navigate = useNavigate();
 
   const google = () => {
-    window.open(`${BACKEND_URL}/auth/google`, "_self");
+    window.open(`${BACKEND_URL}/auth/google`, '_self');
   };
 
   const github = () => {
-    window.open(`${BACKEND_URL}/auth/github`, "_self");
+    window.open(`${BACKEND_URL}/auth/github`, '_self');
   };
 
-  
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
       <h1 className="text-4xl font-bold mb-8 text-center text-green-500 drop-shadow-lg">
