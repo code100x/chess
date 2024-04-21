@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Square, Chess } from 'chess.js';
 import { FaChessBishop, FaChessKing, FaChessKnight, FaChessQueen, FaChessRook } from 'react-icons/fa';
-import { GiChessBishop } from 'react-icons/gi';
 
 const chess = new Chess();
 interface Move {

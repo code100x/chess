@@ -51,8 +51,8 @@ const History: React.FC<{ history: Array<engine.Move> }> = ({ history }) => {
   //   endRef.current?.scrollIntoView();
   // }, [history]);
 
-  const moves: engine.Move[] = history.map(({ from, to }: engine.Move) => {
-    return { from, to, type: '' };
+  const moves = history.map(({ from, to }: engine.Move) => {
+    return { from, to };
   });
 
   const endRef = useRef<HTMLDivElement>(null);
