@@ -287,12 +287,23 @@ export class Game {
   }
 
   updateUserTimer(user: User) {
-    const time = new Date(Date.now()).getTime();
+    const currentTime = new Date(Date.now()).getTime();
+    const elapsedTime = currentTime - this.tempTime;
     if (user.userId === this.player1UserId) {
-      this.player1Time -= time - this.tempTime;
-    } else {
-      this.player2Time -= time - this.tempTime;
+      this.player1Time = Math.max(0, this.player1Time - elapsedTime);
+    } else if (user.userId === this.player2UserId) {
+      this.player2Time = Math.max(0, this.player2Time - elapsedTime);
     }
-    this.tempTime = time;
+    this.tempTime = currentTime;
+    SocketManager.getInstance().broadcast(
+      this.gameId,
+      JSON.stringify({
+        type: GAME_TIME,
+        payload: {
+          player1Time: this.player1Time,
+          player2Time: this.player2Time,
+        },
+      }),
+    );
   }
 }
