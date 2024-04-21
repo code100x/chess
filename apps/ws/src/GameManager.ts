@@ -11,6 +11,8 @@ import {
   GAME_ADDED,
   RESIGN,
   GAME_OVER,
+  OFFER_DRAW,
+  DRAW_OFFER_ACCEPTED,
 } from './messages';
 import { Game, isPromoting } from './Game';
 import { db } from './db';
@@ -170,6 +172,31 @@ export class GameManager {
             type: GAME_OVER,
             payload: {
               result: `${message.payload.myColor} resigned. ${message.payload.myColor === 'white' ? 'Black' : 'White'} wins!!!`,
+            },
+          }),
+        );
+      }
+
+      if (message.type === OFFER_DRAW) {
+        SocketManager.getInstance().broadcast(
+          message.payload.gameId,
+          JSON.stringify({
+            type: OFFER_DRAW,
+            payload: {
+              from: message.payload.myColor,
+              id: message.payload.myId,
+            },
+          }),
+        );
+      }
+
+      if (message.type === DRAW_OFFER_ACCEPTED) {
+        SocketManager.getInstance().broadcast(
+          message.payload.gameId,
+          JSON.stringify({
+            type: GAME_OVER,
+            payload: {
+              result: 'Draw Accepted! Game is Draw!!!!',
             },
           }),
         );

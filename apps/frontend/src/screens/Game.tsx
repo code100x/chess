@@ -11,6 +11,7 @@ import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
 import { UserAvatar } from '../components/UserAvatar';
 import { GameActions } from '../components/GameActions';
+import { DrawDialog } from '../components/draw-dialog';
 
 // TODO: Move together, there's code repetition here
 export const INIT_GAME = 'init_game';
@@ -22,6 +23,7 @@ export const GAME_JOINED = 'game_joined';
 export const GAME_ALERT = 'game_alert';
 export const GAME_ADDED = 'game_added';
 export const RESIGN = 'resign';
+export const OFFER_DRAW = 'offer_draw';
 
 export interface IMove {
   from: Square;
@@ -51,6 +53,7 @@ export const Game = () => {
     'WHITE_WINS' | 'BLACK_WINS' | 'DRAW' | typeof OPPONENT_DISCONNECTED | null
   >(null);
   const [moves, setMoves] = useState<IMove[]>([]);
+  const [drawReq, setDrawReq] = useState(false);
 
   useEffect(() => {
     if (!socket) {
@@ -116,6 +119,14 @@ export const Game = () => {
             }
           });
           setBoard(chess.board());
+          break;
+
+        case OFFER_DRAW:
+          // console.log(message.payload.id);
+          if (message.payload.id !== user.id) {
+            console.log('this should be shown to other userr');
+            setDrawReq(true);
+          }
           break;
 
         default:
@@ -196,6 +207,7 @@ export const Game = () => {
                 </div>
               ) : (
                 <GameActions
+                  myId={user.id}
                   socket={socket}
                   gameId={gameId ?? ''}
                   myColor={
@@ -218,6 +230,11 @@ export const Game = () => {
           </div>
         </div>
       </div>
+      <DrawDialog
+        setDrawReq={setDrawReq}
+        drawReqSent={drawReq}
+        myColor={user.id === gameMetadata?.blackPlayer?.id ? 'black' : 'white'}
+      />
     </div>
   );
 };

@@ -5,17 +5,35 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from './ui/tooltip';
-import { RESIGN } from '../screens/Game';
+import { OFFER_DRAW, RESIGN } from '../screens/Game';
 
 type GameActionsProps = {
   socket?: WebSocket;
   gameId: string;
   myColor: 'black' | 'white';
+  myId: string;
 };
 
-export function GameActions({ socket, gameId, myColor }: GameActionsProps) {
-  // TODO: Implement this
-  const handleDrawClick = () => {};
+export function GameActions({
+  socket,
+  gameId,
+  myColor,
+  myId,
+}: GameActionsProps) {
+  const handleDrawClick = () => {
+    if (!socket) return;
+
+    socket.send(
+      JSON.stringify({
+        type: OFFER_DRAW,
+        payload: {
+          gameId,
+          myColor,
+          myId,
+        },
+      }),
+    );
+  };
 
   const handleResignClick = () => {
     if (!socket) return;
@@ -32,34 +50,36 @@ export function GameActions({ socket, gameId, myColor }: GameActionsProps) {
   };
 
   return (
-    <div className="flex justify-center gap-5">
-      <button>
+    <>
+      <div className="flex justify-center gap-5">
+        <button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <button onClick={handleResignClick}>
+                  <Flag className="text-white" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="bg-black">
+                <p className="text-white">Resign</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </button>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <button onClick={handleResignClick}>
-                <Flag className="text-white" />
+              <button onClick={handleDrawClick}>
+                <Handshake className="text-white" />
               </button>
             </TooltipTrigger>
             <TooltipContent className="bg-black">
-              <p className="text-white">Resign</p>
+              <p className="text-white">Offer Draw</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      </button>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger>
-            <button onClick={handleDrawClick}>
-              <Handshake className="text-white" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent className="bg-black">
-            <p className="text-white">Offer Draw</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-      {/* TODO: Add Undo Feature */}
-    </div>
+        {/* TODO: Add Undo Feature */}
+      </div>
+    </>
   );
 }

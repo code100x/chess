@@ -9,3 +9,5 @@ export const GAME_JOINED = 'game_joined';
 export const GAME_ALERT = 'game_alert';
 export const GAME_ADDED = 'game_added';
 export const RESIGN = 'resign';
+export const OFFER_DRAW = 'offer_draw';
+export const DRAW_OFFER_ACCEPTED = 'draw_offer_accepted';
