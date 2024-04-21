@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, ChangeEvent } from 'react';
 import Chessboard from 'chessboardjsx';
-import * as engine from './engine';
+import * as engine from '../../hooks/BotEngine';
 import type { AvailableBots, InitialisedBot } from './Bots';
 import { Button } from '../../components/Button';
 import MovesTable from '../MovesTable';

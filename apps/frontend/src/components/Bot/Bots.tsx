@@ -1,5 +1,5 @@
 import {Chess } from 'chess.js';
-import type { Fen, ShortMove } from './engine';
+import type { Fen, ShortMove } from '../../hooks/BotEngine';
 
 export type UninitialisedBot = () => InitialisedBot;
 export type InitialisedBot = (fen: Fen) => Promise<ShortMove>;
