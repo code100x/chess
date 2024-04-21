@@ -7,7 +7,7 @@ import LegalMoveIndicator from "./chess-board/LegalMoveIndicator";
 import ChessSquare from "./chess-board/ChessSquare";
 import NumberNotation from "./chess-board/NumberNotation";
 import { drawArrow } from "../utils/canvas";
-import MoveSound from '../../public/MoveSound.mp3'
+// import MoveSound from '../../public/MoveSound.mp3'
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
     if (!from) {
@@ -78,7 +78,7 @@ export const ChessBoard = ({
     const labels = ["a", "b", "c", "d", "e", "f", "g", "h"];
     const isFlipped = myColor === "b";
     const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
-    const audio = new Audio(MoveSound);
+    // const audio = new Audio(MoveSound);
 
     const handleMouseDown = (e: MouseEvent<HTMLDivElement>, squareRep: string) => {
         e.preventDefault();
@@ -208,9 +208,10 @@ export const ChessBoard = ({
                                                             from,
                                                             to: squareRepresentation,
                                                         });
+                                                        const piece=chess.get(squareRepresentation)?.type
                                                         setMoves((moves) => [
                                                             ...moves,
-                                                            { from, to: squareRepresentation },
+                                                            { from, to: squareRepresentation,piece },
                                                         ]);
                                                     } catch (e) {}
                                                 }
