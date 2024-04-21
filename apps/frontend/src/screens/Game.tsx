@@ -8,7 +8,6 @@ import { Chess, Move, Square } from 'chess.js';
 import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
-import { MatchHeading } from '../components/MatchHeading';
 import { UserAvatar } from '../components/UserAvatar';
 
 // TODO: Move together, there's code repetition here
@@ -29,6 +28,7 @@ export interface IMove {
 export interface Player {
   id: string;
   name: string;
+  isGuest: boolean;
 }
 
 export interface Metadata {
@@ -150,7 +150,7 @@ export const Game = () => {
               <div className="flex justify-center">
                 <div>
                   <div className="mb-4 flex justify-between">
-                    <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ''} />
+                    <UserAvatar gameMetadata={gameMetadata} />
                   </div>
                   <div>
                     <ChessBoard
@@ -168,7 +168,7 @@ export const Game = () => {
                     />
                   </div>
                   <div className="mt-4 flex justify-between">
-                    <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ''} />
+                    <UserAvatar gameMetadata={gameMetadata} self />
                   </div>
                 </div>
               </div>

@@ -83,4 +83,5 @@ enum AuthProvider {
   GOOGLE
   FACEBOOK
   GITHUB
+  GUEST
 }
