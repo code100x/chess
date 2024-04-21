@@ -5,10 +5,14 @@ import { register } from '../services/metrics';
 const metricsRouter = Router();
 
 metricsRouter.get('/', async (req, res) => {
-  const metrics = await register.metrics();
-  logger.info('metrics route working as expected');
-  res.set('Content-Type', register.contentType);
-  res.send(metrics);
+  try {
+    const metrics = await register.metrics();
+    res.set('Content-Type', register.contentType);
+    res.send(metrics);
+    logger.info('metrics route working as expected');
+  } catch (err) {
+    logger.error('metrics route working as expected');
+  }
 });
 
 export default metricsRouter;
