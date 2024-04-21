@@ -171,7 +171,6 @@ export const Game = () => {
                     <div className="justify-center flex">
                         </div>
                          </div>
-                        <Button onClick={logout}>Logout</Button>
                   <div>
                     <ChessBoard
                       started={started}
