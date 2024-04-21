@@ -171,7 +171,7 @@ export const Game = () => {
                 </div>
               </div>
             </div>
-            <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10">
+            <div className="col-span-2 bg-brown-500  w-full flex justify-center h-[90vh] overflow-scroll mt-8">
               {!started && (
                 <div className="pt-8">
                   {added ? (
