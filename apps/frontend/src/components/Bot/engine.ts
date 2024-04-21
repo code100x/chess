@@ -1,43 +1,64 @@
-import {Chess} from 'chess.js';
+import {Chess } from 'chess.js';
 import type { Square, Move } from 'chess.js';
-
-
 type ShortMove = {
   from: Square;
   to: Square;
   promotion?: 'q' ;
 };
-
 export type Fen = string;
-export type GameWinner = 'b' | 'w' | 'd' |  null;
-export type { Square, Move ,ShortMove  };
+export type GameWinner = 'b' | 'w' | null;
+export type { Square, Move, ShortMove };
 
 
 const newGame = (): Fen => 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-const isNewGame =(fen: Fen): boolean  => fen === newGame();
+const isNewGame = (fen: Fen): boolean => fen === newGame();
 
-const isBlackTurn = (fen: Fen): boolean => new Chess(fen).turn() === 'b';
+const isBlackTurn = (fen: Fen): boolean =>  {
+  const game = new Chess(fen);
+  return game.turn() === 'b';
 
-const isWhiteTurn = (fen: Fen): boolean=> new Chess(fen).turn() === 'w';
+}
+const isWhiteTurn = (fen: Fen): boolean => {
+  const game = new Chess(fen);
+  return game.turn() === 'w';
 
-const isCheck = (fen: Fen): boolean => new Chess(fen).isCheck();
+}
 
+const isCheck = (fen: Fen): boolean => {
+  const game = new Chess(fen);
+  return game.inCheck();
+
+}
 const getGameWinner = (fen: Fen): GameWinner => {
   const game = new Chess(fen);
-  return game.isCheckmate()? (game.turn() === 'w' ? 'b' : 'w') : null;
+  return game.isCheckmate() ? (game.turn() === 'w' ? 'b' : 'w') : null;
 };
 
-const isGameOver = (fen: Fen): boolean => new Chess(fen).isGameOver();
+const isGameOver = (fen: Fen): boolean => {
+  const game = new Chess(fen);
+  return game.isGameOver();
+}
 
-const isMoveable = (fen: Fen, from: Square): boolean =>
-  new Chess(fen).moves({ square: from }).length > 0;
+const isMoveable = (fen: Fen, from: Square): boolean =>{
+  const game = new Chess(fen);
+  return game.moves({ square: from }).length > 0;
+}
+  // new Chess(fen).moves({ square: from }).length > 0;
 
 const move = (fen: Fen, from: Square, to: Square): [Fen, Move] | null => {
   const game = new Chess(fen);
-  const action = game.move({ from, to, promotion: 'q' });
-  return action ? [game.fen(), action] : null;
+
+  try{
+    const action = game.move({ from, to, promotion: 'q' });
+    return action ? [game.fen(), action] : null;
+  
+  }catch(err){
+    return null;
+  }
+
 };
+
 
 export {
   newGame,
