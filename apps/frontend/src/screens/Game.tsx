@@ -241,15 +241,14 @@ export const Game = () => {
                     </div>
                   </div>
                   <div className="mt-4 flex justify-between">
-                    <div className="mb-4 flex justify-between">
-                      <UserAvatar
-                        name={
-                          user.id === gameMetadata?.blackPlayer?.id
-                            ? gameMetadata?.blackPlayer?.name
-                            : gameMetadata?.whitePlayer?.name ?? ''
-                        }
-                      />
-                    </div>
+                    <UserAvatar
+                      name={
+                        user.id === gameMetadata?.blackPlayer?.id
+                          ? gameMetadata?.blackPlayer?.name
+                          : gameMetadata?.whitePlayer?.name ?? ''
+                      }
+                    />
+
                     {getTimer(myTimer)}
                   </div>
                 </div>
