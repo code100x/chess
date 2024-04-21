@@ -56,12 +56,15 @@ export const Game = () => {
     | 'WHITE_WINS'
     | 'BLACK_WINS'
     | 'DRAW'
+    | 'RESIGN_B'
+    | 'RESIGN_W'
     | typeof OPPONENT_DISCONNECTED
     | typeof USER_TIMEOUT
     | null
   >(null);
   const [moves, setMoves] = useState<IMove[]>([]);
-  const [drawReq, setDrawReq] = useState(false);  const [myTimer, setMyTimer] = useState(10 * 60 * 1000);
+  const [drawReq, setDrawReq] = useState(false);
+  const [myTimer, setMyTimer] = useState(10 * 60 * 1000);
   const [opponentTimer, setOppotentTimer] = useState(10 * 60 * 1000);
 
   useEffect(() => {
@@ -138,6 +141,7 @@ export const Game = () => {
           if (message.payload.id !== user.id) {
             console.log('this should be shown to other userr');
             setDrawReq(true);
+          }
           break;
 
         case GAME_TIME:
@@ -206,6 +210,8 @@ export const Game = () => {
           {result === 'WHITE_WINS' && 'White wins'}
           {result === 'BLACK_WINS' && 'Black wins'}
           {result === 'DRAW' && 'Draw'}
+          {result === 'RESIGN_B' && 'Black Resigned! White Wins!!!'}
+          {result === 'RESIGN_W' && 'White Resigned! Black Wins!!!'}
         </div>
       )}
       {started && (

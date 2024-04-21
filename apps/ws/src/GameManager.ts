@@ -2,16 +2,13 @@ import { WebSocket } from 'ws';
 import {
   GAME_OVER,
   INIT_GAME,
-  JOIN_GAME,
   MOVE,
-  OPPONENT_DISCONNECTED,
   JOIN_ROOM,
   GAME_JOINED,
   GAME_NOT_FOUND,
   GAME_ALERT,
   GAME_ADDED,
   RESIGN,
-  GAME_OVER,
   OFFER_DRAW,
   DRAW_OFFER_ACCEPTED,
 } from './messages';
@@ -182,7 +179,8 @@ export class GameManager {
           JSON.stringify({
             type: GAME_OVER,
             payload: {
-              result: `${message.payload.myColor} resigned. ${message.payload.myColor === 'white' ? 'Black' : 'White'} wins!!!`,
+              result:
+                message.payload.myColor === 'black' ? 'RESIGN_B' : 'RESIGN_W',
             },
           }),
         );
@@ -207,7 +205,7 @@ export class GameManager {
           JSON.stringify({
             type: GAME_OVER,
             payload: {
-              result: 'Draw Accepted! Game is Draw!!!!',
+              result: 'DRAW',
             },
           }),
         );
