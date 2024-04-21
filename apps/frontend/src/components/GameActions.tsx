@@ -6,6 +6,7 @@ import {
   TooltipTrigger,
 } from './ui/tooltip';
 import { OFFER_DRAW, RESIGN } from '../screens/Game';
+import { Button } from './ui/button';
 
 type GameActionsProps = {
   socket?: WebSocket;
@@ -68,10 +69,14 @@ export function GameActions({
         </button>
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger>
-              <button onClick={handleDrawClick}>
+            <TooltipTrigger className="text-white">
+              <Button
+                onClick={handleDrawClick}
+                className="flex gap-1 items-center"
+              >
+                <span>Offer Draw</span>
                 <Handshake className="text-white" />
-              </button>
+              </Button>
             </TooltipTrigger>
             <TooltipContent className="bg-black">
               <p className="text-white">Offer Draw</p>
