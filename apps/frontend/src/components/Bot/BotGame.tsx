@@ -3,12 +3,14 @@ import Chessboard from 'chessboardjsx';
 import * as engine from './engine';
 import type { AvailableBots, InitialisedBot } from './Bots';
 import { Button } from '../../components/Button';
+import MovesTable from '../MovesTable';
 
 
 type SelectedBot = {
   name: string;
   move: InitialisedBot;
 } | null;
+
 
 type BoardMove = {
   sourceSquare: engine.Square;
@@ -43,17 +45,23 @@ const BotSelector: React.FC<{
 };
 
 const History: React.FC<{ history: Array<engine.Move> }> = ({ history }) => {
+  // const endRef = useRef<HTMLDivElement>(null);
+
+  // useEffect(() => {
+  //   endRef.current?.scrollIntoView();
+  // }, [history]);
+
+  const moves: engine.Move[] = history.map(({ from, to }: engine.Move) => {
+    return { from, to, type: '' };
+  });
+
   const endRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    endRef.current?.scrollIntoView();
-  }, [history]);
-
   return (
-    <pre className='m-auto mt-[5vh] flex  h-[525px] w-[120px] text-white overflow-scroll'>
-      {history.map(({ color, piece, from, san }) => `${color}${piece}${from} ${san}`).join('\n')}
+    <div className=" bg-brown-500  ml-[56vw] mr-[18vw] h-[78vh] overflow-scroll mt-">
+      <MovesTable moves={moves}/>
       <div ref={endRef} />
-    </pre>
+    </div>
   );
 };
 
@@ -162,12 +170,19 @@ const BotGame: React.FC<{
           Reset
         </Button>
       </div>
-      <div className={'float-left ml-[10vw] mt-[2vw]'}>
-        <Chessboard position={fen} allowDrag={onDragStart} onDrop={onMovePiece} />
+      <div className={'float-left ml-[10vw] mt-[2vw] '}>
+        <Chessboard position={fen} allowDrag={onDragStart} onDrop={onMovePiece}/>
       </div>
+     
+
       <History history={history} />
+      
     </div>
   );
+
+
+
+
 };
 
 export default BotGame;

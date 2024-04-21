@@ -7,7 +7,6 @@ const chess = new Chess();
 interface Move {
   from: Square;
   to: Square;
-  type: string;
 }
 
 interface MovesTableProps {
