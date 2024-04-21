@@ -148,7 +148,13 @@ export const Game = () => {
               <div className="flex justify-center">
                 <div>
                   <div className="mb-4 flex justify-between">
-                    <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ''} />
+                    <UserAvatar
+                      name={
+                        user.id === gameMetadata?.whitePlayer?.id
+                          ? gameMetadata?.blackPlayer?.name
+                          : gameMetadata?.whitePlayer?.name ?? ''
+                      }
+                    />
                   </div>
                   <div>
                     <ChessBoard
@@ -166,7 +172,15 @@ export const Game = () => {
                     />
                   </div>
                   <div className="mt-4 flex justify-between">
-                    <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ''} />
+                    <div className="mb-4 flex justify-between">
+                      <UserAvatar
+                        name={
+                          user.id === gameMetadata?.blackPlayer?.id
+                            ? gameMetadata?.blackPlayer?.name
+                            : gameMetadata?.whitePlayer?.name ?? ''
+                        }
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
