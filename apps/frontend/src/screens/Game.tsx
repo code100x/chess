@@ -173,7 +173,7 @@ export const Game = () => {
               </div>
             </div>
             <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10 flex-col">
-              {!started && (
+              {!started ? (
                 <div className="pt-8">
                   {added ? (
                     <div className="text-white">Waiting</div>
@@ -193,9 +193,18 @@ export const Game = () => {
                     )
                   )}
                 </div>
+              ) : (
+                <GameActions
+                  socket={socket}
+                  gameId={gameId ?? ''}
+                  myColor={
+                    user.id === gameMetadata?.blackPlayer?.id
+                      ? 'black'
+                      : 'white'
+                  }
+                />
               )}
               <section className="mt-64">
-                <GameActions />
                 <div>
                   {moves.length > 0 && (
                     <div className="mt-4">

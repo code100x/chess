@@ -6,14 +6,37 @@ import {
   TooltipTrigger,
 } from './ui/tooltip';
 
-export function GameActions() {
+type GameActionsProps = {
+  socket?: WebSocket;
+  gameId: string;
+  myColor: 'black' | 'white';
+};
+
+export function GameActions({ socket, gameId, myColor }: GameActionsProps) {
+  // TODO: Implement this
+  const handleDrawClick = () => {};
+
+  const handleResignClick = () => {
+    if (!socket) return;
+
+    socket.send(
+      JSON.stringify({
+        type: 'resign',
+        payload: {
+          gameId,
+          myColor,
+        },
+      }),
+    );
+  };
+
   return (
     <div className="flex justify-center gap-5">
       <button>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <button onClick={() => console.log('Flag clicked')}>
+              <button onClick={handleResignClick}>
                 <Flag className="text-white" />
               </button>
             </TooltipTrigger>
@@ -26,7 +49,7 @@ export function GameActions() {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger>
-            <button onClick={() => console.log('Handshake clicked')}>
+            <button onClick={handleDrawClick}>
               <Handshake className="text-white" />
             </button>
           </TooltipTrigger>

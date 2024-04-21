@@ -9,6 +9,8 @@ import {
   GAME_NOT_FOUND,
   GAME_ALERT,
   GAME_ADDED,
+  RESIGN,
+  GAME_OVER,
 } from './messages';
 import { Game, isPromoting } from './Game';
 import { db } from './db';
@@ -159,6 +161,18 @@ export class GameManager {
         );
 
         SocketManager.getInstance().addUser(user, gameId);
+      }
+
+      if (message.type === RESIGN) {
+        SocketManager.getInstance().broadcast(
+          message.payload.gameId,
+          JSON.stringify({
+            type: GAME_OVER,
+            payload: {
+              result: `${message.payload.myColor} resigned. ${message.payload.myColor === 'white' ? 'Black' : 'White'} wins!!!`,
+            },
+          }),
+        );
       }
     });
   }
