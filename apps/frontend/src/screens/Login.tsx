@@ -27,6 +27,7 @@ const Login = () => {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify({
         name: (guestName.current && guestName.current.value) || '',
       }),
