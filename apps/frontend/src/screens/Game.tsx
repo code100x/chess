@@ -54,14 +54,15 @@ export const Game = () => {
     if (!socket) {
       return;
     }
-    socket.onmessage = (event) => {
+
+    const handleSocketMessage = (event: MessageEvent) => {
       const message = JSON.parse(event.data);
 
-      switch (message.type) {
-        case GAME_ADDED:
+      const messageHandlers = {
+        GAME_ADDED: () => {
           setAdded(true);
-          break;
-        case INIT_GAME:
+        },
+        INIT_GAME: () => {
           setBoard(chess.board());
           setStarted(true);
           navigate(`/game/${message.payload.gameId}`);
@@ -69,15 +70,12 @@ export const Game = () => {
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
           });
-          break;
-        case MOVE:
+        },
+        MOVE: () => {
           const move = message.payload;
           const moves = chess.moves({ verbose: true });
-          //TODO: Fix later
-          if (
-            moves.map((x) => JSON.stringify(x)).includes(JSON.stringify(move))
-          )
-            return;
+          const moveExists = moves.some((x) => JSON.stringify(x) === JSON.stringify(move));
+          if (moveExists) return;
           if (isPromoting(chess, move.from, move.to)) {
             chess.move({
               from: move.from,
@@ -90,23 +88,21 @@ export const Game = () => {
           moveAudio.play();
           setBoard(chess.board());
           setMoves((moves) => [...moves, move]);
-          break;
-        case GAME_OVER:
+        },
+        GAME_OVER: () => {
           setResult(message.payload.result);
-          break;
-
-        case OPPONENT_DISCONNECTED:
+        },
+        OPPONENT_DISCONNECTED: () => {
           setResult(OPPONENT_DISCONNECTED);
-          break;
-
-        case GAME_JOINED:
+        },
+        GAME_JOINED: () => {
           setGameMetadata({
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
           });
           setStarted(true);
           setMoves(message.payload.moves);
-          message.payload.moves.map((x: Move) => {
+          message.payload.moves.forEach((x: Move) => {
             if (isPromoting(chess, x.from, x.to)) {
               chess.move({ ...x, promotion: 'q' });
             } else {
@@ -114,25 +110,33 @@ export const Game = () => {
             }
           });
           setBoard(chess.board());
-          break;
+        }
+      };
 
-        default:
-          alert(message.payload.message);
-          break;
-      }
+      const handleMessage = (message: any) => {
+        const handler = messageHandlers[message.type as keyof typeof messageHandlers];
+        if (handler) {
+          handler();
+        }
+      };
+      handleMessage(message);
     };
 
-    if (gameId !== 'random') {
-      socket.send(
-        JSON.stringify({
-          type: JOIN_ROOM,
-          payload: {
-            gameId,
-          },
-        }),
-      );
-    }
-  }, [chess, socket]);
+
+    const joinRoomPayload = gameId !== 'random' ? { gameId } : null;
+    socket.send(
+      JSON.stringify({
+        type: JOIN_ROOM,
+        payload: joinRoomPayload,
+      }),
+    );
+
+    socket.onmessage = handleSocketMessage;
+
+    return () => {
+      socket.onmessage = null;
+    };
+  }, [chess, gameId, navigate, socket]);
 
   if (!socket) return <div>Connecting...</div>;
 

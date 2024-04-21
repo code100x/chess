@@ -5,7 +5,7 @@ import BackgroundSvg from '../components/BackgroundSvg';
 export const Landing = () => {
   const navigate = useNavigate();
   return (
-    <div className="flex justify-center overflow-hidden relative h-full">
+    <div className="flex justify-center overflow-hidden relative h-screen">
       <BackgroundSvg />
       <div className="grid content-center py-8 max-w-screen-xl z-[1]">
         <div className="grid grid-cols-1 grid-rows-[max-content] lg:grid-rows-[auto] gap-4 lg:grid-cols-3 px-4 py-8 lg:p-8 h-full">
