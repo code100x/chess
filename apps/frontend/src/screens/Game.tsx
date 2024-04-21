@@ -140,6 +140,19 @@ export const Game = () => {
         }
     }, [chess, socket]);
 
+    useEffect(()=>{
+        if (started){
+            const interval = setInterval(() => {
+                if ((user.id === gameMetadata?.blackPlayer?.id ? "b" : "w") === chess.turn()) {
+                    setMyTimer(myTimer => myTimer - 100);
+                } else {
+                    setOppotentTimer(opponentTimer => opponentTimer - 100);
+                }
+            }, 100)
+            return () => clearInterval(interval)
+        }
+    },[started])
+
     const getTimer = (tempTime: number) => {
         const minutes = Math.floor(tempTime / (1000 * 60));
         const remainingSeconds = Math.floor((tempTime % (1000 * 60)) / 1000);
@@ -147,10 +160,9 @@ export const Game = () => {
 
         return (
             <div className="text-white">
-                Time Left: {minutes < 10 ? '0' : ''}
-                {minutes}:{remainingSeconds < 10 ? '0' : ''}
-                {remainingSeconds}.{remainingMilliseconds < 100 ? '0' : ''}
-                {remainingMilliseconds}
+            Time Left: {minutes < 10 ? '0' : ''}
+            {minutes}:{remainingSeconds < 10 ? '0' : ''}
+            {remainingSeconds}
             </div>
         );
     }
@@ -165,6 +177,11 @@ export const Game = () => {
                 }
                 </div>}
         </div>}
+        {
+            started && <div className="justify-center flex pt-4 text-white">
+            {(user.id === gameMetadata?.blackPlayer?.id ? "b" : "w" ) === chess.turn() ? "Your turn" : "Opponent's turn"}
+            </div>
+        }
         <div className="justify-center flex">
             <div className="pt-2 max-w-screen-xl w-full">
                 <div className="grid grid-cols-7 gap-4 w-full">
