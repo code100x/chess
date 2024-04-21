@@ -22,8 +22,5 @@
   },
   "exports": {
     "./client": "./src/index.ts"
-  },
-  "devDependencies": {
-    "ts-node": "^10.9.2"
   }
 }
