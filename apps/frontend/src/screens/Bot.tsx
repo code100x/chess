@@ -7,7 +7,7 @@ const Bot  = ()=>{
              <BotGame
                 bots={bots}
                 onGameCompleted={winner => {
-                    global.alert(
+                    window.alert(
                     `${winner === 'b' ? 'Black' : winner === 'w' ? 'White' : 'No one'} is the winner!`
                     );
                 }}
