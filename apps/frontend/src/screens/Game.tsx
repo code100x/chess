@@ -25,6 +25,8 @@ export const GAME_ADDED = 'game_added';
 export const RESIGN = 'resign';
 export const OFFER_DRAW = 'offer_draw';
 export const DRAW_OFFER_ACCEPTED = 'draw_offer_accepted';
+export const USER_TIMEOUT = 'user_timeout';
+export const GAME_TIME = 'game_time';
 
 export interface IMove {
   from: Square;
@@ -51,10 +53,16 @@ export const Game = () => {
   const [started, setStarted] = useState(false);
   const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
   const [result, setResult] = useState<
-    'WHITE_WINS' | 'BLACK_WINS' | 'DRAW' | typeof OPPONENT_DISCONNECTED | null
+    | 'WHITE_WINS'
+    | 'BLACK_WINS'
+    | 'DRAW'
+    | typeof OPPONENT_DISCONNECTED
+    | typeof USER_TIMEOUT
+    | null
   >(null);
   const [moves, setMoves] = useState<IMove[]>([]);
-  const [drawReq, setDrawReq] = useState(false);
+  const [drawReq, setDrawReq] = useState(false);  const [myTimer, setMyTimer] = useState(10 * 60 * 1000);
+  const [opponentTimer, setOppotentTimer] = useState(10 * 60 * 1000);
 
   useEffect(() => {
     if (!socket) {
@@ -105,6 +113,10 @@ export const Game = () => {
           setResult(OPPONENT_DISCONNECTED);
           break;
 
+        case USER_TIMEOUT:
+          setResult(message.payload.win);
+          break;
+
         case GAME_JOINED:
           setGameMetadata({
             blackPlayer: message.payload.blackPlayer,
@@ -126,6 +138,15 @@ export const Game = () => {
           if (message.payload.id !== user.id) {
             console.log('this should be shown to other userr');
             setDrawReq(true);
+          break;
+
+        case GAME_TIME:
+          if (message.payload.player2UserId === user.id) {
+            setMyTimer(message.payload.player2Time);
+            setOppotentTimer(message.payload.player1Time);
+          } else {
+            setMyTimer(message.payload.player1Time);
+            setOppotentTimer(message.payload.player2Time);
           }
           break;
 
@@ -147,12 +168,53 @@ export const Game = () => {
     }
   }, [chess, socket]);
 
+  useEffect(() => {
+    if (started) {
+      const interval = setInterval(() => {
+        if (
+          (user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w') ===
+          chess.turn()
+        ) {
+          setMyTimer((myTimer) => myTimer - 100);
+        } else {
+          setOppotentTimer((opponentTimer) => opponentTimer - 100);
+        }
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [started]);
+
+  const getTimer = (tempTime: number) => {
+    const minutes = Math.floor(tempTime / (1000 * 60));
+    const remainingSeconds = Math.floor((tempTime % (1000 * 60)) / 1000);
+
+    return (
+      <div className="text-white">
+        Time Left: {minutes < 10 ? '0' : ''}
+        {minutes}:{remainingSeconds < 10 ? '0' : ''}
+        {remainingSeconds}
+      </div>
+    );
+  };
+
   if (!socket) return <div>Connecting...</div>;
 
   return (
     <div className="">
       {result && (
-        <div className="justify-center flex pt-4 text-white">{result}</div>
+        <div className="justify-center flex pt-4 text-white">
+          {result === 'WHITE_WINS' && 'White wins'}
+          {result === 'BLACK_WINS' && 'Black wins'}
+          {result === 'DRAW' && 'Draw'}
+        </div>
+      )}
+      {started && (
+        <div className="justify-center flex pt-4 text-white">
+          {(user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w') ===
+          chess.turn()
+            ? 'Your turn'
+            : "Opponent's turn"}
+        </div>
       )}
       <div className="justify-center flex">
         <div className="pt-2 max-w-screen-xl w-full">
@@ -162,24 +224,30 @@ export const Game = () => {
                 <div>
                   <div className="mb-4 flex justify-between">
                     <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ''} />
+                    {getTimer(opponentTimer)}
                   </div>
                   <div>
-                    <ChessBoard
-                      started={started}
-                      gameId={gameId ?? ''}
-                      myColor={
-                        user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w'
-                      }
-                      setMoves={setMoves}
-                      moves={moves}
-                      chess={chess}
-                      setBoard={setBoard}
-                      socket={socket}
-                      board={board}
-                    />
+                    <div
+                      className={`col-span-4 w-full flex justify-center text-white ${(result === OPPONENT_DISCONNECTED || result === USER_TIMEOUT) && 'pointer-events-none'}`}
+                    >
+                      <ChessBoard
+                        started={started}
+                        gameId={gameId ?? ''}
+                        myColor={
+                          user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w'
+                        }
+                        setMoves={setMoves}
+                        moves={moves}
+                        chess={chess}
+                        setBoard={setBoard}
+                        socket={socket}
+                        board={board}
+                      />
+                    </div>
                   </div>
                   <div className="mt-4 flex justify-between">
                     <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ''} />
+                    {getTimer(myTimer)}
                   </div>
                 </div>
               </div>
