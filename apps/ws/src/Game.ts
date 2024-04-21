@@ -47,6 +47,8 @@ export class Game {
   private timer: NodeJS.Timeout | null = null;
   private player1Time: number = 10 * 60 * 1000;
   private player2Time: number = 10 * 60 * 1000;
+  private player1MoveStoredTime: number = 0;
+  private player2MoveStoredTime: number = 0;
   private gameStartTime: number = 0;
   private tempTime: number = 0;
 
@@ -76,6 +78,7 @@ export class Game {
       return;
     }
 
+    const time = new Date(Date.now()).getTime();
     SocketManager.getInstance().broadcast(
       this.gameId,
       JSON.stringify({
@@ -91,14 +94,14 @@ export class Game {
             id: this.player2UserId,
           },
           fen: this.board.fen(),
-          startTime: this.gameStartTime,
+          startTime: time,
           moves: [],
         },
       }),
     );
-    const time = new Date(Date.now()).getTime();
     this.gameStartTime = time;
     this.tempTime = time;
+    this.player1MoveStoredTime = time;
   }
 
   async createGameInDb() {
@@ -130,8 +133,8 @@ export class Game {
   async addMoveToDb(move: {
     from: string;
     to: string;
-    createdAt: number;
-    timeTaken: number;
+    startTime: number;
+    endTime: number;
   }) {
     await db.$transaction([
       db.move.create({
@@ -143,8 +146,8 @@ export class Game {
           // Todo: Fix start fen
           startFen: this.board.fen(),
           endFen: this.board.fen(),
-          createdAt: new Date(move.createdAt),
-          timeTaken: move.timeTaken,
+          createdAt: new Date(move.endTime),
+          timeTaken: move.endTime - move.startTime,
         },
       }),
       db.game.update({
@@ -163,8 +166,8 @@ export class Game {
     move: {
       from: Square;
       to: Square;
-      createdAt: number;
-      timeTaken: number;
+      startTime: number;
+      endTime: number;
     },
   ) {
     // validate the type of move using zod
@@ -214,7 +217,7 @@ export class Game {
     }
 
     await this.addMoveToDb(move);
-    this.updateUserTimer(user, move.createdAt + move.timeTaken);
+    this.updateUserTimer(user, move.endTime);
     SocketManager.getInstance().broadcast(
       this.gameId,
       JSON.stringify({

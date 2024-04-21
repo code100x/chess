@@ -17,8 +17,8 @@ interface Move {
   from: Square;
   to: Square;
   piece: string;
-  createdAt: number;
-  timeTaken: number;
+  startTime: number;
+  endTime: number;
 }
 
 interface MovesTableProps {
@@ -82,7 +82,16 @@ const MovesTable: React.FC<MovesTableProps> = ({ moves }) => {
                               ]
                             }
                           />
-                          {movesData[i * 2].from + 'x' + movesData[i * 2].to}
+                          <span>
+                            {movesData[i * 2].from + 'x' + movesData[i * 2].to}
+                          </span>
+                          <p>
+                            {(
+                              (movesData[i * 2].startTime -
+                                movesData[i * 2].startTime) /
+                              1000
+                            ).toString() + 's'}
+                          </p>
                         </div>
                       </>
                     )}
@@ -101,9 +110,18 @@ const MovesTable: React.FC<MovesTableProps> = ({ moves }) => {
                               ]
                             }
                           />
-                          {movesData[i * 2 + 1].from +
-                            'x' +
-                            movesData[i * 2 + 1].to}
+                          <span>
+                            {movesData[i * 2 + 1].from +
+                              'x' +
+                              movesData[i * 2 + 1].to}
+                          </span>
+                          <p>
+                            {(
+                              (movesData[i * 2 + 1].startTime -
+                                movesData[i * 2 + 1].endTime) /
+                              1000
+                            ).toString() + 's'}
+                          </p>
                         </div>
                       </>
                     )}

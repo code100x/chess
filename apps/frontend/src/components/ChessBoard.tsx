@@ -241,7 +241,7 @@ export const ChessBoard = ({
                                   move: {
                                     from,
                                     to: squareRepresentation,
-                                    time: time,
+                                    endTime: time,
                                   },
                                 },
                               }),
@@ -254,16 +254,16 @@ export const ChessBoard = ({
                               to: squareRepresentation,
                             });
                             const piece = chess.get(squareRepresentation)?.type;
-                            setMoves((moves) => [
-                              ...moves,
-                              {
-                                from,
-                                to: squareRepresentation,
-                                piece,
-                                createdAt: moveStartTime,
-                                timeTaken: time - moveStartTime,
-                              },
-                            ]);
+                            // setMoves((moves) => [
+                            //   ...moves,
+                            //   {
+                            //     from,
+                            //     to: squareRepresentation,
+                            //     piece,
+                            //     createdAt: moveStartTime,
+                            //     timeTaken: time - moveStartTime,
+                            //   },
+                            // ]);
                           } catch (e) {}
                         }
                       }}
