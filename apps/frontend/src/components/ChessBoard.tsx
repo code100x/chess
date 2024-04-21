@@ -11,7 +11,6 @@ import Confetti from 'react-confetti';
 import MoveSound from '../../public/move.wav';
 import CaptureSound from '../../public/capture.wav';
 
-
 export function isPromoting(chess: Chess, from: Square, to: Square) {
   if (!from) {
     return false;
@@ -220,14 +219,14 @@ export const ChessBoard = ({
                             }
                             if (moveResult) {
                               moveAudio.play();
-                              
+
                               if (moveResult?.captured) {
                                 captureAudio.play();
                               }
-                              
+
                               if (moveResult.san.includes('#')) {
                                 setGameOver(true);
-                              
+                              }
                             }
                             socket.send(
                               JSON.stringify({
