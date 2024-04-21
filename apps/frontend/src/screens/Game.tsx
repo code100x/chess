@@ -10,6 +10,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
 import { UserAvatar } from '../components/UserAvatar';
+import { GameActions } from '../components/GameActions';
 
 // TODO: Move together, there's code repetition here
 export const INIT_GAME = 'init_game';
@@ -171,7 +172,7 @@ export const Game = () => {
                 </div>
               </div>
             </div>
-            <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10">
+            <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10 flex-col">
               {!started && (
                 <div className="pt-8">
                   {added ? (
@@ -193,17 +194,19 @@ export const Game = () => {
                   )}
                 </div>
               )}
-              <div>
-                {moves.length > 0 && (
-                  <div className="mt-4">
-                    <MovesTable moves={moves} />
-                  </div>
-                )}
-              </div>
+              <section className="mt-64">
+                <GameActions />
+                <div>
+                  {moves.length > 0 && (
+                    <div className="mt-4">
+                      <MovesTable moves={moves} />
+                    </div>
+                  )}
+                </div>
+              </section>
             </div>
           </div>
         </div>
-        {/* <UserAvatar name={gameMetadata?.whitePlayer?.name ?? ""} /> */}
       </div>
     </div>
   );
