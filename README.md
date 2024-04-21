@@ -1,18 +1,49 @@
 ## Chess
 
-Building a platform where people can
+Welcome to the Chess Repository! This platform allows users to sign up, create new matches, get connected to existing matches, and play real-time chess games.
 
-1. Sign up
-2. Create a new match/get connected to an existing match
-3. During the match, let users play moves
-4. Have a rating system that goes up and down similar to standard chess rating
+## Installation
 
-## Tech stack
+To get started, follow these steps:
 
-Let's keep it simple
+1. Clone this repository to your local machine:
+```bash
+git clone https://github.com/code100x/chess
+```
 
-1. React for Frontend
-2. Node.js for Backend
-3. Typescript as the language
-4. Saparate Websocket servers for handling real time games
-5. Redis for storing all moves of a game in a queue
+2. Navigate to the project directory:
+```bash
+cd chess
+```
+
+3. Install dependencies:
+```bash
+npm install
+```
+
+This command installs all the necessary dependencies required to run the Chess Platform.
+
+## Usage
+
+Once you have installed the dependencies, you can start the servers by running the following command:
+```bash
+npm run dev
+```
+
+This command builds the TypeScript files and starts the backend server. It's configured to automatically rebuild the code whenever changes are made, making it suitable for development.
+
+After starting the servers, open your browser and go to [http://localhost:5173](http://localhost:5173) to access the Chess Platform.
+
+## Tech Stack
+
+The Chess Platform uses the following technologies:
+
+- React for Frontend
+- Node.js for Backend
+- TypeScript as the language
+- Separate WebSocket servers for handling real-time games
+- Redis for storing all moves of a game in a queue
+
+## Contributing
+
+Contributions are welcome! Please follow the contribution guidelines to contribute to this project.
