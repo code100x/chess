@@ -1,19 +1,28 @@
-import { createContext, ReactNode } from 'react';
+import { createContext, ReactNode, FC } from 'react';
+
+interface UserType {
+  id: string;
+  name: string;
+  email: string;
+}
 
 interface AuthContextType {
-  isAuthenticated?: boolean;
-  user?: any; 
+  isAuthenticated: boolean;
+  user: UserType | null;
 }
 
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType>({
+  isAuthenticated: false,
+  user: null,
+});
 
 interface AuthProviderProps {
   children: ReactNode;
 }
+i
 
-// AuthProvider component
-export const AuthProvider = ({ children }: AuthProviderProps) => {
+export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const value = {
     isAuthenticated: false,
     user: null,
@@ -23,5 +32,5 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
-  )
+  );
 };
