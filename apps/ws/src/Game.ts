@@ -152,6 +152,27 @@ export class Game {
             return;
         }
 
+    if (this.player1Time <= 0 || this.player2Time <= 0) {
+        SocketManager.getInstance().broadcast(
+            this.gameId,
+            JSON.stringify({
+                type: USER_TIMEOUT,
+                payload: { 
+                    win: this.player1Time <= 0 ? "BLACK_WINS" : "WHITE_WINS",
+                },
+            })
+        );
+        await db.game.update({
+            data: {
+                status: "COMPLETED",
+                result: this.player1Time <= 0 ? "BLACK_WINS" : "WHITE_WINS"
+            },
+            where: {
+                id: this.gameId
+            }
+        })
+    }
+
         try {
             if (isPromoting(this.board, move.from, move.to))  {
                 this.board.move({
@@ -214,7 +235,9 @@ export class Game {
             this.gameId,
             JSON.stringify({
                 type: USER_TIMEOUT,
-                payload: { result: USER_TIMEOUT },
+                payload: { 
+                    win: this.board.turn() === "b" ? "WHITE_WINS" : "BLACK_WINS",
+                },
             })
         );
         await db.game.update({

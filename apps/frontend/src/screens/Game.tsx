@@ -94,7 +94,7 @@ export const Game = () => {
                     break;
                 
                 case USER_TIMEOUT:
-                    setResult(USER_TIMEOUT)
+                    setResult(message.payload.win)
                     break;
 
                 case GAME_JOINED:
@@ -156,7 +156,6 @@ export const Game = () => {
     const getTimer = (tempTime: number) => {
         const minutes = Math.floor(tempTime / (1000 * 60));
         const remainingSeconds = Math.floor((tempTime % (1000 * 60)) / 1000);
-        const remainingMilliseconds = tempTime % 1000;
 
         return (
             <div className="text-white">
@@ -171,11 +170,9 @@ export const Game = () => {
 
     return <div className="">
         {result && <div className="justify-center flex pt-4 text-white">
-            {result === USER_TIMEOUT && <div>
-                {
-                    gameMetadata?.blackPlayer?.id === user.id ? "You lost on time" : "Opponent lost on time"
-                }
-                </div>}
+            {result === "WHITE_WINS" && "White wins"}
+            {result === "BLACK_WINS" && "Black wins"}
+            {result === "DRAW" && "Draw"}
         </div>}
         {
             started && <div className="justify-center flex pt-4 text-white">
