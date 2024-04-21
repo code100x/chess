@@ -13,7 +13,7 @@ const ChessSquare = ({
     <div className="h-full justify-center flex flex-col ">
       {square ? (
         <img
-          className="w-14"
+          className="w-24"
           src={`/${square?.color === 'b' ? `b${square.type}` : `w${square.type}`}.png`}
         />
       ) : null}

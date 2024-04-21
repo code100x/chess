@@ -52,14 +52,19 @@ export function GameActions({
 
   return (
     <>
-      <div className="flex justify-center gap-5">
+      <div className="flex justify-center gap-5  items-center">
         <button>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-                <button onClick={handleResignClick}>
+                <Button
+                  onClick={handleResignClick}
+                  className="flex gap-1 items-center border border-white"
+                  variant={'secondary'}
+                >
                   <Flag className="text-white" />
-                </button>
+                  <p className="text-white">Resign</p>
+                </Button>
               </TooltipTrigger>
               <TooltipContent className="bg-black">
                 <p className="text-white">Resign</p>
@@ -72,10 +77,11 @@ export function GameActions({
             <TooltipTrigger className="text-white">
               <Button
                 onClick={handleDrawClick}
-                className="flex gap-1 items-center"
+                className="flex gap-1 items-center border border-white"
+                variant={'secondary'}
               >
-                <span>Offer Draw</span>
                 <Handshake className="text-white" />
+                <span>Offer Draw</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent className="bg-black">

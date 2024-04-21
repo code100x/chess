@@ -275,7 +275,7 @@ export const Game = () => {
                 </div>
               </div>
             </div>
-            <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10 flex-col overflow-y-scroll no-scrollbar">
+            <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10 flex-col items-center overflow-y-scroll no-scrollbar">
               {!started ? (
                 <div className="pt-8">
                   {added ? (
@@ -297,26 +297,26 @@ export const Game = () => {
                   )}
                 </div>
               ) : (
-                <GameActions
-                  myId={user.id}
-                  socket={socket}
-                  gameId={gameId ?? ''}
-                  myColor={
-                    user.id === gameMetadata?.blackPlayer?.id
-                      ? 'black'
-                      : 'white'
-                  }
-                />
+                <section className="flex flex-col justify-between items-center h-full py-5">
+                  <div>
+                    {moves.length > 0 && (
+                      <div className="mt-4">
+                        <MovesTable moves={moves} />
+                      </div>
+                    )}
+                  </div>
+                  <GameActions
+                    myId={user.id}
+                    socket={socket}
+                    gameId={gameId ?? ''}
+                    myColor={
+                      user.id === gameMetadata?.blackPlayer?.id
+                        ? 'black'
+                        : 'white'
+                    }
+                  />
+                </section>
               )}
-              <section className="mt-64">
-                <div>
-                  {moves.length > 0 && (
-                    <div className="mt-4">
-                      <MovesTable moves={moves} />
-                    </div>
-                  )}
-                </div>
-              </section>
             </div>
           </div>
         </div>
