@@ -5,6 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from './ui/tooltip';
+import { RESIGN } from '../screens/Game';
 
 type GameActionsProps = {
   socket?: WebSocket;
@@ -21,7 +22,7 @@ export function GameActions({ socket, gameId, myColor }: GameActionsProps) {
 
     socket.send(
       JSON.stringify({
-        type: 'resign',
+        type: RESIGN,
         payload: {
           gameId,
           myColor,
