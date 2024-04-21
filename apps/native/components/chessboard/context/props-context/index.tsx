@@ -63,7 +63,7 @@ type ChessboardProps = {
    */
   durations?: ChessboardDurationsType;
 
-  boardOrientation?: "white" | "black"
+  boardOrientation?: 'white' | 'black';
 };
 
 type ChessboardContextType = ChessboardProps &
@@ -96,32 +96,32 @@ const defaultChessboardProps: ChessboardContextType = {
   withNumbers: true,
   boardSize: DEFAULT_BOARD_SIZE,
   pieceSize: DEFAULT_BOARD_SIZE / 8,
-  boardOrientation: "white"
+  boardOrientation: 'white',
 };
 
 const ChessboardPropsContext = React.createContext<ChessboardContextType>(
-  defaultChessboardProps
+  defaultChessboardProps,
 );
 
-const ChessboardPropsContextProvider: React.FC<{children: React.ReactNode} &  ChessboardProps> = React.memo(
-  ({ children, ...rest }) => {
-    const value = useMemo(() => {
-      const data = {
-        ...defaultChessboardProps,
-        ...rest,
-        colors: { ...defaultChessboardProps.colors, ...rest.colors },
-        durations: { ...defaultChessboardProps.durations, ...rest.durations },
-      };
-      return { ...data, pieceSize: data.boardSize / 8 };
-    }, [rest]);
+const ChessboardPropsContextProvider: React.FC<
+  { children: React.ReactNode } & ChessboardProps
+> = React.memo(({ children, ...rest }) => {
+  const value = useMemo(() => {
+    const data = {
+      ...defaultChessboardProps,
+      ...rest,
+      colors: { ...defaultChessboardProps.colors, ...rest.colors },
+      durations: { ...defaultChessboardProps.durations, ...rest.durations },
+    };
+    return { ...data, pieceSize: data.boardSize / 8 };
+  }, [rest]);
 
-    return (
-      <ChessboardPropsContext.Provider value={value}>
-        {children}
-      </ChessboardPropsContext.Provider>
-    );
-  }
-);
+  return (
+    <ChessboardPropsContext.Provider value={value}>
+      {children}
+    </ChessboardPropsContext.Provider>
+  );
+});
 
 export { ChessboardPropsContextProvider, ChessboardPropsContext };
 // eslint-disable-next-line no-undef

@@ -43,7 +43,7 @@ const Piece = React.memo(
       const {
         durations: { move: moveDuration },
         gestureEnabled: gestureEnabledFromChessboardProps,
-        boardOrientation
+        boardOrientation,
       } = useChessboardProps();
 
       // const gestureEnabled = useDerivedValue(
@@ -53,14 +53,13 @@ const Piece = React.memo(
 
       const gestureEnabled = useDerivedValue(
         // () => (turn.value === id.charAt(0)) && (boardOrientation.charAt(0) === id.charAt(0)) && gestureEnabledFromChessboardProps,
-        () => (turn.value === id.charAt(0))  && gestureEnabledFromChessboardProps,
-        [id, gestureEnabledFromChessboardProps, boardOrientation]
+        () => turn.value === id.charAt(0) && gestureEnabledFromChessboardProps,
+        [id, gestureEnabledFromChessboardProps, boardOrientation],
       );
 
       // gestureEnabled.addListener(12222, () => {
       //   console.log(gestureEnabled.value)
       // })
-
 
       const { toPosition, toTranslation } = useReversePiecePosition();
 
@@ -78,14 +77,14 @@ const Piece = React.memo(
             .moves({ verbose: true })
             .find((m) => m.from === from && m.to === to);
         },
-        [chess]
+        [chess],
       );
 
       const wrappedOnMoveForJSThread = useCallback(
         ({ move }: { move: Move }) => {
           onMove(move.from, move.to);
         },
-        [onMove]
+        [onMove],
       );
 
       const moveTo = useCallback(
@@ -114,7 +113,7 @@ const Piece = React.memo(
                 } else {
                   runOnJS(resolve)(undefined);
                 }
-              }
+              },
             );
           });
         },
@@ -128,7 +127,7 @@ const Piece = React.memo(
           translateY,
           validateMove,
           wrappedOnMoveForJSThread,
-        ]
+        ],
       );
 
       const movePiece = useCallback(
@@ -136,7 +135,7 @@ const Piece = React.memo(
           const from = toPosition({ x: offsetX.value, y: offsetY.value });
           moveTo(from, to);
         },
-        [moveTo, offsetX.value, offsetY.value, toPosition]
+        [moveTo, offsetX.value, offsetY.value, toPosition],
       );
 
       useImperativeHandle(
@@ -151,7 +150,7 @@ const Piece = React.memo(
             },
           };
         },
-        [moveTo, pieceEnabled, square]
+        [moveTo, pieceEnabled, square],
       );
 
       const onStartTap = useCallback(
@@ -163,14 +162,14 @@ const Piece = React.memo(
           }
           runOnJS(onSelectPiece)(square);
         },
-        [onSelectPiece]
+        [onSelectPiece],
       );
 
       const globalMoveTo = useCallback(
         (move: Move) => {
           refs?.current?.[move.from].current.moveTo?.(move.to);
         },
-        [refs]
+        [refs],
       );
 
       const handleOnBegin = useCallback(() => {
@@ -217,10 +216,10 @@ const Piece = React.memo(
         })
         .onUpdate(({ translationX, translationY }) => {
           if (!gestureEnabled.value) return;
-          if(boardOrientation === "white"){
+          if (boardOrientation === 'white') {
             translateX.value = offsetX.value + translationX;
             translateY.value = offsetY.value + translationY;
-          } else{
+          } else {
             translateX.value = offsetX.value - translationX;
             translateY.value = offsetY.value - translationY;
           }
@@ -228,7 +227,7 @@ const Piece = React.memo(
         .onEnd(() => {
           if (!gestureEnabled.value) return;
           runOnJS(movePiece)(
-            toPosition({ x: translateX.value, y: translateY.value })
+            toPosition({ x: translateX.value, y: translateY.value }),
           );
         })
         .onFinalize(() => {
@@ -280,12 +279,12 @@ const Piece = React.memo(
           </GestureDetector>
         </>
       );
-    }
+    },
   ),
   (prev, next) =>
     prev.id === next.id &&
     prev.size === next.size &&
-    prev.square === next.square
+    prev.square === next.square,
 );
 
 export default Piece;

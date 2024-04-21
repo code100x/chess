@@ -7,6 +7,8 @@ import { userAtom } from '@repo/store/userAtom';
 
 const BACKEND_URL =
   import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
+const BACKEND_URL =
+  import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,6 +16,7 @@ const Login = () => {
   const [_, setUser] = useRecoilState(userAtom);
 
   const google = () => {
+    window.open(`${BACKEND_URL}/auth/google`, '_self');
     window.open(`${BACKEND_URL}/auth/google`, '_self');
   };
 
@@ -38,6 +41,9 @@ const Login = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
+      <h1 className="text-4xl font-bold mb-8 text-center text-green-500 drop-shadow-lg">
+        Enter the Game World
+      </h1>
       <h1 className="text-4xl font-bold mb-8 text-center text-green-500 drop-shadow-lg">
         Enter the Game World
       </h1>
