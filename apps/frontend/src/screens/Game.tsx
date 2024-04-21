@@ -212,7 +212,13 @@ export const Game = () => {
               <div className="flex justify-center">
                 <div>
                   <div className="mb-4 flex justify-between">
-                    <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ''} />
+                    <UserAvatar
+                      name={
+                        user.id === gameMetadata?.whitePlayer?.id
+                          ? gameMetadata?.blackPlayer?.name
+                          : gameMetadata?.whitePlayer?.name ?? ''
+                      }
+                    />
                     {getTimer(opponentTimer)}
                   </div>
                   <div>
@@ -235,7 +241,15 @@ export const Game = () => {
                     </div>
                   </div>
                   <div className="mt-4 flex justify-between">
-                    <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ''} />
+                    <div className="mb-4 flex justify-between">
+                      <UserAvatar
+                        name={
+                          user.id === gameMetadata?.blackPlayer?.id
+                            ? gameMetadata?.blackPlayer?.name
+                            : gameMetadata?.whitePlayer?.name ?? ''
+                        }
+                      />
+                    </div>
                     {getTimer(myTimer)}
                   </div>
                 </div>
