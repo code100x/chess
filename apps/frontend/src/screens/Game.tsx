@@ -24,7 +24,9 @@ export const USER_TIMEOUT = 'user_timeout';
 export const GAME_TIME = 'game_time';
 
 export interface IMove {
-    from: Square; to: Square; piece: string
+  from: Square;
+  to: Square;
+  piece: string;
 }
 
 const moveAudio = new Audio(MoveSound);
@@ -97,8 +99,11 @@ export const Game = () => {
           }
           moveAudio.play();
           setBoard(chess.board());
-          const piece=chess.get(move.to)?.type
-          setMoves(moves => [...moves,{from:move.from,to:move.to,piece}])
+          const piece = chess.get(move.to)?.type;
+          setMoves((moves) => [
+            ...moves,
+            { from: move.from, to: move.to, piece },
+          ]);
           break;
         case GAME_OVER:
           setResult(message.payload.result);
@@ -219,6 +224,7 @@ export const Game = () => {
                           : gameMetadata?.whitePlayer?.name ?? ''
                       }
                     />
+                    <div className="text-white">{getTimer(opponentTimer)}</div>
                   </div>
                   <div>
                     <div
@@ -240,15 +246,14 @@ export const Game = () => {
                     </div>
                   </div>
                   <div className="mt-4 flex justify-between">
-                    <div className="mb-4 flex justify-between">
-                      <UserAvatar
-                        name={
-                          user.id === gameMetadata?.blackPlayer?.id
-                            ? gameMetadata?.blackPlayer?.name
-                            : gameMetadata?.whitePlayer?.name ?? ''
-                        }
-                      />
-                    </div>
+                    <UserAvatar
+                      name={
+                        user.id === gameMetadata?.blackPlayer?.id
+                          ? gameMetadata?.blackPlayer?.name
+                          : gameMetadata?.whitePlayer?.name ?? ''
+                      }
+                    />
+                    <div className="text-white">{getTimer(myTimer)}</div>
                   </div>
                 </div>
               </div>
