@@ -152,6 +152,13 @@ export class Game {
             return;
         }
 
+    if (this.player1Time <= 0 || this.player2Time <= 0) {
+        if (this.board.turn() === "b") {
+        }else{
+        }
+        return;
+    }
+
         try {
             if (isPromoting(this.board, move.from, move.to))  {
                 this.board.move({
@@ -244,9 +251,5 @@ export class Game {
             this.player2Time -= (time - this.tempTime);
         }
         this.tempTime = time;
-
-        console.log("Player 1 Time: ", this.player1Time)
-        console.log("Player 2 Time: ", this.player2Time)
-        console.log("Time: ", time)
     }
 }
