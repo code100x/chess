@@ -152,13 +152,6 @@ export class Game {
             return;
         }
 
-    if (this.player1Time <= 0 || this.player2Time <= 0) {
-        if (this.board.turn() === "b") {
-        }else{
-        }
-        return;
-    }
-
         try {
             if (isPromoting(this.board, move.from, move.to))  {
                 this.board.move({
