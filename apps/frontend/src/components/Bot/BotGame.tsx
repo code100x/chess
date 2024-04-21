@@ -1,68 +1,15 @@
-import React, { useState, useEffect, useRef, useCallback, ChangeEvent } from 'react';
 import Chessboard from 'chessboardjsx';
-import * as engine from '../../hooks/BotEngine';
-import type { AvailableBots, InitialisedBot } from './Bots';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button } from '../../components/Button';
-import MovesTable from '../MovesTable';
-
-
-type SelectedBot = {
-  name: string;
-  move: InitialisedBot;
-} | null;
-
+import BotSelector from './BotSelector';
+import * as engine from '../../hooks/BotEngine';
+import type { SelectedBot } from './BotSelector';
+import type { AvailableBots } from './Bots';
+import History from './History';
 
 type BoardMove = {
   sourceSquare: engine.Square;
   targetSquare: engine.Square;
-};
-
-const BotSelector: React.FC<{
-  playerName: string;
-  availableBots: AvailableBots;
-  selectedBot: SelectedBot;
-  setSelectedBot: (bot: SelectedBot) => void;
-  disabled: boolean;
-}> = ({ playerName, availableBots, selectedBot, setSelectedBot, disabled }) => {
-  const handleChange = (e: ChangeEvent<HTMLSelectElement>): void => {
-    const name = e.target.value;
-    setSelectedBot(name ? { name, move: availableBots[name]() } : null);
-  };
-
-  return (
-    <div className='m-[10px] inline-block'>
-      <label className='mr-[10px] text-white'>{playerName}</label>
-      <select value={selectedBot?.name} onChange={handleChange} disabled={disabled}>
-        <option className='text-white' value="" key="User">
-          User
-        </option>
-        {Object.keys(availableBots).map(name => (
-          <option key={name}>{name}</option>
-        ))}
-      </select>
-    </div>
-  );
-};
-
-const History: React.FC<{ history: Array<engine.Move> }> = ({ history }) => {
-  // const endRef = useRef<HTMLDivElement>(null);
-
-  // useEffect(() => {
-  //   endRef.current?.scrollIntoView();
-  // }, [history]);
-
-  const moves = history.map(({ from, to }: engine.Move) => {
-    return { from, to };
-  });
-
-  const endRef = useRef<HTMLDivElement>(null);
-
-  return (
-    <div className=" bg-brown-500  ml-[56vw] mr-[18vw] h-[78vh] overflow-scroll mt-">
-      <MovesTable moves={moves}/>
-      <div ref={endRef} />
-    </div>
-  );
 };
 
 const BotGame: React.FC<{
@@ -179,10 +126,6 @@ const BotGame: React.FC<{
       
     </div>
   );
-
-
-
-
 };
 
 export default BotGame;
