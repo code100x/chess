@@ -44,6 +44,10 @@ The Chess Platform uses the following technologies:
 - Separate WebSocket servers for handling real-time games
 - Redis for storing all moves of a game in a queue
 
+## Deployment
+
+The Chess Platform is deployed and accessible at [chess.100xdevs.com](http://chess.100xdevs.com/). Visit the deployed version to play chess matches online!
+
 ## Contributing
 
 Contributions are welcome! Please follow the contribution guidelines to contribute to this project.
