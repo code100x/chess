@@ -29,8 +29,7 @@ export const USER_TIMEOUT = 'user_timeout';
 export const GAME_TIME = 'game_time';
 
 export interface IMove {
-  from: Square;
-  to: Square;
+    from: Square; to: Square; piece: string
 }
 
 const moveAudio = new Audio(MoveSound);
@@ -106,7 +105,8 @@ export const Game = () => {
           }
           moveAudio.play();
           setBoard(chess.board());
-          setMoves((moves) => [...moves, move]);
+          const piece=chess.get(move.to)?.type
+          setMoves(moves => [...moves,{from:move.from,to:move.to,piece}])
           break;
         case GAME_OVER:
           setResult(message.payload.result);
@@ -229,8 +229,13 @@ export const Game = () => {
               <div className="flex justify-center">
                 <div>
                   <div className="mb-4 flex justify-between">
-                    <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ''} />
-                    {getTimer(opponentTimer)}
+                    <UserAvatar
+                      name={
+                        user.id === gameMetadata?.whitePlayer?.id
+                          ? gameMetadata?.blackPlayer?.name
+                          : gameMetadata?.whitePlayer?.name ?? ''
+                      }
+                    />
                   </div>
                   <div>
                     <div
@@ -252,14 +257,21 @@ export const Game = () => {
                     </div>
                   </div>
                   <div className="mt-4 flex justify-between">
-                    <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ''} />
-                    {getTimer(myTimer)}
+                    <div className="mb-4 flex justify-between">
+                      <UserAvatar
+                        name={
+                          user.id === gameMetadata?.blackPlayer?.id
+                            ? gameMetadata?.blackPlayer?.name
+                            : gameMetadata?.whitePlayer?.name ?? ''
+                        }
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10 flex-col">
-              {!started ? (
+            <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10 flex-col overflow-y-scroll no-scrollbar">
+              {!started && (
                 <div className="pt-8">
                   {added ? (
                     <div className="text-white">Waiting</div>
