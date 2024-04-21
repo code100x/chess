@@ -21,12 +21,13 @@ export const GAME_JOINED = 'game_joined';
 export const GAME_ALERT = 'game_alert';
 export const GAME_ADDED = 'game_added';
 export const USER_TIMEOUT = 'user_timeout';
-export const GAME_TIME = 'game_time';
 
 export interface IMove {
   from: Square;
   to: Square;
   piece: string;
+  createdAt: number;
+  timeTaken: number;
 }
 
 const moveAudio = new Audio(MoveSound);
@@ -59,6 +60,7 @@ export const Game = () => {
   const [moves, setMoves] = useState<IMove[]>([]);
   const [myTimer, setMyTimer] = useState(10 * 60 * 1000);
   const [opponentTimer, setOppotentTimer] = useState(10 * 60 * 1000);
+  const [moveStartTime, setMoveStartTime] = useState(0);
 
   useEffect(() => {
     if (!socket) {
@@ -72,6 +74,7 @@ export const Game = () => {
           setAdded(true);
           break;
         case INIT_GAME:
+          setMoveStartTime(message.payload.startTime);
           setBoard(chess.board());
           setStarted(true);
           navigate(`/game/${message.payload.gameId}`);
@@ -102,8 +105,21 @@ export const Game = () => {
           const piece = chess.get(move.to)?.type;
           setMoves((moves) => [
             ...moves,
-            { from: move.from, to: move.to, piece },
+            {
+              from: move.from,
+              to: move.to,
+              piece,
+              createdAt: move.createdAt,
+              timeTaken: move.timeTaken,
+            },
           ]);
+          if (move.player2UserId === user.id) {
+            setMyTimer(move.player2Time);
+            setOppotentTimer(move.player1Time);
+          } else {
+            setMyTimer(move.player1Time);
+            setOppotentTimer(move.player2Time);
+          }
           break;
         case GAME_OVER:
           setResult(message.payload.result);
@@ -132,16 +148,6 @@ export const Game = () => {
             }
           });
           setBoard(chess.board());
-          break;
-
-        case GAME_TIME:
-          if (message.payload.player2UserId === user.id) {
-            setMyTimer(message.payload.player2Time);
-            setOppotentTimer(message.payload.player1Time);
-          } else {
-            setMyTimer(message.payload.player1Time);
-            setOppotentTimer(message.payload.player2Time);
-          }
           break;
 
         default:
@@ -242,6 +248,8 @@ export const Game = () => {
                         setBoard={setBoard}
                         socket={socket}
                         board={board}
+                        moveStartTime={moveStartTime}
+                        setMoveStartTime={setMoveStartTime}
                       />
                     </div>
                   </div>

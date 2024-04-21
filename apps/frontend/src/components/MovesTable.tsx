@@ -16,7 +16,9 @@ import { Square } from 'chess.js';
 interface Move {
   from: Square;
   to: Square;
-  piece: String;
+  piece: string;
+  createdAt: number;
+  timeTaken: number;
 }
 
 interface MovesTableProps {

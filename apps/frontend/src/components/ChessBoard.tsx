@@ -46,6 +46,8 @@ export const ChessBoard = ({
   setBoard,
   setMoves,
   moves,
+  moveStartTime,
+  setMoveStartTime,
 }: {
   myColor: Color;
   gameId: string;
@@ -68,6 +70,8 @@ export const ChessBoard = ({
     color: Color;
   } | null)[][];
   socket: WebSocket;
+  moveStartTime: number;
+  setMoveStartTime: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   const { height, width } = useWindowSize();
   const [lastMoveFrom, lastMoveTo] = [
@@ -228,6 +232,7 @@ export const ChessBoard = ({
                                 setGameOver(true);
                               }
                             }
+                            const time = new Date(Date.now()).getTime();
                             socket.send(
                               JSON.stringify({
                                 type: MOVE,
@@ -236,6 +241,7 @@ export const ChessBoard = ({
                                   move: {
                                     from,
                                     to: squareRepresentation,
+                                    time: time,
                                   },
                                 },
                               }),
@@ -250,7 +256,13 @@ export const ChessBoard = ({
                             const piece = chess.get(squareRepresentation)?.type;
                             setMoves((moves) => [
                               ...moves,
-                              { from, to: squareRepresentation, piece },
+                              {
+                                from,
+                                to: squareRepresentation,
+                                piece,
+                                createdAt: moveStartTime,
+                                timeTaken: time - moveStartTime,
+                              },
                             ]);
                           } catch (e) {}
                         }

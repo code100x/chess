@@ -91,6 +91,7 @@ export class Game {
             id: this.player2UserId,
           },
           fen: this.board.fen(),
+          startTime: this.gameStartTime,
           moves: [],
         },
       }),
@@ -126,7 +127,12 @@ export class Game {
     this.gameId = game.id;
   }
 
-  async addMoveToDb(move: { from: string; to: string }) {
+  async addMoveToDb(move: {
+    from: string;
+    to: string;
+    createdAt: number;
+    timeTaken: number;
+  }) {
     await db.$transaction([
       db.move.create({
         data: {
@@ -137,7 +143,8 @@ export class Game {
           // Todo: Fix start fen
           startFen: this.board.fen(),
           endFen: this.board.fen(),
-          createdAt: new Date(Date.now()),
+          createdAt: new Date(move.createdAt),
+          timeTaken: move.timeTaken,
         },
       }),
       db.game.update({
@@ -156,6 +163,8 @@ export class Game {
     move: {
       from: Square;
       to: Square;
+      createdAt: number;
+      timeTaken: number;
     },
   ) {
     // validate the type of move using zod
@@ -205,19 +214,13 @@ export class Game {
     }
 
     await this.addMoveToDb(move);
-    this.updateUserTimer(user);
+    this.updateUserTimer(user, move.createdAt + move.timeTaken);
     SocketManager.getInstance().broadcast(
       this.gameId,
       JSON.stringify({
         type: MOVE,
-        payload: move,
-      }),
-    );
-    SocketManager.getInstance().broadcast(
-      this.gameId,
-      JSON.stringify({
-        type: GAME_TIME,
         payload: {
+          ...move,
           player1UserId: this.player1UserId,
           player1Time: this.player1Time,
           player2UserId: this.player2UserId,
@@ -286,8 +289,7 @@ export class Game {
     if (this.timer) clearTimeout(this.timer);
   }
 
-  updateUserTimer(user: User) {
-    const time = new Date(Date.now()).getTime();
+  updateUserTimer(user: User, time: number) {
     if (user.userId === this.player1UserId) {
       this.player1Time -= time - this.tempTime;
     } else {
