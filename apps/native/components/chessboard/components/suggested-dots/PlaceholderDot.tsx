@@ -26,7 +26,7 @@ const PlaceholderDot: React.FC<PlaceholderDotProps> = React.memo(
     const currentSquare = toPosition({ x: x * pieceSize, y: y * pieceSize });
     const translation = useMemo(
       () => toTranslation(currentSquare),
-      [currentSquare, toTranslation]
+      [currentSquare, toTranslation],
     );
 
     const isSelectable = useDerivedValue(() => {
@@ -71,7 +71,7 @@ const PlaceholderDot: React.FC<PlaceholderDotProps> = React.memo(
         />
       </View>
     );
-  }
+  },
 );
 
 const styles = StyleSheet.create({

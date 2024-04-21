@@ -29,6 +29,6 @@ export const getChessboardState = (chess: ChessInstance): ChessboardState => {
     insufficient_material: chess.insufficient_material(),
     game_over: chess.game_over(),
     fen: chess.fen(),
-    pgn: chess.pgn()
+    pgn: chess.pgn(),
   };
 };
