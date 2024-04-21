@@ -80,6 +80,24 @@ export const ChessBoard = ({
   const isMyTurn = myColor === chess.turn();
   const [legalMoves, setLegalMoves] = useState<string[]>([]);
 
+  // Get the square king is in
+  let kingSquare: string = '';
+  for (let i = 0; i < 8; i++) {
+    for (let j = 0; j < 8; j++) {
+      const square = String.fromCharCode('a'.charCodeAt(0) + i) + (j + 1);
+      const piece = chess.get(square);
+      if (piece && piece.type === 'k' && piece.color === chess.turn()) {
+        kingSquare = square;
+        break;
+      }
+    }
+    if (kingSquare) {
+      break;
+    }
+  }
+  //King under check
+  const isKingInCheck = chess.inCheck();
+
   const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
   const isFlipped = myColor === 'b';
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
@@ -251,7 +269,7 @@ export const ChessBoard = ({
                         height: boxSize,
                       }}
                       key={j}
-                      className={`${isRightClickedSquare ? (isMainBoxColor ? 'bg-[#CF664E]' : 'bg-[#E87764]') : isHighlightedSquare ? `${isMainBoxColor ? 'bg-[#BBCB45]' : 'bg-[#F4F687]'}` : isMainBoxColor ? 'bg-[#739552]' : 'bg-[#EBEDD0]'} ${''}`}
+                      className={`${isRightClickedSquare ? (isMainBoxColor ? 'bg-[#CF664E]' : 'bg-[#E87764]') : isKingInCheck && squareRepresentation === kingSquare ? `bg-red-600` : isHighlightedSquare ? `${isMainBoxColor ? 'bg-[#BBCB45]' : 'bg-[#F4F687]'}` : isMainBoxColor ? 'bg-[#739552]' : 'bg-[#EBEDD0]'} ${''}`}
                       onContextMenu={(e) => {
                         e.preventDefault();
                       }}
