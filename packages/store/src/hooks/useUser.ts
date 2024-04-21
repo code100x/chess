@@ -1,7 +1,7 @@
-import { useRecoilValue } from "recoil";
-import { userAtom } from "../atoms/user";
+import { useRecoilValue } from 'recoil';
+import { userAtom } from '../atoms/user';
 
 export const useUser = () => {
-    const value = useRecoilValue(userAtom);
-    return value;
-}
+  const value = useRecoilValue(userAtom);
+  return value;
+};
