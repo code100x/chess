@@ -68,7 +68,7 @@ const ChessBoard = () => {
         </ScrollView>
       </View>
 
-      <PlayerStrip />
+      <PlayerStrip label="Player 2" />
       <View>
         <Chessboard
           ref={chessboardRef}
@@ -88,19 +88,19 @@ const ChessBoard = () => {
           }}
         />
       </View>
-      <PlayerStrip />
+      <PlayerStrip label="Player 1" />
     </View>
   );
 };
 
 export default ChessBoard;
 
-const PlayerStrip = () => {
+const PlayerStrip = ({ label = "Player 1" }) => {
   return (
     <View style={styles.playerStrip}>
       <View style={styles.playerAvatar}></View>
       <View>
-        <Text style={styles.name}>Player 1</Text>
+        <Text style={styles.name}>{label}</Text>
       </View>
     </View>
   );
