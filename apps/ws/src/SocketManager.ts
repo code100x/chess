@@ -18,7 +18,7 @@ export class SocketManager {
   private interestedSockets: Map<string, User[]>;
   private userRoomMappping: Map<string, string>;
 
-  constructor() {
+  private constructor() {
     this.interestedSockets = new Map<string, User[]>();
     this.userRoomMappping = new Map<string, string>();
   }
