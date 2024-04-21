@@ -11,6 +11,7 @@ import {
 import { db } from './db';
 import { randomUUID } from 'crypto';
 import { SocketManager, User } from './SocketManager';
+import { AuthProvider } from '@prisma/client';
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
   if (!from) {
@@ -37,17 +38,10 @@ export function isPromoting(chess: Chess, from: Square, to: Square) {
     .includes(to);
 }
 
-export interface Player {
-  id?: string;
-  userId: string;
-  name: string;
-  isGuest?: boolean;
-}
-
 export class Game {
   public gameId: string;
-  public player1: Player;
-  public player2: Player | null;
+  public player1UserId: string;
+  public player2UserId: string | null;
   public board: Chess;
   private startTime: Date;
   private moveCount = 0;
@@ -57,18 +51,24 @@ export class Game {
   private gameStartTime: number = 0;
   private tempTime: number = 0;
 
-  constructor(player1: Player, player2: Player | null) {
-    this.player1 = player1;
-    this.player2 = player2;
+  constructor(player1UserId: string, player2UserId: string | null) {
+    this.player1UserId = player1UserId;
+    this.player2UserId = player2UserId;
     this.board = new Chess();
     this.startTime = new Date();
     this.gameId = randomUUID();
   }
 
-  async updateSecondPlayer(player2: Player) {
-    this.player2 = player2;
-    let player1Name = this.player1.name;
-    let player2Name = this.player2?.name;
+  async updateSecondPlayer(player2UserId: string) {
+    this.player2UserId = player2UserId;
+
+    const users = await db.user.findMany({
+      where: {
+        id: {
+          in: [this.player1UserId, this.player2UserId ?? ''],
+        },
+      },
+    });
 
     try {
       await this.createGameInDb();
@@ -77,6 +77,9 @@ export class Game {
       return;
     }
 
+    let WhitePlayer = users.find((user) => user.id === this.player1UserId);
+    let BlackPlayer = users.find((user) => user.id === this.player2UserId);
+
     SocketManager.getInstance().broadcast(
       this.gameId,
       JSON.stringify({
@@ -84,14 +87,14 @@ export class Game {
         payload: {
           gameId: this.gameId,
           whitePlayer: {
-            name: player1Name,
-            id: this.player1.userId,
-            isGuest: this.player1.isGuest,
+            name: WhitePlayer?.name,
+            id: this.player1UserId,
+            isGuest: WhitePlayer?.provider === AuthProvider.GUEST,
           },
           blackPlayer: {
-            name: player2Name,
-            id: this.player2.userId,
-            isGuest: this.player2.isGuest,
+            name: BlackPlayer?.name,
+            id: this.player2UserId,
+            isGuest: BlackPlayer?.provider === AuthProvider.GUEST,
           },
           fen: this.board.fen(),
           moves: [],
@@ -112,12 +115,12 @@ export class Game {
         currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
         whitePlayer: {
           connect: {
-            id: this.player1.userId,
+            id: this.player1UserId,
           },
         },
         blackPlayer: {
           connect: {
-            id: this.player2?.userId ?? '',
+            id: this.player2UserId ?? '',
           },
         },
       },
@@ -162,10 +165,10 @@ export class Game {
     },
   ) {
     // validate the type of move using zod
-    if (this.moveCount % 2 === 0 && user.userId !== this.player1.userId) {
+    if (this.moveCount % 2 === 0 && user.userId !== this.player1UserId) {
       return;
     }
-    if (this.moveCount % 2 === 1 && user.userId !== this.player2?.userId) {
+    if (this.moveCount % 2 === 1 && user.userId !== this.player2UserId) {
       return;
     }
 
