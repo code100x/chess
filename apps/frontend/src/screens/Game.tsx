@@ -24,6 +24,7 @@ export const GAME_ALERT = 'game_alert';
 export const GAME_ADDED = 'game_added';
 export const RESIGN = 'resign';
 export const OFFER_DRAW = 'offer_draw';
+export const DRAW_OFFER_ACCEPTED = 'draw_offer_accepted';
 
 export interface IMove {
   from: Square;
@@ -122,7 +123,6 @@ export const Game = () => {
           break;
 
         case OFFER_DRAW:
-          // console.log(message.payload.id);
           if (message.payload.id !== user.id) {
             console.log('this should be shown to other userr');
             setDrawReq(true);
@@ -231,6 +231,8 @@ export const Game = () => {
         </div>
       </div>
       <DrawDialog
+        gameId={gameId!}
+        socket={socket}
         setDrawReq={setDrawReq}
         drawReqSent={drawReq}
         myColor={user.id === gameMetadata?.blackPlayer?.id ? 'black' : 'white'}

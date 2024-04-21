@@ -1,9 +1,9 @@
+import { DRAW_OFFER_ACCEPTED } from '../screens/Game';
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogFooter,
@@ -13,12 +13,16 @@ type DrawDialogProps = {
   drawReqSent: boolean;
   myColor: string;
   setDrawReq: React.Dispatch<React.SetStateAction<boolean>>;
+  socket: WebSocket;
+  gameId: string;
 };
 
 export function DrawDialog({
   myColor,
   drawReqSent,
   setDrawReq,
+  socket,
+  gameId,
 }: DrawDialogProps) {
   if (!drawReqSent) return null;
 
@@ -43,8 +47,15 @@ export function DrawDialog({
 
             <AlertDialogAction
               onClick={() => {
-                // TODO: Implement this
-                console.log('drw accepted');
+                socket.send(
+                  JSON.stringify({
+                    type: DRAW_OFFER_ACCEPTED,
+                    payload: {
+                      gameId,
+                    },
+                  }),
+                );
+                setDrawReq(false);
               }}
             >
               Yes!
