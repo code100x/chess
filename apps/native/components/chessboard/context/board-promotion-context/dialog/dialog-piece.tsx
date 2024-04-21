@@ -79,7 +79,7 @@ const DialogPiece: React.FC<DialogPieceProps> = React.memo(
         </Animated.View>
       </GestureDetector>
     );
-  }
+  },
 );
 
 const styles = StyleSheet.create({

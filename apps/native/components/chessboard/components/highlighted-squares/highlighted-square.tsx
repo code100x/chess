@@ -39,7 +39,7 @@ const HighlightedSquareComponent = React.forwardRef<
       },
       isHighlighted: () => isHighlighted.value,
     }),
-    [backgroundColor, isHighlighted, lastMoveHighlight]
+    [backgroundColor, isHighlighted, lastMoveHighlight],
   );
 
   const rHighlightedSquareStyle = useAnimatedStyle(() => {

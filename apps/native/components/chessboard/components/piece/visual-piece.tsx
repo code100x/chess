@@ -14,7 +14,16 @@ const ChessPiece: React.FC<ChessPieceType> = React.memo(({ id, ...rest }) => {
   return (
     renderPiece?.(id) ?? (
       <Image
-        style={[{ width: pieceSize, height: pieceSize, transform: [{rotate: boardOrientation==="white" ? "0deg":  "180deg"}] }, rest.style]}
+        style={[
+          {
+            width: pieceSize,
+            height: pieceSize,
+            transform: [
+              { rotate: boardOrientation === 'white' ? '0deg' : '180deg' },
+            ],
+          },
+          rest.style,
+        ]}
         {...rest}
         source={PIECES[id]}
       />
