@@ -169,9 +169,9 @@ export const Game = () => {
                   <div className="mb-4 flex justify-between">
                     <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ''} />
                     <div className="justify-center flex">
-                        <Button onClick={logout}>Logout</Button>
                         </div>
                          </div>
+                        <Button onClick={logout}>Logout</Button>
                   <div>
                     <ChessBoard
                       started={started}
