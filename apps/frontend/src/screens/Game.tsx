@@ -24,8 +24,7 @@ export const USER_TIMEOUT = 'user_timeout';
 export const GAME_TIME = 'game_time';
 
 export interface IMove {
-  from: Square;
-  to: Square;
+    from: Square; to: Square; piece: string
 }
 
 const moveAudio = new Audio(MoveSound);
@@ -98,7 +97,8 @@ export const Game = () => {
           }
           moveAudio.play();
           setBoard(chess.board());
-          setMoves((moves) => [...moves, move]);
+          const piece=chess.get(move.to)?.type
+          setMoves(moves => [...moves,{from:move.from,to:move.to,piece}])
           break;
         case GAME_OVER:
           setResult(message.payload.result);
