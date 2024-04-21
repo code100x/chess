@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "db:generate":"prisma generate",
+    "db:generate": "prisma generate",
     "db:push": "prisma db push --skip-generate",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npx prisma migrate dev && npx prisma generate",
@@ -22,5 +22,8 @@
   },
   "exports": {
     "./client": "./src/index.ts"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2"
   }
 }

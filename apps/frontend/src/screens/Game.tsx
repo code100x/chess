@@ -10,6 +10,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
 import { UserAvatar } from '../components/UserAvatar';
+import { BACKEND_URL } from '../../../../packages/store/src/atoms/user';
 
 // TODO: Move together, there's code repetition here
 export const INIT_GAME = 'init_game';
@@ -36,11 +37,11 @@ interface Metadata {
 export const Game = () => {
   const socket = useSocket();
   const { gameId } = useParams();
-  const user = useUser();
+  const { user , setUser } = useUser();
 
   const navigate = useNavigate();
   // Todo move to store/context
-  const [chess, _setChess] = useState(new Chess());
+  const [chess,_setChess] = useState(new Chess());
   const [board, setBoard] = useState(chess.board());
   const [added, setAdded] = useState(false);
   const [started, setStarted] = useState(false);
@@ -49,6 +50,24 @@ export const Game = () => {
     'WHITE_WINS' | 'BLACK_WINS' | 'DRAW' | typeof OPPONENT_DISCONNECTED | null
   >(null);
   const [moves, setMoves] = useState<IMove[]>([]);
+
+  const logout = () => {
+    fetch(`${BACKEND_URL}/auth/logout`, {
+      method: 'GET',
+      credentials: 'include',
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to logout');
+        }
+        setUser(null);
+        navigate('/login');
+      })
+      .catch((error) => {
+        console.error('Error logging out:', error);
+      });
+  };
+
 
   useEffect(() => {
     if (!socket) {
@@ -149,7 +168,10 @@ export const Game = () => {
                 <div>
                   <div className="mb-4 flex justify-between">
                     <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ''} />
-                  </div>
+                    <div className="justify-center flex">
+                        <Button onClick={logout}>Logout</Button>
+                        </div>
+                         </div>
                   <div>
                     <ChessBoard
                       started={started}
