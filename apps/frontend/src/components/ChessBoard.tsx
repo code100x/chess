@@ -8,27 +8,27 @@ export function isPromoting(chess: Chess, from: Square, to: Square) {
     }
 
     const piece = chess.get(from);
-  
+
     if (piece?.type !== "p") {
-      return false;
+        return false;
     }
-  
+
     if (piece.color !== chess.turn()) {
-      return false;
+        return false;
     }
-  
+
     if (!["1", "8"].some((it) => to.endsWith(it))) {
-      return false;
+        return false;
     }
-  
+
     return chess
-      .moves({ square: from, verbose: true })
-      .map((it) => it.to)
-      .includes(to);
+        .moves({ square: from, verbose: true })
+        .map((it) => it.to)
+        .includes(to);
 }
 
 export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, setBoard, moves, setMoves }: {
-    myColor: Color, 
+    myColor: Color,
     gameId: string,
     started: boolean,
     chess: Chess;
@@ -51,92 +51,101 @@ export const ChessBoard = ({ gameId, started, myColor, chess, board, socket, set
     const [legalMoves, setLegalMoves] = useState<string[]>([]);
     const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
+
+    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, square: Square) => {
+        setFrom(square);
+        setLegalMoves(chess.moves({ square }))
+    };
+
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+    };
+
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>, to: Square) => {
+        if (!started || !isMyTurn || !from) return;
+
+        try {
+            if (isPromoting(chess, from, to)) {
+                chess.move({
+                    from,
+                    to,
+                    promotion: 'q'
+                });
+            } else {
+                chess.move({
+                    from,
+                    to,
+                });
+            }
+            socket.send(JSON.stringify({
+                type: MOVE,
+                payload: {
+                    gameId,
+                    move: {
+                        from,
+                        to,
+                    }
+                }
+            }));
+            setFrom(null);
+            setLegalMoves([]);
+            setBoard(chess.board());
+            setMoves(moves => [...moves, { from, to }]);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     return (
         <div className="flex">
             <div className="text-white-200 mr-10">
-            {board.map((row, i) => {
-                return <div key={i} className="flex">
-                            <div className="w-16 h-16 flex justify-center items-center text-cyan-100">
-                                {8 - i} {/* Vertical labels */}
-                            </div>  
-                    {row.map((square, j) => {
-                        const squareRepresentation = String.fromCharCode(97 + (j % 8)) + "" + (8 - i) as Square;
-
-                        return <div onClick={() => {
-                            if (!started) {
-                                return;
-                            }
-                            if (!from && square?.color !== chess.turn()) return;
-                            if (!isMyTurn) return;
-                            if (from === squareRepresentation) {
-                                setFrom(null);
-                            }
-                            
-                            if (!from) {
-                                setFrom(squareRepresentation);
-                                setLegalMoves(chess.moves({ square: squareRepresentation }))
-                        } else {
-                                try {
-                                    if (isPromoting(chess, from ,squareRepresentation))  {
-                                        chess.move({
-                                            from,
-                                            to: squareRepresentation,
-                                            promotion: 'q'
-                                        });
-                                    } else {
-                                        chess.move({
-                                            from,
-                                            to: squareRepresentation,
-                                        });
-                                    }
-                                    socket.send(JSON.stringify({
-                                        type: MOVE,
-                                        payload: {
-                                            gameId,
-                                            move: {
-                                                from,
-                                                to: squareRepresentation
-                                            }
-                                        }
-                                    }))
-                                    setFrom(null)
-                                    setLegalMoves([])
-                                    setBoard(chess.board());
-                                    console.log({
-                                        from,
-                                        to: squareRepresentation
-                                    })
-                                    setMoves(moves =>[...moves, { from, to: squareRepresentation }]);
-                                } catch(e) {
-
-                                }
-                            }
-                        }} key={j} className={`w-16 h-16 ${includeBox([from || ""], j, i) ? "bg-red-400" : includeBox(legalMoves,j,i) ? `${(i+j)%2 === 0 ? 'bg-green_legal' : 'bg-slate_legal'}` : `${(i+j)%2 === 0 ? 'bg-green-500' : 'bg-slate-500'}`}`}>
-                            <div className="w-full justify-center flex h-full">
-                                <div className="h-full justify-center flex flex-col">
-                                    {square ? <img className="w-4" src={`/${square?.color === "b" ? square?.type : `${square?.type?.toUpperCase()} copy`}.png`} /> : null} 
-                                </div>
-                            </div>
+                {board.map((row, i) => {
+                    return <div key={i} className="flex">
+                        <div className="w-16 h-16 flex justify-center items-center text-cyan-100">
+                            {8 - i} {/* Vertical labels */}
                         </div>
-                    })}
+                        {row.map((square, j) => {
+                            const squareRepresentation = String.fromCharCode(97 + (j % 8)) + "" + (8 - i) as Square;
+                            return (
+                                <div
+                                    key={j}
+                                    className={`w-16 h-16 ${includeBox([from || ""], j, i) ? "bg-red-400" : includeBox(legalMoves, j, i) ? `${(i + j) % 2 === 0 ? 'bg-green_legal' : 'bg-slate_legal'}` : `${(i + j) % 2 === 0 ? 'bg-green-500' : 'bg-slate-500'}`}`}
+                                    onDragOver={handleDragOver}
+                                    onDrop={(e) => handleDrop(e, squareRepresentation)}
+                                >
+                                    <div
+                                        draggable={!!square}
+                                        onDragStart={(e) => handleDragStart(e, squareRepresentation)}
+                                        className="w-full justify-center flex h-full"
+                                    >
+                                        <div className="h-full justify-center flex flex-col">
+                                            {square ? <img className="w-4" src={`/${square?.color === "b" ? square?.type : `${square?.type?.toUpperCase()} copy`}.png`} /> : null}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>;
+
+                })}
+                <div className="flex">
+                    <div className="w-16 h-8"></div>
+                    {labels.map((label, i) => (
+                        <div key={i} className="w-16 h-8 flex justify-center items-center text-cyan-100">
+                            {label} {/* Horizontal labels */}
+                        </div>
+                    ))}
                 </div>
-            })}
-             <div className="flex">
-                    <div className="w-16 h-8"></div> 
-                        {labels.map((label, i) => (
-                            <div key={i} className="w-16 h-8 flex justify-center items-center text-cyan-100">
-                                {label} {/* Horizontal labels */}
-                            </div>
-                        ))}
-                    </div>
             </div>
         </div>
-   
-    )
-}
+    );
+};
 
-const includeBox = (legalMoves: string[], i:number,j:number) => {
-    let first,second
+
+const includeBox = (legalMoves: string[], i: number, j: number) => {
+    let first, second
 
     switch (i) {
         case 0:
