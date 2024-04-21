@@ -19,7 +19,7 @@ const Login = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
       <h1 className="text-4xl font-bold mb-8 text-center text-green-500 drop-shadow-lg">
-        Enter the Game World
+        Enter the Chess World
       </h1>
       <div className="bg-gray-800 rounded-lg shadow-lg p-8 flex flex-col md:flex-row">
         <div className="mb-8 md:mb-0 md:mr-8 justify-center flex flex-col">
