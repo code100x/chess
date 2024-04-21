@@ -42,7 +42,7 @@ const HighlightedSquares: React.FC = React.memo(() => {
               ]}
             />
           );
-        })
+        }),
       )}
     </View>
   );

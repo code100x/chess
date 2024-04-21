@@ -4,7 +4,7 @@ import type { Player } from '../../types';
 import { useContext } from 'react';
 
 const BoardContext = createContext<ReturnType<ChessInstance['board']>>(
-  {} as any
+  {} as any,
 );
 
 const BoardSetterContext = createContext<

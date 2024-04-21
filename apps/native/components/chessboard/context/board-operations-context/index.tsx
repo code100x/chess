@@ -28,7 +28,7 @@ type BoardOperationsContextType = {
 };
 
 const BoardOperationsContext = createContext<BoardOperationsContextType>(
-  {} as any
+  {} as any,
 );
 
 export type BoardOperationsRef = {
@@ -63,7 +63,7 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
         turn.value = chess.turn();
       },
     }),
-    [chess, controller, selectableSquares, turn]
+    [chess, controller, selectableSquares, turn],
   );
 
   const isPromoting = useCallback(
@@ -81,7 +81,7 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
           (to.includes('1') && piece.color === chess.BLACK))
       );
     },
-    [chess, pieceSize, toTranslation]
+    [chess, pieceSize, toTranslation],
   );
 
   const findKing = useCallback(
@@ -103,7 +103,7 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
       }
       return null;
     },
-    [chess]
+    [chess],
   );
 
   const moveProgrammatically = useCallback(
@@ -144,7 +144,7 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
       onChessboardMoveCallback,
       setBoard,
       turn,
-    ]
+    ],
   );
 
   const onMove = useCallback(
@@ -180,7 +180,7 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
       selectableSquares,
       selectedSquare,
       showPromotionDialog,
-    ]
+    ],
   );
 
   const onSelectPiece = useCallback(
@@ -201,7 +201,7 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
         return splittedSquare[splittedSquare.length - 1] as Square;
       });
     },
-    [chess, selectableSquares, selectedSquare]
+    [chess, selectableSquares, selectedSquare],
   );
 
   const moveTo = useCallback(
@@ -212,7 +212,7 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
       }
       return false;
     },
-    [controller, selectedSquare.value]
+    [controller, selectedSquare.value],
   );
 
   const value = useMemo(() => {
@@ -243,7 +243,7 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
 });
 
 const BoardOperationsContextProvider = React.memo(
-  BoardOperationsContextProviderComponent
+  BoardOperationsContextProviderComponent,
 );
 
 export { BoardOperationsContextProvider, BoardOperationsContext };
