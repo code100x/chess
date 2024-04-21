@@ -29,7 +29,9 @@ export const USER_TIMEOUT = 'user_timeout';
 export const GAME_TIME = 'game_time';
 
 export interface IMove {
-    from: Square; to: Square; piece: string
+  from: Square;
+  to: Square;
+  piece: string;
 }
 
 const moveAudio = new Audio(MoveSound);
@@ -105,8 +107,11 @@ export const Game = () => {
           }
           moveAudio.play();
           setBoard(chess.board());
-          const piece=chess.get(move.to)?.type
-          setMoves(moves => [...moves,{from:move.from,to:move.to,piece}])
+          const piece = chess.get(move.to)?.type;
+          setMoves((moves) => [
+            ...moves,
+            { from: move.from, to: move.to, piece },
+          ]);
           break;
         case GAME_OVER:
           setResult(message.payload.result);
@@ -291,18 +296,17 @@ export const Game = () => {
                     )
                   )}
                 </div>
-              ) : (
-                <GameActions
-                  myId={user.id}
-                  socket={socket}
-                  gameId={gameId ?? ''}
-                  myColor={
-                    user.id === gameMetadata?.blackPlayer?.id
-                      ? 'black'
-                      : 'white'
-                  }
-                />
               )}
+              : (
+              <GameActions
+                myId={user.id}
+                socket={socket}
+                gameId={gameId ?? ''}
+                myColor={
+                  user.id === gameMetadata?.blackPlayer?.id ? 'black' : 'white'
+                }
+              />
+              )
               <section className="mt-64">
                 <div>
                   {moves.length > 0 && (

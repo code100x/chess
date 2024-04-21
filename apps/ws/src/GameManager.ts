@@ -16,7 +16,6 @@ import { Game, isPromoting } from './Game';
 import { db } from './db';
 import { SocketManager, User } from './SocketManager';
 import { Square } from 'chess.js';
-import { Cache } from './utils/in-memory';
 
 export class GameManager {
   private games: Game[];
@@ -188,13 +187,6 @@ export class GameManager {
       }
 
       if (message.type === OFFER_DRAW) {
-        // Draws should be accepted by the other player within 30 seconds
-        Cache.getInstance().set(
-          'draw_offer',
-          [message.payload.gameId],
-          message.payload.gameId,
-          30,
-        );
         SocketManager.getInstance().broadcast(
           message.payload.gameId,
           JSON.stringify({
@@ -208,11 +200,6 @@ export class GameManager {
       }
 
       if (message.type === DRAW_OFFER_ACCEPTED) {
-        const drawOfferCache = Cache.getInstance().get('draw_offer', [
-          message.payload.gameId,
-        ]);
-        if (!drawOfferCache) return;
-
         SocketManager.getInstance().broadcast(
           message.payload.gameId,
           JSON.stringify({
