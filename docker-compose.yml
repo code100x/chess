@@ -1,50 +1,41 @@
 version: '3.8'
 services:
-  postgres:
-    image: postgres:14
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: mysecretpassword
-      POSTGRES_DB: postgres
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./apps/backend
+    volumes:
+      - ./apps/backend:/app
     ports:
       - "3000:3000"
-    environment:
-      DATABASE_URL: postgresql://postgres:mysecretpassword@postgres:5432/postgres
-      # Add other environment variables here
     depends_on:
-      - postgres
-
-  ws:
-    build:
-      context: .
-      dockerfile: ws/Dockerfile
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
+      - db
 
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ./apps/frontend
+    volumes:
+      - ./apps/frontend:/app
     ports:
       - "5173:5173"
+
+  ws:
+    build:
+      context: ./apps/ws
     volumes:
-      - ./frontend:/app/frontend
+      - ./apps/ws:/app
+    ports:
+      - "8080:8080"
+
+  db:
+    image: postgres
     environment:
-      VITE_BACKEND_URL: http://localhost:3000
-     
-    depends_on:
-      - backend
+      POSTGRES_DB: chessdb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  postgres-data:
+  postgres_data:
