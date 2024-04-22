@@ -18,12 +18,6 @@ Let's keep it simple
 5. Redis for storing all moves of a game in a queue
 
 
-Below is a revised version of the `README.md` file for the Chess Platform project, formatted entirely in Markdown and structured to ensure all content is included within the respective sections of the document:
-
-
-
-
-
 
 ## Setup
 
