@@ -1,32 +1,50 @@
-version: '3'
+version: '3.8'
 services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   backend:
     build:
       context: .
-      dockerfile: Dockerfile.backend
+      dockerfile: backend/Dockerfile
     ports:
       - "3000:3000"
     environment:
-      - ALLOWED_HOSTS=http://localhost:5173
-      - COOKIE_SECRET=your_secret_key
-    restart: always
-
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    ports:
-      - "5173:5173"
+      DATABASE_URL: postgresql://postgres:mysecretpassword@postgres:5432/postgres
+      # Add other environment variables here
     depends_on:
-      - backend
-    restart: always
+      - postgres
 
   ws:
     build:
       context: .
-      dockerfile: Dockerfile.ws
+      dockerfile: ws/Dockerfile
     ports:
       - "8080:8080"
     depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app/frontend
+    environment:
+      VITE_BACKEND_URL: http://localhost:3000
+     
+    depends_on:
       - backend
-    restart: always
+
+volumes:
+  postgres-data:
