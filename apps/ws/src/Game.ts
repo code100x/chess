@@ -217,7 +217,7 @@ export class Game {
     }
 
     await this.addMoveToDb(move);
-    this.updateUserTimer(user, move.endTime);
+    this.updateUserTimer(user, move);
     SocketManager.getInstance().broadcast(
       this.gameId,
       JSON.stringify({
@@ -292,12 +292,25 @@ export class Game {
     if (this.timer) clearTimeout(this.timer);
   }
 
-  updateUserTimer(user: User, time: number) {
+  updateUserTimer(
+    user: User,
+    move: {
+      from: Square;
+      to: Square;
+      startTime: number;
+      endTime: number;
+    },
+  ) {
     if (user.userId === this.player1UserId) {
-      this.player1Time -= time - this.tempTime;
+      this.player1Time -= move.endTime - this.tempTime;
+      this.player1MoveStoredTime = move.endTime;
     } else {
-      this.player2Time -= time - this.tempTime;
+      this.player2Time -= move.endTime - this.tempTime;
+      this.player2MoveStoredTime = move.endTime;
     }
-    this.tempTime = time;
+    if (this.player2MoveStoredTime === 0) {
+      this.player2MoveStoredTime = move.endTime;
+    }
+    this.tempTime = move.endTime;
   }
 }

@@ -10,6 +10,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
 import { UserAvatar } from '../components/UserAvatar';
+import { connectStorageEmulator } from 'firebase/storage';
 
 // TODO: Move together, there's code repetition here
 export const INIT_GAME = 'init_game';
@@ -60,7 +61,8 @@ export const Game = () => {
   const [moves, setMoves] = useState<IMove[]>([]);
   const [myTimer, setMyTimer] = useState(10 * 60 * 1000);
   const [opponentTimer, setOppotentTimer] = useState(10 * 60 * 1000);
-  const [moveStartTime, setMoveStartTime] = useState(0);
+  const [myMoveStartTime, setMyMoveStartTime] = useState(0);
+  // const [opponentMoveStartTime, setOpponentMoveStartTime] = useState(0);
 
   useEffect(() => {
     if (!socket) {
@@ -74,9 +76,7 @@ export const Game = () => {
           setAdded(true);
           break;
         case INIT_GAME:
-          if (user.id === message.payload.whitePlayer.id) {
-            setMoveStartTime(message.payload.startTime);
-          }
+          setMyMoveStartTime(message.payload.startTime);
           setBoard(chess.board());
           setStarted(true);
           navigate(`/game/${message.payload.gameId}`);
@@ -121,6 +121,15 @@ export const Game = () => {
           } else {
             setMyTimer(move.player1Time);
             setOppotentTimer(move.player2Time);
+          }
+          if (
+            chess.turn() ===
+            (user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w')
+          ) {
+            setMyMoveStartTime(move.startTime);
+          }
+          {
+            setMyMoveStartTime(move.endTime);
           }
           break;
         case GAME_OVER:
@@ -250,8 +259,8 @@ export const Game = () => {
                         setBoard={setBoard}
                         socket={socket}
                         board={board}
-                        moveStartTime={moveStartTime}
-                        setMoveStartTime={setMoveStartTime}
+                        myMoveStartTime={myMoveStartTime}
+                        setMyMoveStartTime={setMyMoveStartTime}
                       />
                     </div>
                   </div>

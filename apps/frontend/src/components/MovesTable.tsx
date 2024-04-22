@@ -71,7 +71,6 @@ const MovesTable: React.FC<MovesTableProps> = ({ moves }) => {
                   <td className="px-4 py-4 text-white border-gray-700  ">
                     {movesData[i * 2] && (
                       <>
-                        {console.log(movesData)}
                         <div className="flex">
                           <img
                             className="h-4 w-4 mt-1"
@@ -85,9 +84,9 @@ const MovesTable: React.FC<MovesTableProps> = ({ moves }) => {
                           <span>
                             {movesData[i * 2].from + 'x' + movesData[i * 2].to}
                           </span>
-                          <p>
+                          <p className="text-xs ml-2">
                             {(
-                              (movesData[i * 2].startTime -
+                              (movesData[i * 2].endTime -
                                 movesData[i * 2].startTime) /
                               1000
                             ).toString() + 's'}
@@ -99,7 +98,6 @@ const MovesTable: React.FC<MovesTableProps> = ({ moves }) => {
                   <td className=" py-4 px-6 text-white border-gray-700  ">
                     {movesData[i * 2 + 1] && (
                       <>
-                        {console.log(movesData)}
                         <div className="flex">
                           <img
                             className="h-4 w-4 mt-1"
@@ -115,10 +113,10 @@ const MovesTable: React.FC<MovesTableProps> = ({ moves }) => {
                               'x' +
                               movesData[i * 2 + 1].to}
                           </span>
-                          <p>
+                          <p className="text-xs ml-2">
                             {(
-                              (movesData[i * 2 + 1].startTime -
-                                movesData[i * 2 + 1].endTime) /
+                              (movesData[i * 2 + 1].endTime -
+                                movesData[i * 2 + 1].startTime) /
                               1000
                             ).toString() + 's'}
                           </p>

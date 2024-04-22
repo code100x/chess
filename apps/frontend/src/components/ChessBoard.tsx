@@ -46,8 +46,8 @@ export const ChessBoard = ({
   setBoard,
   setMoves,
   moves,
-  moveStartTime,
-  setMoveStartTime,
+  myMoveStartTime,
+  setMyMoveStartTime,
 }: {
   myColor: Color;
   gameId: string;
@@ -70,8 +70,8 @@ export const ChessBoard = ({
     color: Color;
   } | null)[][];
   socket: WebSocket;
-  moveStartTime: number;
-  setMoveStartTime: React.Dispatch<React.SetStateAction<number>>;
+  myMoveStartTime: number;
+  setMyMoveStartTime: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   const { height, width } = useWindowSize();
   const [lastMoveFrom, lastMoveTo] = [
@@ -241,6 +241,7 @@ export const ChessBoard = ({
                                   move: {
                                     from,
                                     to: squareRepresentation,
+                                    startTime: myMoveStartTime,
                                     endTime: time,
                                   },
                                 },
@@ -254,16 +255,16 @@ export const ChessBoard = ({
                               to: squareRepresentation,
                             });
                             const piece = chess.get(squareRepresentation)?.type;
-                            // setMoves((moves) => [
-                            //   ...moves,
-                            //   {
-                            //     from,
-                            //     to: squareRepresentation,
-                            //     piece,
-                            //     createdAt: moveStartTime,
-                            //     timeTaken: time - moveStartTime,
-                            //   },
-                            // ]);
+                            setMoves((moves) => [
+                              ...moves,
+                              {
+                                from,
+                                to: squareRepresentation,
+                                piece,
+                                startTime: myMoveStartTime,
+                                endTime: time,
+                              },
+                            ]);
                           } catch (e) {}
                         }
                       }}
