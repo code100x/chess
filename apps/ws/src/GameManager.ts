@@ -90,12 +90,9 @@ export class GameManager {
         const game = this.games.find((game) => game.gameId === gameId);
         if (game) {
           game.makeMove(user, message.payload.move);
-          game.clearTimer();
-          const timer = setTimeout(() => {
-            game.endGame();
+          if (game.result)  {
             this.removeGame(game.gameId);
-          }, 60 * 1000);
-          game.setTimer(timer);
+          }
         }
       }
 
@@ -105,7 +102,7 @@ export class GameManager {
           return;
         }
 
-        const availableGame = this.games.find((game) => game.gameId === gameId);
+        let availableGame = this.games.find((game) => game.gameId === gameId);
         const gameFromDb = await db.game.findUnique({
           where: { id: gameId },
           include: {
@@ -118,6 +115,7 @@ export class GameManager {
             whitePlayer: true,
           },
         });
+
         if (!gameFromDb) {
           user.socket.send(
             JSON.stringify({
@@ -131,25 +129,16 @@ export class GameManager {
           const game = new Game(
             gameFromDb?.whitePlayerId!,
             gameFromDb?.blackPlayerId!,
+            gameFromDb.id,
+            gameFromDb.startAt
           );
-          gameFromDb?.moves.forEach((move) => {
-            if (
-              isPromoting(game.board, move.from as Square, move.to as Square)
-            ) {
-              game.board.move({
-                from: move.from,
-                to: move.to,
-                promotion: 'q',
-              });
-            } else {
-              game.board.move({
-                from: move.from,
-                to: move.to,
-              });
-            }
-          });
+          game.seedMoves(gameFromDb?.moves || [])
           this.games.push(game);
+          availableGame = game;
         }
+
+        console.log(availableGame.getPlayer1TimeConsumed());
+        console.log(availableGame.getPlayer2TimeConsumed());
 
         user.socket.send(
           JSON.stringify({
@@ -165,6 +154,8 @@ export class GameManager {
                 id: gameFromDb.whitePlayer.id,
                 name: gameFromDb.whitePlayer.name,
               },
+              player1TimeConsumed: availableGame.getPlayer1TimeConsumed(),
+              player2TimeConsumed: availableGame.getPlayer2TimeConsumed(),
             },
           }),
         );
