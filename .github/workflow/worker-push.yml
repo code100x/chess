@@ -1,0 +1,37 @@
+name: Containerize worker
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: "mv docker/worker/Dockerfile ."
+
+      - name: add secrets
+        env:
+          DOCKER_USER: ${{secrets.DOCKERHUB_USERNAME}}
+          DOCKER_PASSWORD: ${{secrets.DOCKERHUB_TOKEN}}
+        run: |
+          cd apps/worker
+          touch .env
+          printf 'REDIS_URL=%s\n' "${{secrets.REDIS_URL}}" >> .env
+          cd ../..
+
+      - name: docker login
+        env:
+          DOCKER_USER: ${{secrets.DOCKERHUB_USERNAME}}
+          DOCKER_PASSWORD: ${{secrets.DOCKERHUB_TOKEN}}
+      #   run: |
+      #     docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+      # - name: Build the Worker Docker image
+      #   run: docker build . --tag code100x/chess-worker:${{ github.sha }}
+
+      # - name: Docker Push
+      #   run: docker push code100x/chess-worker:${{ github.sha }}
