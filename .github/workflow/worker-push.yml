@@ -4,9 +4,14 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'apps/worker/**'
   pull_request:
     branches:
       - main
+    paths:
+      - 'apps/worker/**'
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -28,10 +33,11 @@ jobs:
         env:
           DOCKER_USER: ${{secrets.DOCKERHUB_USERNAME}}
           DOCKER_PASSWORD: ${{secrets.DOCKERHUB_TOKEN}}
-      #   run: |
-      #     docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-      # - name: Build the Worker Docker image
-      #   run: docker build . --tag code100x/chess-worker:${{ github.sha }}
+        run: |
+          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+          
+      - name: Build the Worker Docker image
+        run: docker build . --tag code100x/chess-worker:${{ github.sha }}
 
-      # - name: Docker Push
-      #   run: docker push code100x/chess-worker:${{ github.sha }}
+      - name: Docker Push
+        run: docker push code100x/chess-worker:${{ github.sha }}

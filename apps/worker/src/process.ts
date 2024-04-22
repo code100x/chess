@@ -1,4 +1,4 @@
-import { db } from '@repo/db';
+import { db } from './db';
 
 export const addMove = async (
     from: string,
