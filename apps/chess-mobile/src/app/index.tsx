@@ -1,13 +1,22 @@
-import { Link } from 'expo-router';
 import { Image, Text, View } from 'react-native';
 import BackgroundSvg from '~/components/BackgroundSvg';
 
+import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '~/components/Button';
 import { Container } from '~/components/Container';
-import { ScreenContent } from '~/components/ScreenContent';
-import { LinearGradient } from 'expo-linear-gradient';
+import * as AuthSession from "expo-auth-session";
+
+const SERVER= "https://dynamic-honeybee-humorous.ngrok-free.app";
+const redirectUri = AuthSession.makeRedirectUri();
 
 export default function Home() {
+
+  const handlePress = async() =>{
+    console.log("hhaha");
+    console.log(redirectUri);
+    
+  }
+  
   return (
     <>
       <View className="bg-slate- relative flex flex-1 bg-slate-950">
@@ -30,12 +39,9 @@ export default function Home() {
                   className="rounded-[5px] bg-slate-900 py-5 active:bg-black"
                 />
               </LinearGradient>
-              <Button title="Login" className="bg-yell rounded-[6px] py-5 active:bg-green-600" />
+              <Button title="Login" className="bg-yell rounded-[6px] py-5 active:bg-green-600" onPress={handlePress}/>
             </View>
           </View>
-          {/* <Link href={{ pathname: '/details', params: { name: 'Dan' } }} asChild>
-            <Button title="Show Details" />
-          </Link> */}
         </Container>
       </View>
     </>

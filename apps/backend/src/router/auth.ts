@@ -1,9 +1,10 @@
 import { Request, Response, Router } from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
+import useragent from 'express-useragent';
 import { db } from '../db';
 const router = Router();
-
+router.use(useragent.express());
 const CLIENT_URL =
   process.env.AUTH_REDIRECT_URL ?? 'http://localhost:5173/game/random';
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
@@ -60,9 +61,17 @@ router.get(
 router.get(
   '/google/callback',
   passport.authenticate('google', {
-    successRedirect: CLIENT_URL,
+    // successRedirect: CLIENT_URL,
     failureRedirect: '/login/failed',
   }),
+  (req, res)=>{
+    const ua =req.useragent;
+    if(ua?.isMobile){
+      res.redirect("chess-mobile://");
+    }else{
+      res.redirect(CLIENT_URL);
+    }
+  }
 );
 
 router.get(
