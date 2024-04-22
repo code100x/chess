@@ -68,6 +68,17 @@ npm run dev
 
 After starting the servers, open your browser and go to [http://localhost:5173](http://localhost:5173) to access the Chess Platform.
 
+## Architecture
+
+![image](https://github.com/pantharshit007/chess/assets/97608579/e20f120c-be47-4ed2-9457-fe366174d4a0)
+
+
+Scalable Architecture for the Future:
+where user can be distributed across multiple servers and to broadcast matched we can use PUB-SUB 
+![image](https://github.com/pantharshit007/chess/assets/97608579/f7377474-b32e-48f7-935b-fbb9c7ecc622)
+
+
+
 ## Tech Stack
 
 The Chess Platform uses the following technologies:
