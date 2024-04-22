@@ -10,23 +10,26 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
 import { UserAvatar } from '../components/UserAvatar';
+import { Message } from '@repo/message'; // Import the Message constants from 'messages'
 
-// TODO: Move together, there's code repetition here
-export const INIT_GAME = 'init_game';
-export const MOVE = 'move';
-export const OPPONENT_DISCONNECTED = 'opponent_disconnected';
-export const GAME_OVER = 'game_over';
-export const JOIN_ROOM = 'join_room';
-export const GAME_JOINED = 'game_joined';
-export const GAME_ALERT = 'game_alert';
-export const GAME_ADDED = 'game_added';
-export const USER_TIMEOUT = 'user_timeout';
-export const GAME_TIME = 'game_time';
+const {
+  INIT_GAME,
+  MOVE,
+  OPPONENT_DISCONNECTED,
+  GAME_OVER,
+  JOIN_ROOM,
+  GAME_JOINED,
+  GAME_ADDED,
+  USER_TIMEOUT,
+  GAME_TIME,
+} = Message;
 
 const GAME_TIME_MS = 10 * 60 * 1000;
 
 export interface IMove {
-    from: Square; to: Square; piece: string
+  from: Square;
+  to: Square;
+  piece: string;
 }
 
 const moveAudio = new Audio(MoveSound);
@@ -81,7 +84,8 @@ export const Game = () => {
           });
           break;
         case MOVE:
-          const { move, player1TimeConsumed, player2TimeConsumed } = message.payload;
+          const { move, player1TimeConsumed, player2TimeConsumed } =
+            message.payload;
           setPlayer1TimeConsumed(player1TimeConsumed);
           setPlayer2TimeConsumed(player2TimeConsumed);
           const moves = chess.moves({ verbose: true });
@@ -103,8 +107,11 @@ export const Game = () => {
           }
           moveAudio.play();
           setBoard(chess.board());
-          const piece=chess.get(move.to)?.type
-          setMoves(moves => [...moves,{from:move.from,to:move.to,piece}])
+          const piece = chess.get(move.to)?.type;
+          setMoves((moves) => [
+            ...moves,
+            { from: move.from, to: move.to, piece },
+          ]);
           break;
         case GAME_OVER:
           setResult(message.payload.result);
@@ -125,7 +132,7 @@ export const Game = () => {
           });
           setPlayer1TimeConsumed(message.payload.player1TimeConsumed);
           setPlayer2TimeConsumed(message.payload.player2TimeConsumed);
-          console.error(message.payload)
+          console.error(message.payload);
           setStarted(true);
           setMoves(message.payload.moves);
           message.payload.moves.map((x: Move) => {
@@ -169,9 +176,7 @@ export const Game = () => {
   useEffect(() => {
     if (started) {
       const interval = setInterval(() => {
-        if (
-          chess.turn() === 'w'
-        ) {
+        if (chess.turn() === 'w') {
           setPlayer1TimeConsumed((p) => p + 100);
         } else {
           setPlayer2TimeConsumed((p) => p + 100);
@@ -220,13 +225,23 @@ export const Game = () => {
             <div className="col-span-7 lg:col-span-5 w-full text-white">
               <div className="flex justify-center">
                 <div>
-                  <div className='mb-4'>
-                    {started && <div className="flex justify-between">
-                      <UserAvatar name={user.id === gameMetadata?.whitePlayer?.id
-                          ? gameMetadata?.blackPlayer?.name
-                          : gameMetadata?.whitePlayer?.name ?? ''} />
-                      {getTimer(user.id === gameMetadata?.whitePlayer?.id ? player2TimeConsumed : player1TimeConsumed)}
-                    </div>}
+                  <div className="mb-4">
+                    {started && (
+                      <div className="flex justify-between">
+                        <UserAvatar
+                          name={
+                            user.id === gameMetadata?.whitePlayer?.id
+                              ? gameMetadata?.blackPlayer?.name
+                              : gameMetadata?.whitePlayer?.name ?? ''
+                          }
+                        />
+                        {getTimer(
+                          user.id === gameMetadata?.whitePlayer?.id
+                            ? player2TimeConsumed
+                            : player1TimeConsumed,
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <div
@@ -247,14 +262,22 @@ export const Game = () => {
                       />
                     </div>
                   </div>
-                  {started && <div className="mt-4 flex justify-between">
-                    <UserAvatar name={user.id === gameMetadata?.blackPlayer?.id
-                      ? gameMetadata?.blackPlayer?.name
-                      : gameMetadata?.whitePlayer?.name ?? ''} />
-                    {getTimer(user.id === gameMetadata?.blackPlayer?.id
-                            ? player2TimeConsumed
-                            : player1TimeConsumed)}
-                  </div>}
+                  {started && (
+                    <div className="mt-4 flex justify-between">
+                      <UserAvatar
+                        name={
+                          user.id === gameMetadata?.blackPlayer?.id
+                            ? gameMetadata?.blackPlayer?.name
+                            : gameMetadata?.whitePlayer?.name ?? ''
+                        }
+                      />
+                      {getTimer(
+                        user.id === gameMetadata?.blackPlayer?.id
+                          ? player2TimeConsumed
+                          : player1TimeConsumed,
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

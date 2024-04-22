@@ -1,21 +1,18 @@
 import { WebSocket } from 'ws';
-import {
-  GAME_OVER,
-  INIT_GAME,
-  JOIN_GAME,
-  MOVE,
-  OPPONENT_DISCONNECTED,
-  JOIN_ROOM,
-  GAME_JOINED,
-  GAME_NOT_FOUND,
-  GAME_ALERT,
-  GAME_ADDED,
-} from './messages';
+import { Message } from '@repo/message';
 import { Game, isPromoting } from './Game';
 import { db } from './db';
 import { SocketManager, User } from './SocketManager';
-import { Square } from 'chess.js';
 
+const {
+  INIT_GAME,
+  MOVE,
+  JOIN_ROOM,
+  GAME_JOINED,
+  GAME_ADDED,
+  GAME_ALERT,
+  GAME_NOT_FOUND,
+} = Message; // Destructure the Message constants
 export class GameManager {
   private games: Game[];
   private pendingGameId: string | null;
@@ -90,7 +87,7 @@ export class GameManager {
         const game = this.games.find((game) => game.gameId === gameId);
         if (game) {
           game.makeMove(user, message.payload.move);
-          if (game.result)  {
+          if (game.result) {
             this.removeGame(game.gameId);
           }
         }
@@ -130,9 +127,9 @@ export class GameManager {
             gameFromDb?.whitePlayerId!,
             gameFromDb?.blackPlayerId!,
             gameFromDb.id,
-            gameFromDb.startAt
+            gameFromDb.startAt,
           );
-          game.seedMoves(gameFromDb?.moves || [])
+          game.seedMoves(gameFromDb?.moves || []);
           this.games.push(game);
           availableGame = game;
         }
