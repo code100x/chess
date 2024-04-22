@@ -1,6 +1,6 @@
-import { Chess, Color, PieceSymbol, Square } from 'chess.js';
+import { Chess, Color, Move, PieceSymbol, Square } from 'chess.js';
 import { MouseEvent, useEffect, useState } from 'react';
-import { IMove, MOVE } from '../screens/Game';
+import { MOVE } from '../screens/Game';
 import LetterNotation from './chess-board/LetterNotation';
 import LegalMoveIndicator from './chess-board/LegalMoveIndicator';
 import ChessSquare from './chess-board/ChessSquare';
@@ -9,6 +9,10 @@ import { drawArrow } from '../utils/canvas';
 import useWindowSize from '../hooks/useWindowSize';
 import MoveSound from '../../public/move.wav';
 import CaptureSound from '../../public/capture.wav';
+
+import { useRecoilState } from 'recoil';
+
+import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
   if (!from) {
@@ -30,7 +34,7 @@ export function isPromoting(chess: Chess, from: Square, to: Square) {
   }
 
   return chess
-    .moves({ square: from, verbose: true })
+    .history({ verbose: true })
     .map((it) => it.to)
     .includes(to);
 }
@@ -43,15 +47,11 @@ export const ChessBoard = ({
   board,
   socket,
   setBoard,
-  setMoves,
-  moves,
 }: {
   myColor: Color;
   gameId: string;
   started: boolean;
   chess: Chess;
-  moves: IMove[];
-  setMoves: React.Dispatch<React.SetStateAction<IMove[]>>;
   setBoard: React.Dispatch<
     React.SetStateAction<
       ({
@@ -69,10 +69,12 @@ export const ChessBoard = ({
   socket: WebSocket;
 }) => {
   const { height, width } = useWindowSize();
-  const [lastMoveFrom, lastMoveTo] = [
-    moves?.at(-1)?.from || '',
-    moves?.at(-1)?.to || '',
-  ];
+  const [userSelectedMoveIndex, setuserSelectedMoveIndex] =
+    useRecoilState(userSelectedMoveIndexAtom);
+  const [moves, setMoves] = useRecoilState(movesAtom);
+  const [lastMove, setLastMove] = useState<{ from: String; to: string } | null>(
+    null,
+  );
   const [rightClickedSquares, setRightClickedSquares] = useState<string[]>([]);
   const [arrowStart, setArrowStart] = useState<string | null>(null);
 
@@ -123,7 +125,13 @@ export const ChessBoard = ({
       if (canvas) {
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          drawArrow(ctx, arrowStart, stoppedAtSquare, isFlipped);
+          drawArrow({
+            ctx,
+            start: arrowStart,
+            end: stoppedAtSquare,
+            isFlipped,
+            squareSize: boxSize,
+          });
         }
       }
       setArrowStart(null);
@@ -148,12 +156,45 @@ export const ChessBoard = ({
 
   useEffect(() => {
     clearCanvas();
+    const lMove = moves.at(-1);
+    if (lMove) {
+      setLastMove({
+        from: lMove.from,
+        to: lMove.to,
+      });
+    } else {
+      setLastMove(null);
+    }
+  }, [moves]);
+
+  useEffect(() => {
+    if (userSelectedMoveIndex !== null) {
+      const move = moves[userSelectedMoveIndex];
+      chess.load(move.after);
+      setBoard(chess.board());
+      return;
+    }
+  }, [userSelectedMoveIndex]);
+
+  useEffect(() => {
+    if (userSelectedMoveIndex!==null) {
+      setuserSelectedMoveIndex(null);
+      chess.reset();
+      moves.forEach((move) => {
+        chess.move({ from: move.from, to: move.to });
+      });
+      setBoard(chess.board());
+      setuserSelectedMoveIndex(null);
+    }
+    else {
+      setBoard(chess.board());
+    }
   }, [moves]);
 
   return (
     <>
       <div className="flex relative">
-        <div className="text-white-200 mr-10 rounded-md overflow-hidden">
+        <div className="text-white-200 rounded-md overflow-hidden">
           {(isFlipped ? board.slice().reverse() : board).map((row, i) => {
             i = isFlipped ? i + 1 : 8 - i;
             return (
@@ -173,8 +214,8 @@ export const ChessBoard = ({
                     i) as Square;
                   const isHighlightedSquare =
                     from === squareRepresentation ||
-                    squareRepresentation === lastMoveFrom ||
-                    squareRepresentation === lastMoveTo;
+                    squareRepresentation === lastMove?.from ||
+                    squareRepresentation === lastMove?.to;
                   const isRightClickedSquare =
                     rightClickedSquares.includes(squareRepresentation);
 
@@ -182,6 +223,15 @@ export const ChessBoard = ({
                     <div
                       onClick={() => {
                         if (!started) {
+                          return;
+                        }
+                        if (userSelectedMoveIndex!==null) {
+                          chess.reset();
+                          moves.forEach((move) => {
+                            chess.move({ from: move.from, to: move.to });
+                          });
+                          setBoard(chess.board());
+                          setuserSelectedMoveIndex(null);
                           return;
                         }
                         if (!from && square?.color !== chess.turn()) return;
@@ -199,7 +249,7 @@ export const ChessBoard = ({
                           );
                         } else {
                           try {
-                            let moveResult;
+                            let moveResult: Move;
                             if (
                               isPromoting(chess, from, squareRepresentation)
                             ) {
@@ -219,31 +269,22 @@ export const ChessBoard = ({
                               if (moveResult?.captured) {
                                 captureAudio.play();
                               }
-                            }
-                            socket.send(
-                              JSON.stringify({
-                                type: MOVE,
-                                payload: {
-                                  gameId,
-                                  move: {
-                                    from,
-                                    to: squareRepresentation,
+                              setMoves((prev) => [...prev, moveResult]);
+                              setFrom(null);
+                              setLegalMoves([]);
+                              socket.send(
+                                JSON.stringify({
+                                  type: MOVE,
+                                  payload: {
+                                    gameId,
+                                    move: moveResult,
                                   },
-                                },
-                              }),
-                            );
-                            setFrom(null);
-                            setLegalMoves([]);
-                            setBoard(chess.board());
-                            console.log({
-                              from,
-                              to: squareRepresentation,
-                            });
-                            setMoves((moves) => [
-                              ...moves,
-                              { from, to: squareRepresentation },
-                            ]);
-                          } catch (e) {}
+                                }),
+                              );
+                            }
+                          } catch (e) {
+                            console.log('e', e);
+                          }
                         }
                       }}
                       style={{

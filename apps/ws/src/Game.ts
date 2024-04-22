@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws';
-import { Chess, Square } from 'chess.js';
+import { Chess, Move, Square } from 'chess.js';
 import { GAME_OVER, INIT_GAME, MOVE } from './messages';
 import { db } from './db';
 import { randomUUID } from 'crypto';
@@ -111,7 +111,8 @@ export class Game {
     this.gameId = game.id;
   }
 
-  async addMoveToDb(move: { from: string; to: string }) {
+  async addMoveToDb(move: Move) {
+    
     await db.$transaction([
       db.move.create({
         data: {
@@ -119,15 +120,15 @@ export class Game {
           moveNumber: this.moveCount + 1,
           from: move.from,
           to: move.to,
-          // Todo: Fix start fen
-          startFen: this.board.fen(),
-          endFen: this.board.fen(),
+          before: move.before,
+          after: move.after,
           createdAt: new Date(Date.now()),
+          san: move.san
         },
       }),
       db.game.update({
         data: {
-          currentFen: this.board.fen(),
+          currentFen: move.after,
         },
         where: {
           id: this.gameId,
@@ -138,11 +139,9 @@ export class Game {
 
   async makeMove(
     user: User,
-    move: {
-      from: Square;
-      to: Square;
-    },
+    move: Move
   ) {
+    
     // validate the type of move using zod
     if (this.moveCount % 2 === 0 && user.userId !== this.player1UserId) {
       return;
