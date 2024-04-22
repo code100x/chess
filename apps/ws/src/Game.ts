@@ -242,11 +242,12 @@ export class Game {
       return;
     }
 
-    if (this.board.turn() === 'w') {
+    // flipped because move has already happened
+    if (this.board.turn() === 'b') {
       this.player1TimeConsumed = this.player1TimeConsumed + (moveTimestamp.getTime() - this.lastMoveTime.getTime());
     }
 
-    if (this.board.turn() === 'b') {
+    if (this.board.turn() === 'w') {
       this.player2TimeConsumed = this.player2TimeConsumed + (moveTimestamp.getTime() - this.lastMoveTime.getTime());
     }
 
