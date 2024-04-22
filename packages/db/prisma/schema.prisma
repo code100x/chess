@@ -12,6 +12,7 @@ model User {
   username      String?   @unique
   name          String?
   email         String   @unique
+  picture       String?
   provider      AuthProvider
   password      String?
   rating        Int      @default(1200)
