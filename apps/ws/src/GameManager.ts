@@ -16,14 +16,21 @@ import { db } from './db';
 import { SocketManager, User } from './SocketManager';
 import { Square } from 'chess.js';
 
+type GameMode = 'bullet' | 'blitz' | 'rapid';
+type PendingGameId = Record<GameMode, string | null>;
+
 export class GameManager {
   private games: Game[];
-  private pendingGameId: { [gameMode: string]: string | null };
+  private pendingGameId: PendingGameId;
   private users: User[];
 
   constructor() {
     this.games = [];
-    this.pendingGameId = {};
+    this.pendingGameId = {
+      bullet: null,
+      blitz: null,
+      rapid: null
+    };
     this.users = [];
   }
 
@@ -50,7 +57,7 @@ export class GameManager {
     user.socket.on('message', async (data) => {
       const message = JSON.parse(data.toString());
       if (message.type === INIT_GAME) {
-        const gameMode= message.gameMode;
+        const gameMode= message.gameMode as GameMode;
         if (this.pendingGameId[gameMode]) {
           const game = this.games.find((x) => x.gameId === this.pendingGameId[gameMode]);
           if (!game) {
