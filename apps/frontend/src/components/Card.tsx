@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-export function DemoNotifications() {
+export function PlayCard() {
   const navigate = useNavigate();
   return (
     <Card>

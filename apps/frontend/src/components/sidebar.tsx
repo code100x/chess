@@ -39,7 +39,7 @@ export default function Sidebar({ className }: SidebarProps) {
           <div className="mt-3 space-y-1">
             {isOpen && (
               <span className="text-center text-white text-2xl font-bold tracking-tighter">
-                100xdevs
+                100xchess
               </span>
             )}
             <SideNav
