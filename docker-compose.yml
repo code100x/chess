@@ -1,0 +1,52 @@
+version: '3'
+services:
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./apps/frontend:/app
+    ports:
+      - "5173:5173"
+
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./apps/backend:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  websocket:
+    build:
+      context: ./apps/ws
+      dockerfile: Dockerfile
+    volumes:
+      - ./apps/ws:/app
+    ports:
+      - "8080:8080"
+
+  react-native:
+    build:
+      context: ./apps/native
+      dockerfile: Dockerfile
+    ports:
+      - "19000:19000"
+    depends_on:
+      - backend
+      - websocket
+
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: myapp
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
