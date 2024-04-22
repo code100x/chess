@@ -179,16 +179,11 @@ export const ChessBoard = ({
                   const isRightClickedSquare =
                     rightClickedSquares.includes(squareRepresentation);
 
-                  const piece = square && chess.get(square.square);
+                  const piece = square && square.type;
                   const isKingInCheckSquare =
-                    piece &&
-                    piece.type === 'k' &&
-                    piece.color === chess.turn() &&
+                    piece === 'k' &&
+                    square.color === chess.turn() &&
                     chess.inCheck();
-
-                  if (isKingInCheckSquare) {
-                    kingSquare = squareRepresentation;
-                  }
 
                   return (
                     <div
