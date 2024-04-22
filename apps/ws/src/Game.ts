@@ -11,6 +11,8 @@ import {
 import { db } from './db';
 import { randomUUID } from 'crypto';
 import { SocketManager, User } from './SocketManager';
+import { Worker } from './worker/publish';
+import { WORKER_PROCESSES } from './types/enums';
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
   if (!from) {
@@ -204,7 +206,22 @@ export class Game {
       return;
     }
 
-    await this.addMoveToDb(move);
+    // await this.addMoveToDb(move);
+
+    //offloading the add move to db to worker -> improves latency
+    await Worker.getInstance().publishOne({
+      type: WORKER_PROCESSES.ADD_MOVE,
+      payload: {
+        from: move.from,
+        to: move.to,
+        gameId: this.gameId,
+        startFen: this.board.fen(),
+        endFen: this.board.fen(),
+        moveNumber: this.moveCount + 1,
+        createdAt: new Date(Date.now()),
+      },
+    })
+
     this.updateUserTimer(user);
     SocketManager.getInstance().broadcast(
       this.gameId,
