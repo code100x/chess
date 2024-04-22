@@ -14,5 +14,5 @@ Let's keep it simple
 1. React for Frontend
 2. Node.js for Backend
 3. Typescript as the language
-4. Saparate Websocket servers for handling real time games
+4. Separate Websocket servers for handling real time games
 5. Redis for storing all moves of a game in a queue

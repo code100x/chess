@@ -7,6 +7,7 @@ import ChessSquare from './chess-board/ChessSquare';
 import NumberNotation from './chess-board/NumberNotation';
 import { drawArrow } from '../utils/canvas';
 import useWindowSize from '../hooks/useWindowSize';
+import Confetti from 'react-confetti';
 import MoveSound from '../../public/move.wav';
 import CaptureSound from '../../public/capture.wav';
 
@@ -88,6 +89,7 @@ export const ChessBoard = ({
     width > height
       ? Math.floor((height - OFFSET) / 8)
       : Math.floor((width - OFFSET) / 8);
+  const [gameOver, setGameOver] = useState(false);
   const moveAudio = new Audio(MoveSound);
   const captureAudio = new Audio(CaptureSound);
 
@@ -152,6 +154,7 @@ export const ChessBoard = ({
 
   return (
     <>
+      {gameOver && <Confetti />}
       <div className="flex relative">
         <div className="text-white-200 mr-10 rounded-md overflow-hidden">
           {(isFlipped ? board.slice().reverse() : board).map((row, i) => {
@@ -225,8 +228,13 @@ export const ChessBoard = ({
                             }
                             if (moveResult) {
                               moveAudio.play();
+
                               if (moveResult?.captured) {
                                 captureAudio.play();
+                              }
+
+                              if (moveResult.san.includes('#')) {
+                                setGameOver(true);
                               }
                             }
                             socket.send(
@@ -248,9 +256,10 @@ export const ChessBoard = ({
                               from,
                               to: squareRepresentation,
                             });
+                            const piece=chess.get(squareRepresentation)?.type
                             setMoves((moves) => [
                               ...moves,
-                              { from, to: squareRepresentation },
+                              { from, to: squareRepresentation,piece },
                             ]);
                           } catch (e) {}
                         }
