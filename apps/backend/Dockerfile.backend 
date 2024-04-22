@@ -1,0 +1,23 @@
+
+FROM node:18
+
+
+WORKDIR /app/backend
+
+
+COPY backend/package*.json ./
+
+
+RUN npm install
+
+
+COPY backend/ .
+
+
+RUN npm run build
+
+
+EXPOSE 3000
+
+
+CMD ["npm", "start"]
