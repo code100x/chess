@@ -11,7 +11,7 @@ import { Layout } from './layout';
 
 function App() {
   return (
-    <div className="min-h-screen bg-brown-600">
+    <div className="min-h-screen bg-stone-800">
       <RecoilRoot>
         <Suspense fallback={<Loader />}>
           <AuthApp />
