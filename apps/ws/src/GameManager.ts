@@ -18,12 +18,12 @@ import { Square } from 'chess.js';
 
 export class GameManager {
   private games: Game[];
-  private pendingGameId: string | null;
+  private pendingGameId: { [gameMode: string]: string | null };
   private users: User[];
 
   constructor() {
     this.games = [];
-    this.pendingGameId = null;
+    this.pendingGameId = {};
     this.users = [];
   }
 
@@ -50,8 +50,9 @@ export class GameManager {
     user.socket.on('message', async (data) => {
       const message = JSON.parse(data.toString());
       if (message.type === INIT_GAME) {
-        if (this.pendingGameId) {
-          const game = this.games.find((x) => x.gameId === this.pendingGameId);
+        const gameMode= message.gameMode;
+        if (this.pendingGameId[gameMode]) {
+          const game = this.games.find((x) => x.gameId === this.pendingGameId[gameMode]);
           if (!game) {
             console.error('Pending game not found?');
             return;
@@ -70,11 +71,11 @@ export class GameManager {
           }
           SocketManager.getInstance().addUser(user, game.gameId);
           await game?.updateSecondPlayer(user.userId);
-          this.pendingGameId = null;
+          this.pendingGameId[gameMode] = null;
         } else {
-          const game = new Game(user.userId, null);
+          const game = new Game(user.userId, null, undefined, undefined, gameMode);
           this.games.push(game);
-          this.pendingGameId = game.gameId;
+          this.pendingGameId[gameMode] = game.gameId;
           SocketManager.getInstance().addUser(user, game.gameId);
           SocketManager.getInstance().broadcast(
             game.gameId,

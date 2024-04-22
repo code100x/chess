@@ -10,6 +10,15 @@ import { SocketManager, User } from './SocketManager';
 
 type GAME_STATUS = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'TIME_UP';
 type GAME_RESULT = "WHITE_WINS" | "BLACK_WINS" | "DRAW";
+type GAME_TYPE = 'CLASSICAL' | 'RAPID' | 'BLITZ' | 'BULLET';
+
+const GAME_MODES: { [key: string]: GAME_TYPE } = {
+  classical: 'CLASSICAL',
+  rapid: 'RAPID',
+  blitz: 'BLITZ',
+  bullet: 'BULLET'
+};
+
 
 const GAME_TIME_MS = 10 * 60 * 60 * 1000;
 
@@ -51,12 +60,14 @@ export class Game {
   private player2TimeConsumed = 0;
   private startTime = new Date(Date.now());
   private lastMoveTime = new Date(Date.now());
+  private gameMode: string ;
 
-  constructor(player1UserId: string, player2UserId: string | null, gameId?: string, startTime?: Date) {
+  constructor(player1UserId: string, player2UserId: string | null, gameId?: string, startTime?: Date, gameMode: string='') {
     this.player1UserId = player1UserId;
     this.player2UserId = player2UserId;
     this.board = new Chess();
     this.gameId = gameId ?? randomUUID();
+    this.gameMode=gameMode;
     if (startTime) {
       this.startTime = startTime;
       this.lastMoveTime = startTime;
@@ -152,7 +163,7 @@ export class Game {
     const game = await db.game.create({
       data: {
         id: this.gameId,
-        timeControl: 'CLASSICAL',
+        timeControl: GAME_MODES[this.gameMode],
         status: 'IN_PROGRESS',
         startAt: this.startTime,
         currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
