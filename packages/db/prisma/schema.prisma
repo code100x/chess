@@ -63,6 +63,7 @@ enum GameStatus {
   IN_PROGRESS
   COMPLETED
   ABANDONED
+  TIME_UP
 }
 
 enum GameResult {
