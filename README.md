@@ -18,7 +18,6 @@ cd chess
 
 3. Install dependencies:
 ```bash
-cd apps
 npm install
 ```
 
