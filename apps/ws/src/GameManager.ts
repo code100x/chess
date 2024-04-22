@@ -16,7 +16,7 @@ import { db } from './db';
 import { SocketManager, User } from './SocketManager';
 import { Square } from 'chess.js';
 
-export class GameManager {
+export class GameManager {g
   private games: Game[];
   private pendingGameId: string | null;
   private users: User[];

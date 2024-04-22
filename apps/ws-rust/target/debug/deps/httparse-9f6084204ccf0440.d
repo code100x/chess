@@ -1,0 +1,11 @@
+/Users/tanmay/Desktop/chess/apps/ws-rust/target/debug/deps/libhttparse-9f6084204ccf0440.rmeta: /Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/lib.rs /Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/iter.rs /Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/macros.rs /Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/simd/mod.rs /Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/simd/fallback.rs
+
+/Users/tanmay/Desktop/chess/apps/ws-rust/target/debug/deps/libhttparse-9f6084204ccf0440.rlib: /Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/lib.rs /Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/iter.rs /Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/macros.rs /Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/simd/mod.rs /Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/simd/fallback.rs
+
+/Users/tanmay/Desktop/chess/apps/ws-rust/target/debug/deps/httparse-9f6084204ccf0440.d: /Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/lib.rs /Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/iter.rs /Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/macros.rs /Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/simd/mod.rs /Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/simd/fallback.rs
+
+/Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/lib.rs:
+/Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/iter.rs:
+/Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/macros.rs:
+/Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/simd/mod.rs:
+/Users/tanmay/.cargo/registry/src/index.crates.io-6f17d22bba15001f/httparse-1.8.0/src/simd/fallback.rs:
