@@ -275,6 +275,11 @@ export class Game {
     }
 
     await this.addMoveToDb(move, moveTimestamp);
+    if (user.userId === this.player1UserId) {
+      this.player1MoveStoredTime = move.endTime;
+    } else {
+      this.player2MoveStoredTime = move.endTime;
+    }
     this.resetAbandonTimer();
     this.resetMoveTimer();
 
@@ -284,7 +289,11 @@ export class Game {
       JSON.stringify({
         type: MOVE,
         payload: {
-          move,
+          move: {
+            ...move,
+            startTime: move.startTime,
+            endTime: move.endTime,
+          },
           player1TimeConsumed: this.player1TimeConsumed,
           player2TimeConsumed: this.player2TimeConsumed,
         },

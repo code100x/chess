@@ -29,6 +29,8 @@ export interface IMove {
   from: Square;
   to: Square;
   piece: string;
+  startTime: number;
+  endTime: number;
 }
 
 const moveAudio = new Audio(MoveSound);
@@ -76,7 +78,7 @@ export const Game = () => {
           setAdded(true);
           break;
         case INIT_GAME:
-          // setMyMoveStartTime(message.payload.startTime);
+          setMyMoveStartTime(message.payload.startTime);
           setBoard(chess.board());
           setStarted(true);
           navigate(`/game/${message.payload.gameId}`);
@@ -115,6 +117,8 @@ export const Game = () => {
               from: move.from,
               to: move.to,
               piece,
+              startTime: move.startTime,
+              endTime: move.endTime,
             },
           ]);
           // if (move.player2UserId === user.id) {
