@@ -4,56 +4,56 @@ use crate::socket_manager::SocketManager;
 use chrono::{DateTime, Duration, Utc};
 use shakmaty::{Chess, Position};
 use std::collections::HashMap;
-use std::sync::{Mutex};
-use std::thread;
-use std::time::Duration as StdDuration;
+use std::sync::Arc;
+use tokio::sync::{Mutex, RwLock};
+use tokio::time::{sleep, timeout};
 
-const GAME_TIME_MS: u64 = 10 * 60 * 60 * 1000; // 10 hours
+const GAME_TIME_MS: u64 = 10 * 60 * 60 * 1000; // 10 hours maybe we can change it later
 
 pub struct GameState {
-    game: Game,
+    game: Arc<RwLock<Game>>,
     position: Position,
     chess: Chess,
-    player1_time_consumed: u64,
-    player2_time_consumed: u64,
+    player1_time_consumed: Arc<Mutex<u64>>,
+    player2_time_consumed: Arc<Mutex<u64>>,
     start_time: DateTime<Utc>,
-    last_move_time: DateTime<Utc>,
-    timer: Mutex<Option<std::thread::JoinHandle<()>>>,
-    move_timer: Mutex<Option<std::thread::JoinHandle<()>>>,
+    last_move_time: Arc<Mutex<DateTime<Utc>>>,
+    abandon_timer: Arc<Mutex<Option<tokio::task::JoinHandle<()>>>>,
+    move_timer: Arc<Mutex<Option<tokio::task::JoinHandle<()>>>>,
 }
 
 impl GameState {
-    pub fn new(game: Game) -> Self {
+    pub async fn new(game: Game) -> Self {
         let mut chess = Chess::default();
         let position = chess.position();
         let start_time = Utc::now();
-        let last_move_time = start_time;
+        let last_move_time = Arc::new(Mutex::new(start_time));
 
         GameState {
-            game,
+            game: Arc::new(RwLock::new(game)),
             position,
             chess,
-            player1_time_consumed: 0,
-            player2_time_consumed: 0,
+            player1_time_consumed: Arc::new(Mutex::new(0)),
+            player2_time_consumed: Arc::new(Mutex::new(0)),
             start_time,
-            last_move_time,
-            timer: Mutex::new(None),
-            move_timer: Mutex::new(None),
+            last_move_time: last_move_time.clone(),
+            abandon_timer: Arc::new(Mutex::new(None)),
+            move_timer: Arc::new(Mutex::new(None)),
         }
     }
 
-    pub fn make_move(&mut self, move_payload: MovePayload, user_id: &str) -> Result<(), String> {
+    pub async fn make_move(&mut self, move_payload: MovePayload, user_id: &str) -> Result<(), String> {
+        let game = self.game.read().await;
+
         if (self.chess.turn() == shakmaty::Color::White
-            && self.game.white_player.id != user_id)
+            && game.white_player.id != user_id)
             || (self.chess.turn() == shakmaty::Color::Black
-                && self.game.black_player.as_ref().unwrap().id != user_id)
+                && game.black_player.as_ref().unwrap().id != user_id)
         {
-            return Err("Not your turn".to_
+            return Err("Not your turn".to_string());
+        }
 
-            string());
-        }g
-
-        if self.game.result.is_some() {
+        if game.result.is_some() {
             return Err("Game is already completed".to_string());
         }
 
@@ -68,18 +68,18 @@ impl GameState {
         self.chess.apply_move(move_obj);
         self.position = self.chess.position();
 
-        let time_taken = move_timestamp.timestamp_millis() - self.last_move_time.timestamp_millis();
+        let time_taken = move_timestamp.timestamp_millis() - self.last_move_time.lock().await.timestamp_millis();
 
         if self.chess.turn() == shakmaty::Color::Black {
-            self.player1_time_consumed += time_taken as u64;
+            *self.player1_time_consumed.lock().await += time_taken as u64;
         } else {
-            self.player2_time_consumed += time_taken as u64;
+            *self.player2_time_consumed.lock().await += time_taken as u64;
         }
 
         let move_data = Move {
             id: uuid::Uuid::new_v4().to_string(),
-            game_id: self.game.id.clone(),
-            move_number: self.game.moves.len() as u64 + 1,
+            game_id: game.id.clone(),
+            move_number: game.moves.len() as u64 + 1,
             from: move_obj.from.to_string(),
             to: move_obj.to.to_string(),
             comments: None,
@@ -89,24 +89,25 @@ impl GameState {
             created_at: move_timestamp,
         };
 
-        self.game.moves.push(move_data);
-        self.game.current_fen = self.position.fen().to_string();
-        self.last_move_time = move_timestamp;
+        let mut game = self.game.write().await;
+        game.moves.push(move_data);
+        game.current_fen = self.position.fen().to_string();
+        *self.last_move_time.lock().await = move_timestamp;
 
-        self.reset_abandon_timer();
-        self.reset_move_timer();
+        self.reset_abandon_timer().await;
+        self.reset_move_timer().await;
 
         SocketManager::broadcast(
-            self.game.id.clone(),
+            game.id.clone(),
             messages::Message {
                 r#type: messages::MessageType::Move,
                 payload: messages::MovePayload {
                     move_payload,
-                    player1_time_consumed: self.player1_time_consumed,
-                    player2_time_consumed: self.player2_time_consumed,
+                    player1_time_consumed: *self.player1_time_consumed.lock().await,
+                    player2_time_consumed: *self.player2_time_consumed.lock().await,
                 },
             },
-        );
+        ).await;
 
         if self.chess.is_game_over() {
             let result = if self.chess.is_draw() {
@@ -117,16 +118,16 @@ impl GameState {
                 GameResult::BlackWins
             };
 
-            self.end_game(GameStatus::Completed, result);
+            self.end_game(GameStatus::Completed, result).await;
         }
 
         Ok(())
     }
 
-    fn reset_abandon_timer(&mut self) {
-        let game_id = self.game.id.clone();
-        let timer = std::thread::spawn(move || {
-            std::thread::sleep(Duration::from_secs(60));
+    async fn reset_abandon_timer(&mut self) {
+        let game_id = self.game.read().await.id.clone();
+        let abandon_timer = tokio::spawn(async move {
+            sleep(Duration::from_secs(60)).await;
             let result = if Chess::default().turn() == shakmaty::Color::Black {
                 GameResult::WhiteWins
             } else {
@@ -141,56 +142,59 @@ impl GameState {
                         status: GameStatus::Abandoned,
                     },
                 },
-            );
+            ).await;
         });
 
-        let mut timer_lock = self.timer.lock().unwrap();
-        *timer_lock = Some(timer);
+        let mut abandon_timer_lock = self.abandon_timer.lock().await;
+        *abandon_timer_lock = Some(abandon_timer);
     }
 
-    fn reset_move_timer(&mut self) {
-        let game_id = self.game.id.clone();
+    async fn reset_move_timer(&mut self) {
+        let game_id = self.game.read().await.id.clone();
         let turn = self.chess.turn();
         let time_left = GAME_TIME_MS
             - if turn == shakmaty::Color::White {
-                self.player1_time_consumed
+                *self.player1_time_consumed.lock().await
             } else {
-                self.player2_time_consumed
+                *self.player2_time_consumed.lock().await
             };
 
-        let move_timer = std::thread::spawn(move || {
-            std::thread::sleep(Duration::from_millis(time_left));
-            let result = if turn == shakmaty::Color::Black {
-                GameResult::WhiteWins
-            } else {
-                GameResult::BlackWins
-            };
-            SocketManager::broadcast(
-                game_id,
-                messages::Message {
-                    r#type: messages::MessageType::GameEnded,
-                    payload: GameEndedPayload {
-                        result,
-                        status: GameStatus::TimeUp,
+        let move_timer = tokio::spawn(async move {
+            let result = timeout(Duration::from_millis(time_left), async {
+                let result = if turn == shakmaty::Color::Black {
+                    GameResult::WhiteWins
+                } else {
+                    GameResult::BlackWins
+                };
+                SocketManager::broadcast(
+                    game_id,
+                    messages::Message {
+                        r#type: messages::MessageType::GameEnded,
+                        payload: GameEndedPayload {
+                            result,
+                            status: GameStatus::TimeUp,
+                        },
                     },
-                },
-            );
+                ).await;
+            }).await;
         });
 
-        let mut move_timer_lock = self.move_timer.lock().unwrap();
+        let mut move_timer_lock = self.move_timer.lock().await;
         *move_timer_lock = Some(move_timer);
     }
 
-    fn end_game(&mut self, status: GameStatus, result: GameResult) {
-        self.game.status = status;
-        self.game.result = Some(result);
+    async fn end_game(&mut self, status: GameStatus, result: GameResult) {
+        let mut game = self.game.write().await;
+        game.status = status;
+        game.result = Some(result);
 
         SocketManager::broadcast(
-            self.game.id.clone(),
+            game.id.clone(),
             messages::Message {
                 r#type: messages::MessageType::GameEnded,
                 payload: GameEndedPayload { result, status },
             },
-        );
-    }
+        ).await;
+   }
+
 }

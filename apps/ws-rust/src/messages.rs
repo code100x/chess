@@ -1,6 +1,7 @@
-use crate::game::Move;
-use crate::game::{User, GameResult, GameStatus};
+use crate::game::{Move, User, GameResult, GameStatus};
 use serde::{Deserialize, Serialize};
+use serde_json::Error;
+
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "type", content = "payload")]
@@ -85,6 +86,6 @@ pub enum MessageType {
     GameTime,
 }
 
-pub fn parse_message(data: &str) -> Message {
-    serde_json::from_str(data).unwrap_or_else(|_| Message::GameAlert("Invalid message format".to_string()))
+pub async fn parse_message(data: &str) -> Result<Message, Error> {
+    serde_json::from_str(data).map_err(|e| e.into())
 }
