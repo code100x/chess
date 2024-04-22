@@ -26,4 +26,22 @@ v1Router.get('/games', async (req, res) => {
   }
 });
 
+v1Router.get('/games/:gameId', async (req, res) => {
+  try {
+    const game = await db.game.findUnique({
+      include: {
+        blackPlayer: true,
+        whitePlayer: true,
+        moves: true,
+      },
+      where: {
+        id: req.params.gameId,
+      },
+    });
+    res.json(game);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 export default v1Router;

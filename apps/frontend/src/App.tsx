@@ -8,6 +8,7 @@ import { RecoilRoot } from 'recoil';
 import { useUser } from '@repo/store/useUser';
 import { Loader } from './components/Loader';
 import { Spectate } from './screens/Spectate';
+import { Review } from './screens/Review';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function AuthApp() {
         <Route path="/login" element={user ? <Game /> : <Login />} />
         <Route path="/game/:gameId" element={user ? <Game /> : <Login />} />
         <Route path="/spectate/:gameId" element={<Spectate />} />
+        <Route path="/review/:gameId" element={<Review />} />
       </Routes>
     </BrowserRouter>
   );

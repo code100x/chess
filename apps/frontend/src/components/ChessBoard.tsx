@@ -10,6 +10,7 @@ import useWindowSize from '../hooks/useWindowSize';
 import Confetti from 'react-confetti';
 import MoveSound from '../../public/move.wav';
 import CaptureSound from '../../public/capture.wav';
+import { useNavigate } from 'react-router-dom';
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
   if (!from) {
@@ -96,6 +97,8 @@ export const ChessBoard = ({
   const moveAudio = new Audio(MoveSound);
   const captureAudio = new Audio(CaptureSound);
 
+  const Navigate = useNavigate();
+
   const handleMouseDown = (
     e: MouseEvent<HTMLDivElement>,
     squareRep: string,
@@ -160,6 +163,16 @@ export const ChessBoard = ({
       {gameOver && <Confetti />}
       <div className="flex relative">
         <div className="text-white-200 mr-10 rounded-md overflow-hidden">
+          {gameOver && (
+            <div
+              className="cursor-pointer re"
+              onClick={() => {
+                Navigate('/review/' + gameId);
+              }}
+            >
+              Review the Match
+            </div>
+          )}
           {(isFlipped ? board.slice().reverse() : board).map((row, i) => {
             i = isFlipped ? i + 1 : 8 - i;
             return (
@@ -232,6 +245,7 @@ export const ChessBoard = ({
                               }
                             }
                             const time = new Date(Date.now()).getTime();
+                            const piece = chess.get(squareRepresentation)?.type;
                             socket.send(
                               JSON.stringify({
                                 type: MOVE,
@@ -240,6 +254,7 @@ export const ChessBoard = ({
                                   move: {
                                     from,
                                     to: squareRepresentation,
+                                    piece,
                                     startTime: myMoveStartTime,
                                     endTime: time,
                                   },
@@ -253,7 +268,6 @@ export const ChessBoard = ({
                               from,
                               to: squareRepresentation,
                             });
-                            const piece = chess.get(squareRepresentation)?.type;
                             setMoves((moves) => [
                               ...moves,
                               {

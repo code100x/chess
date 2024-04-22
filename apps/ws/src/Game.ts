@@ -1,4 +1,4 @@
-import { Chess, Square } from 'chess.js';
+import { Chess, PieceSymbol, Square } from 'chess.js';
 import { GAME_ENDED, GAME_MESSAGE, INIT_GAME, MOVE } from './messages';
 import { db } from './db';
 import { randomUUID } from 'crypto';
@@ -189,6 +189,7 @@ export class Game {
     move: {
       from: string;
       to: string;
+      piece: PieceSymbol;
       startTime: number;
       endTime: number;
     },
@@ -201,6 +202,7 @@ export class Game {
           moveNumber: this.moveCount + 1,
           from: move.from,
           to: move.to,
+          piece: move.piece,
           // Todo: Fix start fen
           startFen: this.board.fen(),
           endFen: this.board.fen(),
@@ -223,6 +225,7 @@ export class Game {
     move: {
       from: Square;
       to: Square;
+      piece: PieceSymbol;
       startTime: number;
       endTime: number;
     },
