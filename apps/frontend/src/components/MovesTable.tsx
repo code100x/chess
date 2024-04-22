@@ -31,11 +31,10 @@ const MovesTable = () => {
       });
     }
   }, [moves]);
-
   return (
     <div className="text-[#C3C3C0] relative w-full ">
       <div
-        className="text-sm max-h-[45vh] overflow-y-scroll"
+        className="text-sm h-[45vh] max-h-[45vh] overflow-y-auto"
         ref={movesTableRef}
       >
         {movesArray.map((movePairs, index) => {
@@ -74,69 +73,67 @@ const MovesTable = () => {
           );
         })}
       </div>
-      <div className="w-full p-2 bg-[#20211D] flex items-center justify-between">
-        <div className="flex gap-4">
-          <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
-            {<HandshakeIcon size={16} />}
-            Draw
-          </button>
-          <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
-            {<FlagIcon size={16} />}
-            Resign
-          </button>
-        </div>
-        <div className="flex gap-1">
-          <button
-            onClick={() => {
-              setUserSelectedMoveIndex(0)
-            }}
-            disabled={userSelectedMoveIndex === 0}
-            className="hover:text-white"
-          >
-            <ChevronFirst />
-          </button>
+      {moves.length && (
+        <div className="w-full p-2 bg-[#20211D] flex items-center justify-between">
+          <div className="flex gap-4">
+            <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
+              {<HandshakeIcon size={16} />}
+              Draw
+            </button>
+            <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
+              {<FlagIcon size={16} />}
+              Resign
+            </button>
+          </div>
+          <div className="flex gap-1">
+            <button
+              onClick={() => {
+                setUserSelectedMoveIndex(0);
+              }}
+              disabled={userSelectedMoveIndex === 0}
+              className="hover:text-white"
+            >
+              <ChevronFirst />
+            </button>
 
-          <button
-            onClick={() => {
-              setUserSelectedMoveIndex(prev=> prev!==null ? prev-1 : moves.length-2);
-            }}
-            disabled={userSelectedMoveIndex === 0}
-            className="hover:text-white"
-          >
-            <ChevronLeft />
-          </button>
-          <button
-            onClick={() => {
-              setUserSelectedMoveIndex((prev) =>
-                prev !== null &&
-                prev !== moves.length - 1 &&
-                !(prev === moves.length - 2)
-                  ? prev + 1
-                  : null,
-              );
-            }}
-            disabled={
-              userSelectedMoveIndex === null ||
-              userSelectedMoveIndex === moves.length - 1
-            }
-            className="hover:text-white"
-          >
-            <ChevronRight />
-          </button>
-          <button
-            onClick={() => {
-              setUserSelectedMoveIndex(null);
-            }}
-            disabled={
-              userSelectedMoveIndex === null ||
-              userSelectedMoveIndex === moves.length - 1
-            }
-            className="hover:text-white"
-          >
-            <ChevronLast />
-          </button>
+            <button
+              onClick={() => {
+                setUserSelectedMoveIndex((prev) =>
+                  prev !== null ? prev - 1 : moves.length - 2,
+                );
+              }}
+              disabled={userSelectedMoveIndex === 0}
+              className="hover:text-white"
+            >
+              <ChevronLeft />
+            </button>
+            <button
+              onClick={() => {
+                setUserSelectedMoveIndex((prev) =>
+                  prev !== null
+                    ? prev + 1 >= moves.length - 1
+                      ? moves.length - 1
+                      : prev + 1
+                    : null,
+                );
+              }}
+              disabled={userSelectedMoveIndex === null}
+              className="hover:text-white"
+            >
+              <ChevronRight />
+            </button>
+            <button
+              onClick={() => {
+                setUserSelectedMoveIndex(moves.length - 1);
+              }}
+              disabled={userSelectedMoveIndex === null}
+              className="hover:text-white"
+            >
+              <ChevronLast />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
