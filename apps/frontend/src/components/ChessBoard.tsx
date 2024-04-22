@@ -80,24 +80,6 @@ export const ChessBoard = ({
   const isMyTurn = myColor === chess.turn();
   const [legalMoves, setLegalMoves] = useState<string[]>([]);
 
-  let kingSquare: string = '';
-  const isKingInCheck = chess.inCheck();
-  if (isKingInCheck) {
-    for (let i = 0; i < 8; i++) {
-      for (let j = 0; j < 8; j++) {
-        const square = String.fromCharCode('a'.charCodeAt(0) + i) + (j + 1);
-        const piece = chess.get(square);
-        if (piece && piece.type === 'k' && piece.color === chess.turn()) {
-          kingSquare = square;
-          break;
-        }
-      }
-      if (kingSquare) {
-        break;
-      }
-    }
-  }
-
   const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
   const isFlipped = myColor === 'b';
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
@@ -168,6 +150,7 @@ export const ChessBoard = ({
     clearCanvas();
   }, [moves]);
 
+  let kingSquare: string = '';
   return (
     <>
       <div className="flex relative">
@@ -195,6 +178,17 @@ export const ChessBoard = ({
                     squareRepresentation === lastMoveTo;
                   const isRightClickedSquare =
                     rightClickedSquares.includes(squareRepresentation);
+
+                  const piece = square && chess.get(square.square);
+                  const isKingInCheckSquare =
+                    piece &&
+                    piece.type === 'k' &&
+                    piece.color === chess.turn() &&
+                    chess.inCheck();
+
+                  if (isKingInCheckSquare) {
+                    kingSquare = squareRepresentation;
+                  }
 
                   return (
                     <div
@@ -269,7 +263,7 @@ export const ChessBoard = ({
                         height: boxSize,
                       }}
                       key={j}
-                      className={`${isRightClickedSquare ? (isMainBoxColor ? 'bg-[#CF664E]' : 'bg-[#E87764]') : isKingInCheck && squareRepresentation === kingSquare ? `bg-red-600` : isHighlightedSquare ? `${isMainBoxColor ? 'bg-[#BBCB45]' : 'bg-[#F4F687]'}` : isMainBoxColor ? 'bg-[#739552]' : 'bg-[#EBEDD0]'} ${''}`}
+                      className={`${isRightClickedSquare ? (isMainBoxColor ? 'bg-[#CF664E]' : 'bg-[#E87764]') : isKingInCheckSquare ? 'bg-red-600' : isHighlightedSquare ? `${isMainBoxColor ? 'bg-[#BBCB45]' : 'bg-[#F4F687]'}` : isMainBoxColor ? 'bg-[#739552]' : 'bg-[#EBEDD0]'} ${''}`}
                       onContextMenu={(e) => {
                         e.preventDefault();
                       }}
