@@ -16,18 +16,9 @@ git clone https://github.com/code100x/chess.git
 cd chess
 ```
 
-3. Install dependencies for both frontend and backend:
+3. Install dependencies:
 ```bash
-cd apps/frontend/
-npm install
-
-cd apps/backend/
-npm install
-
-cd apps/ws/
-npm install
-
-cd packages/db/
+cd apps
 npm install
 ```
 
@@ -35,12 +26,10 @@ These commands install all the necessary dependencies required to run both the f
 
 ## Usage
 
-Once you have installed the dependencies, you can start the servers by running the following command in separate terminal windows:
-
-Before running your code you need to add required environment variables:
+Before running your code you need to add the required environment variables:
 use the `.env.example`
 
-- We have 3 places where you need to add your personla credentials
+- We have 3 places where you need to add your credentials
 
 `apps/backend`
 ```bash
