@@ -27,7 +27,8 @@ export const GAME_TIME = 'game_time';
 const GAME_TIME_MS = 10 * 60 * 1000;
 
 export interface IMove {
-    from: Square; to: Square; piece: string
+  from: Square;
+  to: Square;
 }
 
 const moveAudio = new Audio(MoveSound);
@@ -122,8 +123,7 @@ export const Game = () => {
           }
           moveAudio.play();
           setBoard(chess.board());
-          const piece=chess.get(move.to)?.type
-          setMoves(moves => [...moves,{from:move.from,to:move.to,piece}])
+          setMoves((moves) => [...moves, move]);
           break;
         case GAME_OVER:
           setResult(message.payload.result);
@@ -283,7 +283,7 @@ export const Game = () => {
                 </div>
               </div>
             </div>
-            <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10 overflow-y-scroll no-scrollbar">
+            <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10">
               {!started && (
                 <div className="pt-8">
                   {added ? (
