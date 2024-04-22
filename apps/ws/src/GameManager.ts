@@ -32,7 +32,7 @@ export class GameManager {
   }
 
   removeUser(socket: WebSocket) {
-    const user = this.users.find((user) => user.socket !== socket);
+    const user = this.users.find((user) => user.socket === socket);
     if (!user) {
       console.error('User not found?');
       return;

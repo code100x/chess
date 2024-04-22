@@ -1,11 +1,11 @@
 /* eslint-disable no-case-declarations */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import MoveSound from '../../public/move.wav';
 import { Button } from '../components/Button';
 import { ChessBoard, isPromoting } from '../components/ChessBoard';
 import { useSocket } from '../hooks/useSocket';
-import { Chess, Move, Square } from 'chess.js';
+import { Chess, Move } from 'chess.js';
 import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
@@ -21,10 +21,9 @@ export const GAME_JOINED = 'game_joined';
 export const GAME_ALERT = 'game_alert';
 export const GAME_ADDED = 'game_added';
 
-export interface IMove {
-  from: Square;
-  to: Square;
-}
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+
+import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
 
 const moveAudio = new Audio(MoveSound);
 
@@ -48,15 +47,21 @@ export const Game = () => {
   const [result, setResult] = useState<
     'WHITE_WINS' | 'BLACK_WINS' | 'DRAW' | typeof OPPONENT_DISCONNECTED | null
   >(null);
-  const [moves, setMoves] = useState<IMove[]>([]);
 
+  const setMoves = useSetRecoilState(movesAtom);
+  const userSelectedMoveIndex = useRecoilValue(userSelectedMoveIndexAtom)
+  const userSelectedMoveIndexRef = useRef(userSelectedMoveIndex);
+
+  useEffect(()=>{
+    userSelectedMoveIndexRef.current = userSelectedMoveIndex
+  }, [userSelectedMoveIndex])
+ 
   useEffect(() => {
     if (!socket) {
       return;
     }
-    socket.onmessage = (event) => {
+    socket.onmessage = function(event) {
       const message = JSON.parse(event.data);
-
       switch (message.type) {
         case GAME_ADDED:
           setAdded(true);
@@ -72,24 +77,25 @@ export const Game = () => {
           break;
         case MOVE:
           const move = message.payload;
-          const moves = chess.moves({ verbose: true });
-          //TODO: Fix later
-          if (
-            moves.map((x) => JSON.stringify(x)).includes(JSON.stringify(move))
-          )
+          if(userSelectedMoveIndexRef.current !== null) {
+            setMoves((moves) => [...moves, move]);
             return;
-          if (isPromoting(chess, move.from, move.to)) {
-            chess.move({
-              from: move.from,
-              to: move.to,
-              promotion: 'q',
-            });
-          } else {
-            chess.move({ from: move.from, to: move.to });
           }
-          moveAudio.play();
-          setBoard(chess.board());
-          setMoves((moves) => [...moves, move]);
+          try {
+            if (isPromoting(chess, move.from, move.to)) {
+              chess.move({
+                from: move.from,
+                to: move.to,
+                promotion: 'q',
+              });
+            } else {
+              chess.move({ from: move.from, to: move.to });
+            }
+            setMoves((moves) => [...moves, move]);
+            moveAudio.play();
+          } catch (error) {
+            console.log("Error", error)
+          }
           break;
         case GAME_OVER:
           setResult(message.payload.result);
@@ -105,7 +111,8 @@ export const Game = () => {
             whitePlayer: message.payload.whitePlayer,
           });
           setStarted(true);
-          setMoves(message.payload.moves);
+
+          
           message.payload.moves.map((x: Move) => {
             if (isPromoting(chess, x.from, x.to)) {
               chess.move({ ...x, promotion: 'q' });
@@ -113,14 +120,14 @@ export const Game = () => {
               chess.move(x);
             }
           });
-          setBoard(chess.board());
+          setMoves(message.payload.moves);
           break;
 
         default:
           alert(message.payload.message);
           break;
       }
-    };
+    }
 
     if (gameId !== 'random') {
       socket.send(
@@ -143,8 +150,8 @@ export const Game = () => {
       )}
       <div className="justify-center flex">
         <div className="pt-2 max-w-screen-xl w-full">
-          <div className="grid grid-cols-7 gap-4 w-full">
-            <div className="col-span-7 lg:col-span-5 w-full text-white">
+          <div className="grid grid-cols-7 w-full">
+            <div className="col-span-7 lg:col-span-4 w-full text-white">
               <div className="flex justify-center">
                 <div>
                   <div className="mb-4 flex justify-between">
@@ -157,8 +164,6 @@ export const Game = () => {
                       myColor={
                         user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w'
                       }
-                      setMoves={setMoves}
-                      moves={moves}
                       chess={chess}
                       setBoard={setBoard}
                       socket={socket}
@@ -171,9 +176,9 @@ export const Game = () => {
                 </div>
               </div>
             </div>
-            <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10">
+            <div className="col-span-3 rounded-md bg-brown-500 w-full h-[90vh] overflow-auto mt-10">
               {!started && (
-                <div className="pt-8">
+                <div className="pt-8 flex justify-center w-full">
                   {added ? (
                     <div className="text-white">Waiting</div>
                   ) : (
@@ -194,11 +199,7 @@ export const Game = () => {
                 </div>
               )}
               <div>
-                {moves.length > 0 && (
-                  <div className="mt-4">
-                    <MovesTable moves={moves} />
-                  </div>
-                )}
+                <MovesTable />
               </div>
             </div>
           </div>
