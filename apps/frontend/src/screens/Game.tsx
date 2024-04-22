@@ -94,13 +94,13 @@ export const Game = () => {
           } else {
             chess.move({ from: move.from, to: move.to });
           }
-          setBoard(chess.board());
-          setMoves((moves) => [...moves, move]);
           if(chess.inCheck()){
             checkAudio.play();
           }else{
             moveAudio.play();
           }
+          setBoard(chess.board());
+          setMoves((moves) => [...moves, move]);
           break;
         case GAME_OVER:
           setResult(message.payload.result);
