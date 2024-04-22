@@ -28,7 +28,7 @@ const SuggestedDots: React.FC = React.memo(() => {
               moveTo={moveTo}
             />
           );
-        })
+        }),
       )}
     </View>
   );

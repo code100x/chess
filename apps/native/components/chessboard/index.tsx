@@ -24,7 +24,17 @@ const Chessboard: React.FC = React.memo(() => {
   const { boardSize, boardOrientation } = useChessboardProps();
 
   return (
-    <View style={[styles.container, { width: boardSize, transform: [{rotate: boardOrientation  === "white" ? "0deg" : "180deg"}] }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          width: boardSize,
+          transform: [
+            { rotate: boardOrientation === 'white' ? '0deg' : '180deg' },
+          ],
+        },
+      ]}
+    >
       <Background />
       <Pieces />
       <HighlightedSquares />
@@ -49,7 +59,7 @@ const ChessboardContainerComponent = React.forwardRef<
       getState: () => chessboardRef?.current?.getState() as ChessboardState,
       resetBoard: (params) => chessboardRef.current?.resetBoard(params),
     }),
-    []
+    [],
   );
 
   return (

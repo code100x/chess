@@ -95,7 +95,7 @@ const BoardRefsContextProviderComponent = React.forwardRef<
         setBoard(chess.board());
       },
     }),
-    [board, chess, setBoard]
+    [board, chess, setBoard],
   );
 
   return (
@@ -109,4 +109,4 @@ const BoardRefsContextProviderComponent = React.forwardRef<
 
 const BoardRefsContextProvider = React.memo(BoardRefsContextProviderComponent);
 
-export {BoardRefsContextProvider };
+export { BoardRefsContextProvider };

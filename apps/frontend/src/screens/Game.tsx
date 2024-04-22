@@ -295,3 +295,4 @@ export const Game = () => {
     </div>
   );
 };
+
