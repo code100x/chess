@@ -70,8 +70,9 @@ export const ChessBoard = ({
   socket: WebSocket;
 }) => {
   const { height, width } = useWindowSize();
-  const [userSelectedMoveIndex, setUserSelectedMoveIndex] =
-    useRecoilState(userSelectedMoveIndexAtom);
+  const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
+    userSelectedMoveIndexAtom,
+  );
   const [moves, setMoves] = useRecoilState(movesAtom);
   const [lastMove, setLastMove] = useState<{ from: String; to: string } | null>(
     null,
@@ -175,7 +176,7 @@ export const ChessBoard = ({
       setLastMove({
         from: move.from,
         to: move.to,
-      })
+      });
       chess.load(move.after);
       setBoard(chess.board());
       return;
@@ -183,15 +184,14 @@ export const ChessBoard = ({
   }, [userSelectedMoveIndex]);
 
   useEffect(() => {
-    if (userSelectedMoveIndex!==null) {
+    if (userSelectedMoveIndex !== null) {
       chess.reset();
       moves.forEach((move) => {
         chess.move({ from: move.from, to: move.to });
       });
       setBoard(chess.board());
       setUserSelectedMoveIndex(null);
-    }
-    else {
+    } else {
       setBoard(chess.board());
     }
   }, [moves]);
@@ -206,15 +206,13 @@ export const ChessBoard = ({
             return (
               <div key={i} className="flex relative">
                 <NumberNotation
-                  isMainBoxColor={i % 2 === 0}
+                  isMainBoxColor={isFlipped ? i % 2 !== 0 : i % 2 === 0}
                   label={i.toString()}
                 />
                 {(isFlipped ? row.slice().reverse() : row).map((square, j) => {
                   j = isFlipped ? 7 - (j % 8) : j % 8;
 
-                  const isMainBoxColor = isFlipped
-                    ? (i + j) % 2 === 0
-                    : (i + j) % 2 !== 0;
+                  const isMainBoxColor = (i + j) % 2 !== 0;
                   const squareRepresentation = (String.fromCharCode(97 + j) +
                     '' +
                     i) as Square;
@@ -231,7 +229,7 @@ export const ChessBoard = ({
                         if (!started) {
                           return;
                         }
-                        if (userSelectedMoveIndex!==null) {
+                        if (userSelectedMoveIndex !== null) {
                           chess.reset();
                           moves.forEach((move) => {
                             chess.move({ from: move.from, to: move.to });
@@ -302,7 +300,7 @@ export const ChessBoard = ({
                         height: boxSize,
                       }}
                       key={j}
-                      className={`${isRightClickedSquare ? (isMainBoxColor ? 'bg-[#CF664E]' : 'bg-[#E87764]') : isHighlightedSquare ? `${isMainBoxColor ? 'bg-[#BBCB45]' : 'bg-[#F4F687]'}` : isMainBoxColor ? 'bg-[#739552]' : 'bg-[#EBEDD0]'} ${''}`}
+                      className={`${isRightClickedSquare ? (isMainBoxColor ? 'bg-[#CF664E]' : 'bg-[#E87764]') : isHighlightedSquare ? `${isMainBoxColor ? 'bg-[#BBCB45]' : 'bg-[#F4F687]'}` : isMainBoxColor ? 'bg-[#739552]' : 'bg-[#EBEDD0]'}`}
                       onContextMenu={(e) => {
                         e.preventDefault();
                       }}
@@ -319,7 +317,7 @@ export const ChessBoard = ({
                           ? i === 8 && (
                               <LetterNotation
                                 label={labels[j]}
-                                isMainBoxColor={j % 2 !== 0}
+                                isMainBoxColor={j % 2 === 0}
                               />
                             )
                           : i === 1 && (
