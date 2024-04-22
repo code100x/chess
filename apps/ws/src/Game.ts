@@ -47,6 +47,8 @@ export class Game {
   private timer: NodeJS.Timeout | null = null;
   private player1Time: number = 10 * 60 * 1000;
   private player2Time: number = 10 * 60 * 1000;
+  private player1MoveStoredTime: number = 0;
+  private player2MoveStoredTime: number = 0;
   private gameStartTime: number = 0;
   private tempTime: number = 0;
 
@@ -76,6 +78,7 @@ export class Game {
       return;
     }
 
+    const time = new Date(Date.now()).getTime();
     SocketManager.getInstance().broadcast(
       this.gameId,
       JSON.stringify({
@@ -91,13 +94,14 @@ export class Game {
             id: this.player2UserId,
           },
           fen: this.board.fen(),
+          startTime: time,
           moves: [],
         },
       }),
     );
-    const time = new Date(Date.now()).getTime();
     this.gameStartTime = time;
     this.tempTime = time;
+    this.player1MoveStoredTime = time;
   }
 
   async createGameInDb() {
@@ -126,7 +130,12 @@ export class Game {
     this.gameId = game.id;
   }
 
-  async addMoveToDb(move: { from: string; to: string }) {
+  async addMoveToDb(move: {
+    from: string;
+    to: string;
+    startTime: number;
+    endTime: number;
+  }) {
     await db.$transaction([
       db.move.create({
         data: {
@@ -137,7 +146,8 @@ export class Game {
           // Todo: Fix start fen
           startFen: this.board.fen(),
           endFen: this.board.fen(),
-          createdAt: new Date(Date.now()),
+          createdAt: new Date(move.endTime),
+          timeTaken: move.endTime - move.startTime,
         },
       }),
       db.game.update({
@@ -156,6 +166,8 @@ export class Game {
     move: {
       from: Square;
       to: Square;
+      startTime: number;
+      endTime: number;
     },
   ) {
     // validate the type of move using zod
@@ -205,19 +217,13 @@ export class Game {
     }
 
     await this.addMoveToDb(move);
-    this.updateUserTimer(user);
+    this.updateUserTimer(user, move);
     SocketManager.getInstance().broadcast(
       this.gameId,
       JSON.stringify({
         type: MOVE,
-        payload: move,
-      }),
-    );
-    SocketManager.getInstance().broadcast(
-      this.gameId,
-      JSON.stringify({
-        type: GAME_TIME,
         payload: {
+          ...move,
           player1UserId: this.player1UserId,
           player1Time: this.player1Time,
           player2UserId: this.player2UserId,
@@ -286,13 +292,25 @@ export class Game {
     if (this.timer) clearTimeout(this.timer);
   }
 
-  updateUserTimer(user: User) {
-    const time = new Date(Date.now()).getTime();
+  updateUserTimer(
+    user: User,
+    move: {
+      from: Square;
+      to: Square;
+      startTime: number;
+      endTime: number;
+    },
+  ) {
     if (user.userId === this.player1UserId) {
-      this.player1Time -= time - this.tempTime;
+      this.player1Time -= move.endTime - this.tempTime;
+      this.player1MoveStoredTime = move.endTime;
     } else {
-      this.player2Time -= time - this.tempTime;
+      this.player2Time -= move.endTime - this.tempTime;
+      this.player2MoveStoredTime = move.endTime;
     }
-    this.tempTime = time;
+    if (this.player2MoveStoredTime === 0) {
+      this.player2MoveStoredTime = move.endTime;
+    }
+    this.tempTime = move.endTime;
   }
 }
