@@ -1,7 +1,11 @@
-import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
+import {
+  isBoardFlippedAtom,
+  movesAtom,
+  userSelectedMoveIndexAtom,
+} from '@repo/store/chessBoard';
 import { Move } from 'chess.js';
 import { useEffect, useRef } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   HandshakeIcon,
   FlagIcon,
@@ -9,11 +13,14 @@ import {
   ChevronLast,
   ChevronLeft,
   ChevronRight,
+  RefreshCw,
 } from 'lucide-react';
+
 const MovesTable = () => {
   const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
     userSelectedMoveIndexAtom,
   );
+  const setIsFlipped = useSetRecoilState(isBoardFlippedAtom);
   const moves = useRecoilValue(movesAtom);
   const movesTableRef = useRef<HTMLInputElement>(null);
   const movesArray = moves.reduce((result, _, index: number, array: Move[]) => {
@@ -92,6 +99,7 @@ const MovesTable = () => {
               }}
               disabled={userSelectedMoveIndex === 0}
               className="hover:text-white"
+              title="Go to first move"
             >
               <ChevronFirst />
             </button>
@@ -128,8 +136,17 @@ const MovesTable = () => {
               }}
               disabled={userSelectedMoveIndex === null}
               className="hover:text-white"
+              title="Go to last move"
             >
               <ChevronLast />
+            </button>
+            <button
+              onClick={() => {
+                setIsFlipped((prev) => !prev);
+              }}
+              title="Flip the board"
+            >
+              <RefreshCw className="hover:text-white mx-2" size={18}/>
             </button>
           </div>
         </div>

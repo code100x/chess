@@ -13,7 +13,7 @@ import CaptureSound from '../../public/capture.wav';
 
 import { useRecoilState } from 'recoil';
 
-import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
+import { isBoardFlippedAtom, movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
   if (!from) {
@@ -70,6 +70,8 @@ export const ChessBoard = ({
   socket: WebSocket;
 }) => {
   const { height, width } = useWindowSize();
+
+  const [isFlipped, setIsFlipped] = useRecoilState(isBoardFlippedAtom)
   const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
     userSelectedMoveIndexAtom,
   );
@@ -85,7 +87,6 @@ export const ChessBoard = ({
   const [legalMoves, setLegalMoves] = useState<string[]>([]);
 
   const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-  const isFlipped = myColor === 'b';
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
   const OFFSET = 100;
   const boxSize =
@@ -105,6 +106,12 @@ export const ChessBoard = ({
       setArrowStart(squareRep);
     }
   };
+
+  useEffect(()=>{
+    if(myColor === "b") {
+      setIsFlipped(true)
+    }
+  },[myColor])
 
   const clearCanvas = () => {
     setRightClickedSquares([]);
