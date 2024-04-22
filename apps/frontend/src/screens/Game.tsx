@@ -215,7 +215,7 @@ export const Game = () => {
       <div className="justify-center flex">
         <div className="pt-2 max-w-screen-xl w-full">
           <div className="grid grid-cols-7 w-full">
-            <div className="col-span-7 lg:col-span-4 w-full text-white">
+            <div className={`col-span-7 lg:col-span-4 w-full text-white ${(result === OPPONENT_DISCONNECTED || result === USER_TIMEOUT) ? 'pointer-events-none':""}`}>
               <div className="flex justify-center">
                 <div>
                   <div className="mb-4">
@@ -238,7 +238,7 @@ export const Game = () => {
                   </div>
                   <div>
                     <div
-                      className={`col-span-4 w-full flex justify-center text-white ${(result === OPPONENT_DISCONNECTED || result === USER_TIMEOUT) && 'pointer-events-none'}`}
+                      className={`col-span-4 w-full flex justify-center text-white`}
                     >
                       <ChessBoard
                         started={started}
@@ -300,7 +300,6 @@ export const Game = () => {
             </div>
           </div>
         </div>
-        {/* <UserAvatar name={gameMetadata?.whitePlayer?.name ?? ""} /> */}
       </div>
     </div>
   );
