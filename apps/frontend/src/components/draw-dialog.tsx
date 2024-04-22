@@ -29,7 +29,7 @@ export function DrawDialog({
   return (
     <>
       <AlertDialog open={drawReqSent}>
-        <AlertDialogContent className="bg-black text-white">
+        <AlertDialogContent className="bg-green-600 text-white">
           <AlertDialogHeader>
             <AlertDialogTitle>
               {myColor === 'black' ? 'white' : 'black'} is offering a draw? Do

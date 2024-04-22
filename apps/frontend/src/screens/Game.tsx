@@ -12,6 +12,7 @@ import { useUser } from '@repo/store/useUser';
 import { UserAvatar } from '../components/UserAvatar';
 import { GameActions } from '../components/GameActions';
 import { DrawDialog } from '../components/draw-dialog';
+import { GameOver } from '../components/game-over';
 
 // TODO: Move together, there's code repetition here
 export const INIT_GAME = 'init_game';
@@ -93,7 +94,8 @@ export const Game = () => {
           });
           break;
         case MOVE:
-          const { move, player1TimeConsumed, player2TimeConsumed } = message.payload;
+          const { move, player1TimeConsumed, player2TimeConsumed } =
+            message.payload;
           setPlayer1TimeConsumed(player1TimeConsumed);
           setPlayer2TimeConsumed(player2TimeConsumed);
           const moves = chess.moves({ verbose: true });
@@ -140,7 +142,7 @@ export const Game = () => {
           });
           setPlayer1TimeConsumed(message.payload.player1TimeConsumed);
           setPlayer2TimeConsumed(message.payload.player2TimeConsumed);
-          console.error(message.payload)
+          console.error(message.payload);
           setStarted(true);
           setMoves(message.payload.moves);
           message.payload.moves.map((x: Move) => {
@@ -191,9 +193,7 @@ export const Game = () => {
   useEffect(() => {
     if (started) {
       const interval = setInterval(() => {
-        if (
-          chess.turn() === 'w'
-        ) {
+        if (chess.turn() === 'w') {
           setPlayer1TimeConsumed((p) => p + 100);
         } else {
           setPlayer2TimeConsumed((p) => p + 100);
@@ -220,7 +220,7 @@ export const Game = () => {
   if (!socket) return <div>Connecting...</div>;
 
   return (
-    <div className="">
+    <div>
       {result && (
         <div className="justify-center flex pt-4 text-white">
           {result === 'WHITE_WINS' && 'White wins'}
@@ -244,87 +244,101 @@ export const Game = () => {
             <div className="col-span-7 lg:col-span-5 w-full text-white">
               <div className="flex justify-center">
                 <div>
-                  <div className='mb-4'>
-                    {started && <div className="flex justify-between">
-                      <UserAvatar name={user.id === gameMetadata?.whitePlayer?.id
+                  <div className="mb-4 flex justify-between">
+                    <UserAvatar
+                      name={
+                        user.id === gameMetadata?.whitePlayer?.id
                           ? gameMetadata?.blackPlayer?.name
-                          : gameMetadata?.whitePlayer?.name ?? ''} />
-                      {getTimer(user.id === gameMetadata?.whitePlayer?.id ? player2TimeConsumed : player1TimeConsumed)}
-                    </div>}
-                  </div>
-                  <div>
-                    <div
-                      className={`col-span-4 w-full flex justify-center text-white ${(result === OPPONENT_DISCONNECTED || result === USER_TIMEOUT) && 'pointer-events-none'}`}
-                    >
-                      <ChessBoard
-                        started={started}
-                        gameId={gameId ?? ''}
-                        myColor={
-                          user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w'
-                        }
-                        setMoves={setMoves}
-                        moves={moves}
-                        chess={chess}
-                        setBoard={setBoard}
-                        socket={socket}
-                        board={board}
-                      />
-                    </div>
-                  </div>
-                  {started && <div className="mt-4 flex justify-between">
-                    <UserAvatar name={user.id === gameMetadata?.blackPlayer?.id
-                      ? gameMetadata?.blackPlayer?.name
-                      : gameMetadata?.whitePlayer?.name ?? ''} />
-                    {getTimer(user.id === gameMetadata?.blackPlayer?.id
-                            ? player2TimeConsumed
-                            : player1TimeConsumed)}
-                  </div>}
-                </div>
-              </div>
-            </div>
-            <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10 flex-col items-center overflow-y-scroll no-scrollbar">
-              {!started ? (
-                <div className="pt-8">
-                  {added ? (
-                    <div className="text-white">Waiting</div>
-                  ) : (
-                    gameId === 'random' && (
-                      <Button
-                        onClick={() => {
-                          socket.send(
-                            JSON.stringify({
-                              type: INIT_GAME,
-                            }),
-                          );
-                        }}
-                      >
-                        Play
-                      </Button>
-                    )
-                  )}
-                </div>
-              ) : (
-                <section className="flex flex-col justify-between items-center h-full py-5">
-                  <div>
-                    {moves.length > 0 && (
-                      <div className="mt-4">
-                        <MovesTable moves={moves} />
-                      </div>
+                          : gameMetadata?.whitePlayer?.name ?? ''
+                      }
+                    />
+                    {getTimer(
+                      user.id === gameMetadata?.whitePlayer?.id
+                        ? player2TimeConsumed
+                        : player1TimeConsumed,
                     )}
                   </div>
-                  <GameActions
-                    myId={user.id}
-                    socket={socket}
-                    gameId={gameId ?? ''}
-                    myColor={
+                </div>
+                <div>
+                  <div
+                    className={`col-span-4 flex-col md:flex-ro w-full flex justify-center text-white ${(result === OPPONENT_DISCONNECTED || result === USER_TIMEOUT) && 'pointer-events-none'}`}
+                  >
+                    <ChessBoard
+                      started={started}
+                      gameId={gameId ?? ''}
+                      myColor={
+                        user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w'
+                      }
+                      setMoves={setMoves}
+                      moves={moves}
+                      chess={chess}
+                      setBoard={setBoard}
+                      socket={socket}
+                      board={board}
+                    />
+                  </div>
+                </div>
+                {started && (
+                  <div className="mt-4 flex justify-between">
+                    <UserAvatar
+                      name={
+                        user.id === gameMetadata?.blackPlayer?.id
+                          ? gameMetadata?.blackPlayer?.name
+                          : gameMetadata?.whitePlayer?.name ?? ''
+                      }
+                    />
+                    {getTimer(
                       user.id === gameMetadata?.blackPlayer?.id
-                        ? 'black'
-                        : 'white'
-                    }
-                  />
-                </section>
-              )}
+                        ? player2TimeConsumed
+                        : player1TimeConsumed,
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
+          </div>
+          <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10 flex-col items-center overflow-y-scroll no-scrollbar">
+            {!started ? (
+              <div className="pt-8">
+                {added ? (
+                  <div className="text-white">Waiting</div>
+                ) : (
+                  gameId === 'random' && (
+                    <Button
+                      onClick={() => {
+                        socket.send(
+                          JSON.stringify({
+                            type: INIT_GAME,
+                          }),
+                        );
+                      }}
+                    >
+                      Play
+                    </Button>
+                  )
+                )}
+              </div>
+            ) : (
+              <section className="flex flex-col justify-between items-center h-full py-5">
+                <div>
+                  {moves.length > 0 && (
+                    <div className="mt-4">
+                      <MovesTable moves={moves} />
+                    </div>
+                  )}
+                </div>
+                <GameActions
+                  myId={user.id}
+                  socket={socket}
+                  gameId={gameId ?? ''}
+                  myColor={
+                    user.id === gameMetadata?.blackPlayer?.id
+                      ? 'black'
+                      : 'white'
+                  }
+                />
+              </section>
+            )}
           </div>
         </div>
       </div>
@@ -334,6 +348,11 @@ export const Game = () => {
         setDrawReq={setDrawReq}
         drawReqSent={drawReq}
         myColor={user.id === gameMetadata?.blackPlayer?.id ? 'black' : 'white'}
+      />
+      <GameOver
+        setResult={setResult}
+        isGameOver={!!result}
+        result={result ?? ''}
       />
     </div>
   );

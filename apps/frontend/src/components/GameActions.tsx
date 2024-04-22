@@ -52,7 +52,7 @@ export function GameActions({
 
   return (
     <>
-      <div className="flex justify-center gap-5  items-center">
+      <div className="flex justify-center gap-5  items-center border-t-2 pt-5">
         <button>
           <TooltipProvider>
             <Tooltip>
