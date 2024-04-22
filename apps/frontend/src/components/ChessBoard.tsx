@@ -80,23 +80,24 @@ export const ChessBoard = ({
   const isMyTurn = myColor === chess.turn();
   const [legalMoves, setLegalMoves] = useState<string[]>([]);
 
-  // Get the square king is in
   let kingSquare: string = '';
-  for (let i = 0; i < 8; i++) {
-    for (let j = 0; j < 8; j++) {
-      const square = String.fromCharCode('a'.charCodeAt(0) + i) + (j + 1);
-      const piece = chess.get(square);
-      if (piece && piece.type === 'k' && piece.color === chess.turn()) {
-        kingSquare = square;
+  const isKingInCheck = chess.inCheck();
+  if (isKingInCheck) {
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        console.log('test');
+        const square = String.fromCharCode('a'.charCodeAt(0) + i) + (j + 1);
+        const piece = chess.get(square);
+        if (piece && piece.type === 'k' && piece.color === chess.turn()) {
+          kingSquare = square;
+          break;
+        }
+      }
+      if (kingSquare) {
         break;
       }
     }
-    if (kingSquare) {
-      break;
-    }
   }
-  //King under check
-  const isKingInCheck = chess.inCheck();
 
   const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
   const isFlipped = myColor === 'b';
