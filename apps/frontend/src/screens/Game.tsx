@@ -10,6 +10,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
 import { UserAvatar } from '../components/UserAvatar';
+import GameStartSound from '../../public/GameStartSound.mp3'
+import GameEndSound from '../../public/GameEndSound.mp3'
+import CheckSound from '../../public/CheckSound.mp3'
 
 // TODO: Move together, there's code repetition here
 export const INIT_GAME = 'init_game';
@@ -27,6 +30,9 @@ export interface IMove {
 }
 
 const moveAudio = new Audio(MoveSound);
+const gameStartAudio = new Audio(GameStartSound);
+const gameEndAudio = new Audio(GameEndSound);
+const checkAudio = new Audio(CheckSound);
 
 interface Metadata {
   blackPlayer: { id: string; name: string };
@@ -69,6 +75,7 @@ export const Game = () => {
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
           });
+          gameStartAudio.play()
           break;
         case MOVE:
           const move = message.payload;
@@ -87,12 +94,19 @@ export const Game = () => {
           } else {
             chess.move({ from: move.from, to: move.to });
           }
-          moveAudio.play();
           setBoard(chess.board());
           setMoves((moves) => [...moves, move]);
+          if(chess.inCheck()){
+            checkAudio.play();
+          }else{
+            moveAudio.play();
+          }
           break;
         case GAME_OVER:
           setResult(message.payload.result);
+          setTimeout(() => {
+            gameEndAudio.play();
+          }, 500);
           break;
 
         case OPPONENT_DISCONNECTED:
