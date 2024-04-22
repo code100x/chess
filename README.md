@@ -23,12 +23,6 @@ Below is a revised version of the `README.md` file for the Chess Platform projec
 
 
 
-## Table of Contents
-
-- [Prerequisites](#prerequisites)
-- [Setup](#setup)
-- [Usage](#usage)
-- [Contributing](#contributing)
 
 ## Prerequisites
 
