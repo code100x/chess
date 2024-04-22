@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { Chess, Color, PieceSymbol, Square } from 'chess.js';
 import { MouseEvent, useEffect, useState } from 'react';
 import { IMove, MOVE } from '../screens/Game';
@@ -8,9 +6,11 @@ import LegalMoveIndicator from './chess-board/LegalMoveIndicator';
 import ChessSquare from './chess-board/ChessSquare';
 import NumberNotation from './chess-board/NumberNotation';
 import { drawArrow } from '../utils/canvas';
-import MoveSound from '../../public/MoveSound.mp3';
+import useWindowSize from '../hooks/useWindowSize';
+import Confetti from 'react-confetti';
+import MoveSound from '../../public/move.wav';
+import CaptureSound from '../../public/capture.wav';
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function isPromoting(chess: Chess, from: Square, to: Square) {
   if (!from) {
     return false;
@@ -69,7 +69,11 @@ export const ChessBoard = ({
   } | null)[][];
   socket: WebSocket;
 }) => {
-  const [lastMoveFrom, lastMoveTo] = [moves?.at(-1)?.from || '', moves?.at(-1)?.to || ''];
+  const { height, width } = useWindowSize();
+  const [lastMoveFrom, lastMoveTo] = [
+    moves?.at(-1)?.from || '',
+    moves?.at(-1)?.to || '',
+  ];
   const [rightClickedSquares, setRightClickedSquares] = useState<string[]>([]);
   const [arrowStart, setArrowStart] = useState<string | null>(null);
 
@@ -80,16 +84,25 @@ export const ChessBoard = ({
   const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
   const isFlipped = myColor === 'b';
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
-  // const audio = new Audio(MoveSound);
+  const OFFSET = 100;
+  const boxSize =
+    width > height
+      ? Math.floor((height - OFFSET) / 8)
+      : Math.floor((width - OFFSET) / 8);
+  const [gameOver, setGameOver] = useState(false);
+  const moveAudio = new Audio(MoveSound);
+  const captureAudio = new Audio(CaptureSound);
 
-  const handleMouseDown = (e: MouseEvent<HTMLDivElement>, squareRep: string) => {
+  const handleMouseDown = (
+    e: MouseEvent<HTMLDivElement>,
+    squareRep: string,
+  ) => {
     e.preventDefault();
     if (e.button === 2) {
       setArrowStart(squareRep);
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const clearCanvas = () => {
     setRightClickedSquares([]);
     if (canvas) {
@@ -137,27 +150,36 @@ export const ChessBoard = ({
 
   useEffect(() => {
     clearCanvas();
-  }, [clearCanvas, moves]);
+  }, [moves]);
 
   return (
     <>
+      {gameOver && <Confetti />}
       <div className="flex relative">
         <div className="text-white-200 mr-10 rounded-md overflow-hidden">
           {(isFlipped ? board.slice().reverse() : board).map((row, i) => {
             i = isFlipped ? i + 1 : 8 - i;
             return (
               <div key={i} className="flex relative">
-                <NumberNotation isMainBoxColor={i % 2 === 0} label={i.toString()} />
+                <NumberNotation
+                  isMainBoxColor={i % 2 === 0}
+                  label={i.toString()}
+                />
                 {(isFlipped ? row.slice().reverse() : row).map((square, j) => {
                   j = isFlipped ? 7 - (j % 8) : j % 8;
 
-                  const isMainBoxColor = isFlipped ? (i + j) % 2 === 0 : (i + j) % 2 !== 0;
-                  const squareRepresentation = (String.fromCharCode(97 + j) + '' + i) as Square;
+                  const isMainBoxColor = isFlipped
+                    ? (i + j) % 2 === 0
+                    : (i + j) % 2 !== 0;
+                  const squareRepresentation = (String.fromCharCode(97 + j) +
+                    '' +
+                    i) as Square;
                   const isHighlightedSquare =
                     from === squareRepresentation ||
                     squareRepresentation === lastMoveFrom ||
                     squareRepresentation === lastMoveTo;
-                  const isRightClickedSquare = rightClickedSquares.includes(squareRepresentation);
+                  const isRightClickedSquare =
+                    rightClickedSquares.includes(squareRepresentation);
 
                   return (
                     <div
@@ -173,20 +195,38 @@ export const ChessBoard = ({
 
                         if (!from) {
                           setFrom(squareRepresentation);
-                          setLegalMoves(chess.moves({ verbose: true, square: square?.square }).map((move) => move.to));
+                          setLegalMoves(
+                            chess
+                              .moves({ verbose: true, square: square?.square })
+                              .map((move) => move.to),
+                          );
                         } else {
                           try {
-                            if (isPromoting(chess, from, squareRepresentation)) {
-                              chess.move({
+                            let moveResult;
+                            if (
+                              isPromoting(chess, from, squareRepresentation)
+                            ) {
+                              moveResult = chess.move({
                                 from,
                                 to: squareRepresentation,
                                 promotion: 'q',
                               });
                             } else {
-                              chess.move({
+                              moveResult = chess.move({
                                 from,
                                 to: squareRepresentation,
                               });
+                            }
+                            if (moveResult) {
+                              moveAudio.play();
+
+                              if (moveResult?.captured) {
+                                captureAudio.play();
+                              }
+
+                              if (moveResult.san.includes('#')) {
+                                setGameOver(true);
+                              }
                             }
                             socket.send(
                               JSON.stringify({
@@ -198,7 +238,7 @@ export const ChessBoard = ({
                                     to: squareRepresentation,
                                   },
                                 },
-                              })
+                              }),
                             );
                             setFrom(null);
                             setLegalMoves([]);
@@ -207,14 +247,20 @@ export const ChessBoard = ({
                               from,
                               to: squareRepresentation,
                             });
-                            setMoves((moves) => [...moves, { from, to: squareRepresentation }]);
-                          } catch (e) {
-                            /* empty */
-                          }
+                            const piece=chess.get(squareRepresentation)?.type
+                            setMoves((moves) => [
+                              ...moves,
+                              { from, to: squareRepresentation,piece },
+                            ]);
+                          } catch (e) {}
                         }
                       }}
+                      style={{
+                        width: boxSize,
+                        height: boxSize,
+                      }}
                       key={j}
-                      className={`w-16 h-16 ${isRightClickedSquare ? (isMainBoxColor ? 'bg-[#CF664E]' : 'bg-[#E87764]') : isHighlightedSquare ? `${isMainBoxColor ? 'bg-[#BBCB45]' : 'bg-[#F4F687]'}` : isMainBoxColor ? 'bg-[#739552]' : 'bg-[#EBEDD0]'} ${''}`}
+                      className={`${isRightClickedSquare ? (isMainBoxColor ? 'bg-[#CF664E]' : 'bg-[#E87764]') : isHighlightedSquare ? `${isMainBoxColor ? 'bg-[#BBCB45]' : 'bg-[#F4F687]'}` : isMainBoxColor ? 'bg-[#739552]' : 'bg-[#EBEDD0]'} ${''}`}
                       onContextMenu={(e) => {
                         e.preventDefault();
                       }}
@@ -227,13 +273,26 @@ export const ChessBoard = ({
                     >
                       <div className="w-full justify-center flex h-full relative">
                         {square && <ChessSquare square={square} />}
-
                         {isFlipped
-                          ? i === 8 && <LetterNotation label={labels[j]} isMainBoxColor={j % 2 !== 0} />
-                          : i === 1 && <LetterNotation label={labels[j]} isMainBoxColor={j % 2 !== 0} />}
-                        {!!from && legalMoves.includes(squareRepresentation) && (
-                          <LegalMoveIndicator isMainBoxColor={isMainBoxColor} isPiece={!!square?.type} />
-                        )}
+                          ? i === 8 && (
+                              <LetterNotation
+                                label={labels[j]}
+                                isMainBoxColor={j % 2 !== 0}
+                              />
+                            )
+                          : i === 1 && (
+                              <LetterNotation
+                                label={labels[j]}
+                                isMainBoxColor={j % 2 !== 0}
+                              />
+                            )}
+                        {!!from &&
+                          legalMoves.includes(squareRepresentation) && (
+                            <LegalMoveIndicator
+                              isMainBoxColor={isMainBoxColor}
+                              isPiece={!!square?.type}
+                            />
+                          )}
                       </div>
                     </div>
                   );
@@ -245,9 +304,14 @@ export const ChessBoard = ({
 
         <canvas
           ref={(ref) => setCanvas(ref)}
-          width={512}
-          height={512}
-          style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}
+          width={boxSize * 8}
+          height={boxSize * 8}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            pointerEvents: 'none',
+          }}
           onContextMenu={(e) => e.preventDefault()}
           onMouseDown={(e) => {
             e.preventDefault();
