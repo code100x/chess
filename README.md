@@ -24,12 +24,6 @@ Below is a revised version of the `README.md` file for the Chess Platform projec
 
 
 
-## Prerequisites
-
-Before you begin, ensure you have the following installed on your machine:
-- **Docker**: For container management.
-- **Docker Compose**: For running multi-container Docker applications.
-- **Node.js and npm**: Required if you need to run the project without Docker (not covered in this guide).
 
 ## Setup
 
