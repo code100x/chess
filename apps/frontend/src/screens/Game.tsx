@@ -220,16 +220,7 @@ export const Game = () => {
   if (!socket) return <div>Connecting...</div>;
 
   return (
-    <div>
-      {result && (
-        <div className="justify-center flex pt-4 text-white">
-          {result === 'WHITE_WINS' && 'White wins'}
-          {result === 'BLACK_WINS' && 'Black wins'}
-          {result === 'DRAW' && 'Draw'}
-          {result === 'RESIGN_B' && 'Black Resigned! White Wins!!!'}
-          {result === 'RESIGN_W' && 'White Resigned! Black Wins!!!'}
-        </div>
-      )}
+    <div className="flex justify-center">
       {started && (
         <div className="justify-center flex pt-4 text-white">
           {(user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w') ===
@@ -239,26 +230,45 @@ export const Game = () => {
         </div>
       )}
       <div className="justify-center flex">
-        <div className="pt-2 max-w-screen-xl w-full">
-          <div className="grid grid-cols-7 gap-4 w-full">
+        <div className="pt-2 max-w-screen-xl w-full flex">
+          <div className="grid grid-cols-7 gap-4 w-full mx-auto">
             <div className="col-span-7 lg:col-span-5 w-full text-white">
               <div className="flex justify-center">
                 <div>
-                  <div className="mb-4 flex justify-between">
-                    <UserAvatar
-                      name={
+                  <div className="mb-4 flex justify-between h-full flex-col w-32">
+                    <div>
+                      <UserAvatar
+                        name={
+                          user.id === gameMetadata?.whitePlayer?.id
+                            ? gameMetadata?.blackPlayer?.name
+                            : gameMetadata?.whitePlayer?.name ?? ''
+                        }
+                      />
+                      {getTimer(
                         user.id === gameMetadata?.whitePlayer?.id
-                          ? gameMetadata?.blackPlayer?.name
-                          : gameMetadata?.whitePlayer?.name ?? ''
-                      }
-                    />
-                    {getTimer(
-                      user.id === gameMetadata?.whitePlayer?.id
-                        ? player2TimeConsumed
-                        : player1TimeConsumed,
+                          ? player2TimeConsumed
+                          : player1TimeConsumed,
+                      )}
+                    </div>
+                    {started && (
+                      <div>
+                        <UserAvatar
+                          name={
+                            user.id === gameMetadata?.blackPlayer?.id
+                              ? gameMetadata?.blackPlayer?.name
+                              : gameMetadata?.whitePlayer?.name ?? ''
+                          }
+                        />
+                        {getTimer(
+                          user.id === gameMetadata?.blackPlayer?.id
+                            ? player2TimeConsumed
+                            : player1TimeConsumed,
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
+
                 <div>
                   <div
                     className={`col-span-4 flex-col md:flex-ro w-full flex justify-center text-white ${(result === OPPONENT_DISCONNECTED || result === USER_TIMEOUT) && 'pointer-events-none'}`}
@@ -278,26 +288,11 @@ export const Game = () => {
                     />
                   </div>
                 </div>
-                {started && (
-                  <div className="mt-4 flex justify-between">
-                    <UserAvatar
-                      name={
-                        user.id === gameMetadata?.blackPlayer?.id
-                          ? gameMetadata?.blackPlayer?.name
-                          : gameMetadata?.whitePlayer?.name ?? ''
-                      }
-                    />
-                    {getTimer(
-                      user.id === gameMetadata?.blackPlayer?.id
-                        ? player2TimeConsumed
-                        : player1TimeConsumed,
-                    )}
-                  </div>
-                )}
               </div>
             </div>
           </div>
-          <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10 flex-col items-center overflow-y-scroll no-scrollbar">
+          {/* Side */}
+          <div className="col-span-2 bg-brown-500 w-full flex justify-center overflow-scroll items-center overflow-y-scroll no-scrollbar">
             {!started ? (
               <div className="pt-8">
                 {added ? (
