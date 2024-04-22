@@ -1,8 +1,19 @@
 import { useNavigate } from "react-router-dom"
 import { Button } from "../components/Button";
+import { useUser } from "@repo/store/useUser";
+import { useEffect } from "react";
 
 export const Landing = () => {
     const navigate = useNavigate();
+    const user = useUser();
+  
+    useEffect(()=>{
+        if(user){
+            navigate("game/random");
+            return;
+        }
+    }, []);
+    
     return (
         <div className="w-full bg-[#302E2B] mx-auto">
             <header className="bg-[#262522] font-mono text-white pt-8 pb-9 w-full shadow-lg">
