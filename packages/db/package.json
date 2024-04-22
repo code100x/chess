@@ -2,13 +2,18 @@
   "name": "@repo/db",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "private": true,
   "scripts": {
     "db:generate":"prisma generate",
     "db:push": "prisma db push --skip-generate",
     "test": "echo \"Error: no test specified\" && exit 1",
     "db:dev": "npx prisma migrate dev && npx prisma generate",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "yarn build -- --watch"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
