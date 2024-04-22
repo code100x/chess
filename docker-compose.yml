@@ -1,9 +1,10 @@
 version: '3.8'
+
 services:
   backend:
     build:
       context: ./apps/backend
-      dockerfile: Dockerfile.backend  
+      dockerfile: Dockerfile.backend
     volumes:
       - ./apps/backend:/app
     ports:
@@ -14,7 +15,7 @@ services:
   frontend:
     build:
       context: ./apps/frontend
-      dockerfile: Dockerfile.frontend  
+      dockerfile: Dockerfile.frontend
     volumes:
       - ./apps/frontend:/app
     ports:
@@ -23,7 +24,7 @@ services:
   ws:
     build:
       context: ./apps/ws
-      dockerfile: Dockerfile.ws  
+      dockerfile: Dockerfile.ws
     volumes:
       - ./apps/ws:/app
     ports:
