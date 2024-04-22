@@ -7,7 +7,8 @@ export const addMove = async (
     startFen: string,
     endFen: string,
     moveNumber: number,
-    createdAt: Date
+    createdAt: Date,
+    timeTaken: number | null
 ) => {
     try {
         await db.$transaction([
@@ -20,6 +21,7 @@ export const addMove = async (
                 startFen,
                 endFen,
                 createdAt,
+                timeTaken,
               },
             }),
             db.game.update({

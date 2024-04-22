@@ -35,7 +35,7 @@ export const processWorker = async (response: string) => {
         const { type, payload } = parsedResponse;
         switch (type as WORKER_PROCESSES) {
             case WORKER_PROCESSES.ADD_MOVE:
-                await addMove(payload.from, payload.to, payload.gameId, payload.startFen, payload.endFen, payload.moveNumber, payload.createdAt);
+                await addMove(payload.from, payload.to, payload.gameId, payload.startFen, payload.endFen, payload.moveNumber, payload.createdAt, payload.timeTaken);
                 break;
             
             default:
