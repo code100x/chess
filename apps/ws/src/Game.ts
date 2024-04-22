@@ -43,13 +43,10 @@ export class Game {
   private timer: NodeJS.Timeout | null = null;
   private moveTimer: NodeJS.Timeout | null = null;
   public result: GAME_RESULT | null = null;
-  private player1MoveStoredTime: number = 0;
-  private player2MoveStoredTime: number = 0;
   private player1TimeConsumed = 0;
   private player2TimeConsumed = 0;
   private startTime = new Date(Date.now());
   private lastMoveTime = new Date(Date.now());
-  private gameStartTime: number = 0;
 
   constructor(
     player1UserId: string,
@@ -149,8 +146,6 @@ export class Game {
         },
       }),
     );
-    this.gameStartTime = time;
-    this.player1MoveStoredTime = time;
   }
 
   async createGameInDb() {
@@ -275,11 +270,6 @@ export class Game {
     }
 
     await this.addMoveToDb(move, moveTimestamp);
-    if (user.userId === this.player1UserId) {
-      this.player1MoveStoredTime = move.endTime;
-    } else {
-      this.player2MoveStoredTime = move.endTime;
-    }
     this.resetAbandonTimer();
     this.resetMoveTimer();
 

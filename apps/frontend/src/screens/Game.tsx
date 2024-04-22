@@ -64,7 +64,6 @@ export const Game = () => {
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
   const [myMoveStartTime, setMyMoveStartTime] = useState(0);
-  // const [opponentMoveStartTime, setOpponentMoveStartTime] = useState(0);
 
   useEffect(() => {
     if (!socket) {
