@@ -7,6 +7,7 @@ import { Suspense } from 'react';
 import { RecoilRoot } from 'recoil';
 import { useUser } from '@repo/store/useUser';
 import { Loader } from './components/Loader';
+import { Layout } from './layout';
 
 function App() {
   return (
@@ -25,9 +26,15 @@ function AuthApp() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={user ? <Game /> : <Login />} />
-        <Route path="/game/:gameId" element={user ? <Game /> : <Login />} />
+        <Route path="/" element={<Layout children={<Landing />} />} />
+        <Route
+          path="/login"
+          element={user ? <Layout children={<Game />} /> : <Login />}
+        />
+        <Route
+          path="/game/:gameId"
+          element={user ? <Layout children={<Game />} /> : <Login />}
+        />
       </Routes>
     </BrowserRouter>
   );
