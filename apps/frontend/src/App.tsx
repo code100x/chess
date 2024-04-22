@@ -7,6 +7,7 @@ import { Suspense } from 'react';
 import { RecoilRoot } from 'recoil';
 import { useUser } from '@repo/store/useUser';
 import { Loader } from './components/Loader';
+import { Spectate } from './screens/Spectate';
 
 function App() {
   return (
@@ -28,6 +29,10 @@ function AuthApp() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={user ? <Game /> : <Login />} />
         <Route path="/game/:gameId" element={user ? <Game /> : <Login />} />
+        <Route
+          path="/spectate/:gameId"
+          element={user ? <Spectate /> : <Login />}
+        />
       </Routes>
     </BrowserRouter>
   );

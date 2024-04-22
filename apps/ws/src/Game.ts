@@ -126,25 +126,32 @@ export class Game {
     }
 
     const time = new Date(Date.now()).getTime();
+    const initGameBroadcastMessage = JSON.stringify({
+      type: INIT_GAME,
+      payload: {
+        gameId: this.gameId,
+        whitePlayer: {
+          name: users.find((user) => user.id === this.player1UserId)?.name,
+          id: this.player1UserId,
+        },
+        blackPlayer: {
+          name: users.find((user) => user.id === this.player2UserId)?.name,
+          id: this.player2UserId,
+        },
+        fen: this.board.fen(),
+        startTime: time,
+        moves: [],
+      },
+    });
+
     SocketManager.getInstance().broadcast(
       this.gameId,
-      JSON.stringify({
-        type: INIT_GAME,
-        payload: {
-          gameId: this.gameId,
-          whitePlayer: {
-            name: users.find((user) => user.id === this.player1UserId)?.name,
-            id: this.player1UserId,
-          },
-          blackPlayer: {
-            name: users.find((user) => user.id === this.player2UserId)?.name,
-            id: this.player2UserId,
-          },
-          fen: this.board.fen(),
-          startTime: time,
-          moves: [],
-        },
-      }),
+      initGameBroadcastMessage,
+    );
+
+    SocketManager.getInstance().broadcastToSpectators(
+      this.gameId,
+      initGameBroadcastMessage,
     );
   }
 
@@ -274,20 +281,22 @@ export class Game {
     this.resetMoveTimer();
 
     this.lastMoveTime = moveTimestamp;
-    SocketManager.getInstance().broadcast(
-      this.gameId,
-      JSON.stringify({
-        type: MOVE,
-        payload: {
-          move: {
-            ...move,
-            startTime: move.startTime,
-            endTime: move.endTime,
-          },
-          player1TimeConsumed: this.player1TimeConsumed,
-          player2TimeConsumed: this.player2TimeConsumed,
+    const moveBroadcastMessage = JSON.stringify({
+      type: MOVE,
+      payload: {
+        move: {
+          ...move,
+          startTime: move.startTime,
+          endTime: move.endTime,
         },
-      }),
+        player1TimeConsumed: this.player1TimeConsumed,
+        player2TimeConsumed: this.player2TimeConsumed,
+      },
+    });
+    SocketManager.getInstance().broadcast(this.gameId, moveBroadcastMessage);
+    SocketManager.getInstance().broadcastToSpectators(
+      this.gameId,
+      moveBroadcastMessage,
     );
 
     if (this.board.isGameOver()) {
@@ -360,15 +369,16 @@ export class Game {
       },
     });
 
+    const gameEndedBroadcastMessage = JSON.stringify({
+      type: GAME_ENDED,
+      payload: {
+        result,
+        status,
+      },
+    });
     SocketManager.getInstance().broadcast(
       this.gameId,
-      JSON.stringify({
-        type: GAME_ENDED,
-        payload: {
-          result,
-          status,
-        },
-      }),
+      gameEndedBroadcastMessage,
     );
   }
 

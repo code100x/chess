@@ -10,6 +10,7 @@ import {
   GAME_NOT_FOUND,
   GAME_ALERT,
   GAME_ADDED,
+  SPECTATE_GAME,
 } from './messages';
 import { Game, isPromoting } from './Game';
 import { db } from './db';
@@ -161,6 +162,9 @@ export class GameManager {
         );
 
         SocketManager.getInstance().addUser(user, gameId);
+      }
+
+      if (message.type === SPECTATE_GAME) {
       }
     });
   }

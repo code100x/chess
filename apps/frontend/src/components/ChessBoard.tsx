@@ -47,7 +47,6 @@ export const ChessBoard = ({
   setMoves,
   moves,
   myMoveStartTime,
-  setMyMoveStartTime,
 }: {
   myColor: Color;
   gameId: string;
