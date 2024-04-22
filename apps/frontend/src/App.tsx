@@ -29,10 +29,7 @@ function AuthApp() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={user ? <Game /> : <Login />} />
         <Route path="/game/:gameId" element={user ? <Game /> : <Login />} />
-        <Route
-          path="/spectate/:gameId"
-          element={user ? <Spectate /> : <Login />}
-        />
+        <Route path="/spectate/:gameId" element={<Spectate />} />
       </Routes>
     </BrowserRouter>
   );
