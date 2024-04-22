@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  backend:
+    image: node:18
+    working_dir: /app
+    volumes:
+      - ./apps/backend:/app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+    depends_on:
+      - database
+
+  frontend:
+    image: node:18
+    working_dir: /app
+    volumes:
+      - ./apps/frontend:/app
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+
+  native:
+    image: node:18
+    working_dir: /app
+    volumes:
+      - ./apps/native:/app
+    ports:
+      - "19000:19000"
+    environment:
+      - NODE_ENV=development
+    command: npm start
+
+  ws:
+    image: node:18
+    working_dir: /app
+    volumes:
+      - ./apps/ws:/app
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+
+  database:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: postgres
+
+networks:
+  mynetwork:
+    driver: bridge
