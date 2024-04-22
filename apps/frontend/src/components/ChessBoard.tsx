@@ -7,6 +7,7 @@ import ChessSquare from './chess-board/ChessSquare';
 import NumberNotation from './chess-board/NumberNotation';
 import { drawArrow } from '../utils/canvas';
 import useWindowSize from '../hooks/useWindowSize';
+import Confetti from 'react-confetti';
 import MoveSound from '../../public/move.wav';
 import CaptureSound from '../../public/capture.wav';
 
@@ -69,7 +70,7 @@ export const ChessBoard = ({
   socket: WebSocket;
 }) => {
   const { height, width } = useWindowSize();
-  const [userSelectedMoveIndex, setuserSelectedMoveIndex] =
+  const [userSelectedMoveIndex, setUserSelectedMoveIndex] =
     useRecoilState(userSelectedMoveIndexAtom);
   const [moves, setMoves] = useRecoilState(movesAtom);
   const [lastMove, setLastMove] = useState<{ from: String; to: string } | null>(
@@ -90,6 +91,7 @@ export const ChessBoard = ({
     width > height
       ? Math.floor((height - OFFSET) / 8)
       : Math.floor((width - OFFSET) / 8);
+  const [gameOver, setGameOver] = useState(false);
   const moveAudio = new Audio(MoveSound);
   const captureAudio = new Audio(CaptureSound);
 
@@ -170,6 +172,10 @@ export const ChessBoard = ({
   useEffect(() => {
     if (userSelectedMoveIndex !== null) {
       const move = moves[userSelectedMoveIndex];
+      setLastMove({
+        from: move.from,
+        to: move.to,
+      })
       chess.load(move.after);
       setBoard(chess.board());
       return;
@@ -178,13 +184,12 @@ export const ChessBoard = ({
 
   useEffect(() => {
     if (userSelectedMoveIndex!==null) {
-      setuserSelectedMoveIndex(null);
       chess.reset();
       moves.forEach((move) => {
         chess.move({ from: move.from, to: move.to });
       });
       setBoard(chess.board());
-      setuserSelectedMoveIndex(null);
+      setUserSelectedMoveIndex(null);
     }
     else {
       setBoard(chess.board());
@@ -193,6 +198,7 @@ export const ChessBoard = ({
 
   return (
     <>
+      {gameOver && <Confetti />}
       <div className="flex relative">
         <div className="text-white-200 rounded-md overflow-hidden">
           {(isFlipped ? board.slice().reverse() : board).map((row, i) => {
@@ -231,7 +237,7 @@ export const ChessBoard = ({
                             chess.move({ from: move.from, to: move.to });
                           });
                           setBoard(chess.board());
-                          setuserSelectedMoveIndex(null);
+                          setUserSelectedMoveIndex(null);
                           return;
                         }
                         if (!from && square?.color !== chess.turn()) return;
@@ -266,12 +272,16 @@ export const ChessBoard = ({
                             }
                             if (moveResult) {
                               moveAudio.play();
+
                               if (moveResult?.captured) {
                                 captureAudio.play();
                               }
                               setMoves((prev) => [...prev, moveResult]);
                               setFrom(null);
                               setLegalMoves([]);
+                              if (moveResult.san.includes('#')) {
+                                setGameOver(true);
+                              }
                               socket.send(
                                 JSON.stringify({
                                   type: MOVE,
