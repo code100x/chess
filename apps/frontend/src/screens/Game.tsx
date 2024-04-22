@@ -26,8 +26,7 @@ export const GAME_TIME = 'game_time';
 const GAME_TIME_MS = 10 * 60 * 1000;
 
 export interface IMove {
-  from: Square;
-  to: Square;
+    from: Square; to: Square; piece: string
 }
 
 const moveAudio = new Audio(MoveSound);
@@ -104,7 +103,8 @@ export const Game = () => {
           }
           moveAudio.play();
           setBoard(chess.board());
-          setMoves((moves) => [...moves, move]);
+          const piece=chess.get(move.to)?.type
+          setMoves(moves => [...moves,{from:move.from,to:move.to,piece}])
           break;
         case GAME_OVER:
           setResult(message.payload.result);
@@ -222,8 +222,10 @@ export const Game = () => {
                 <div>
                   <div className='mb-4'>
                     {started && <div className="flex justify-between">
-                      <UserAvatar name={gameMetadata?.whitePlayer?.name ?? ''} />
-                      {getTimer(player1TimeConsumed)}
+                      <UserAvatar name={user.id === gameMetadata?.whitePlayer?.id
+                          ? gameMetadata?.blackPlayer?.name
+                          : gameMetadata?.whitePlayer?.name ?? ''} />
+                      {getTimer(user.id === gameMetadata?.whitePlayer?.id ? player2TimeConsumed : player1TimeConsumed)}
                     </div>}
                   </div>
                   <div>
@@ -246,13 +248,17 @@ export const Game = () => {
                     </div>
                   </div>
                   {started && <div className="mt-4 flex justify-between">
-                    <UserAvatar name={gameMetadata?.blackPlayer?.name ?? ''} />
-                    {getTimer(player2TimeConsumed)}
+                    <UserAvatar name={user.id === gameMetadata?.blackPlayer?.id
+                      ? gameMetadata?.blackPlayer?.name
+                      : gameMetadata?.whitePlayer?.name ?? ''} />
+                    {getTimer(user.id === gameMetadata?.blackPlayer?.id
+                            ? player2TimeConsumed
+                            : player1TimeConsumed)}
                   </div>}
                 </div>
               </div>
             </div>
-            <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10">
+            <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10 overflow-y-scroll no-scrollbar">
               {!started && (
                 <div className="pt-8">
                   {added ? (
