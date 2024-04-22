@@ -51,9 +51,6 @@ const MovesTable: React.FC<MovesTableProps> = ({ moves }) => {
   return (
     <div className="bg-black">
       <div className="bg-brown-600 rounded shadow">
-        <h2 className="text-lg font-bold mb-4 text-white text-center pt-2 ">
-          Moves Table
-        </h2>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <tbody>

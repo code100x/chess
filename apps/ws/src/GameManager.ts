@@ -10,7 +10,8 @@ import {
   GAME_NOT_FOUND,
   GAME_ALERT,
   GAME_ADDED,
-  SPECTATE_GAME,
+  SPECTATE_MESSAGE,
+  GAME_MESSAGE,
 } from './messages';
 import { Game, isPromoting } from './Game';
 import { db } from './db';
@@ -164,7 +165,14 @@ export class GameManager {
         SocketManager.getInstance().addUser(user, gameId);
       }
 
-      if (message.type === SPECTATE_GAME) {
+      if (message.type === GAME_MESSAGE) {
+        console.log(message);
+        console.log(user);
+        const gameId = message.payload.gameId;
+        const game = this.games.find((game) => game.gameId === gameId);
+        if (game) {
+          game.sendMessage(message.payload.message, user.userId);
+        }
       }
     });
   }

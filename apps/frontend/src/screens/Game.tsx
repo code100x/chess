@@ -11,6 +11,7 @@ import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
 import { UserAvatar } from '../components/UserAvatar';
 import { connectStorageEmulator } from 'firebase/storage';
+import { set } from 'firebase/database';
 
 // TODO: Move together, there's code repetition here
 export const INIT_GAME = 'init_game';
@@ -22,6 +23,7 @@ export const GAME_JOINED = 'game_joined';
 export const GAME_ALERT = 'game_alert';
 export const GAME_ADDED = 'game_added';
 export const USER_TIMEOUT = 'user_timeout';
+export const GAME_MESSAGE = 'game_message';
 
 const GAME_TIME_MS = 10 * 60 * 1000;
 
@@ -31,6 +33,11 @@ export interface IMove {
   piece: string;
   startTime: number;
   endTime: number;
+}
+
+export interface Message {
+  value: string;
+  userId: string;
 }
 
 const moveAudio = new Audio(MoveSound);
@@ -64,6 +71,8 @@ export const Game = () => {
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
   const [myMoveStartTime, setMyMoveStartTime] = useState(0);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [messageState, setMessageState] = useState('');
 
   useEffect(() => {
     if (!socket) {
@@ -168,6 +177,19 @@ export const Game = () => {
           setBoard(chess.board());
           break;
 
+        case GAME_MESSAGE:
+          console.log(message);
+          console.log(user);
+          setMessages((messages) => [
+            ...messages,
+            {
+              value: message.payload.message,
+              userId: message.payload.user.id,
+              name: message.payload.user.name,
+            },
+          ]);
+          break;
+
         default:
           alert(message.payload.message);
           break;
@@ -198,6 +220,17 @@ export const Game = () => {
       return () => clearInterval(interval);
     }
   }, [started, gameMetadata, user]);
+
+  const sendMessage = () => {
+    if (!messageState) return;
+    socket?.send(
+      JSON.stringify({
+        type: GAME_MESSAGE,
+        payload: { message: messageState, gameId },
+      }),
+    );
+    setMessageState('');
+  };
 
   const getTimer = (tempTime: number) => {
     const minutes = Math.floor(tempTime / (1000 * 60));
@@ -317,13 +350,53 @@ export const Game = () => {
                   )}
                 </div>
               )}
-              <div>
-                {moves.length > 0 && (
-                  <div className="mt-4">
-                    <MovesTable moves={moves} />
+              {started && (
+                <div className="flex flex-col">
+                  <div className="bg-brown-600 rounded-lg shadow-md p-6 h-[49%] overflow-hidden">
+                    <h2 className="text-2xl font-bold mb-4 text-white">
+                      Moves
+                    </h2>
+                    <div className="overflow-y-auto max-h-[21rem]">
+                      {moves.length > 0 && <MovesTable moves={moves} />}
+                    </div>
                   </div>
-                )}
-              </div>
+                  <div className="bg-brown-600 rounded-lg shadow-md p-6 mt-8 md:mt-0 h-[49%] flex flex-col justify-between overflow-hidden">
+                    <div>
+                      <h2 className="text-2xl font-bold mb-4 text-white">
+                        Chat Messages
+                      </h2>
+                      <div className="overflow-y-auto max-h-[17.5rem]">
+                        {messages.map((it, i) => (
+                          <div
+                            key={i}
+                            className={`flex ${it.userId === user.id ? 'justify-end' : 'justify-start'} mb-2`}
+                          >
+                            <div className="bg-gray-300 p-2 py-1 rounded">
+                              <p>{it.value}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mt-4 flex">
+                      <input
+                        type="text"
+                        value={messageState}
+                        onChange={(e) => {
+                          setMessageState(e.target.value);
+                        }}
+                        className="flex-1 border border-gray-300 rounded-md px-3 py-1 mr-2 focus:outline-none focus:border-blue-400"
+                      />
+                      <button
+                        onClick={sendMessage}
+                        className="bg-[#739552] text-white px-4 py-2 rounded-md"
+                      >
+                        Send
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

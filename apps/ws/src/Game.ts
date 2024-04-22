@@ -1,5 +1,5 @@
 import { Chess, Square } from 'chess.js';
-import { GAME_ENDED, INIT_GAME, MOVE } from './messages';
+import { GAME_ENDED, GAME_MESSAGE, INIT_GAME, MOVE } from './messages';
 import { db } from './db';
 import { randomUUID } from 'crypto';
 import { SocketManager, User } from './SocketManager';
@@ -310,6 +310,29 @@ export class Game {
     }
 
     this.moveCount++;
+  }
+
+  async sendMessage(message: string, userId: string) {
+    const user = await db.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    console.log('User', user);
+
+    const messageBroadcast = JSON.stringify({
+      type: GAME_MESSAGE,
+      payload: {
+        message,
+        user: {
+          id: userId,
+        },
+      },
+    });
+
+    console.log('Broadcasting message', messageBroadcast);
+
+    SocketManager.getInstance().broadcast(this.gameId, messageBroadcast);
   }
 
   getPlayer1TimeConsumed() {
