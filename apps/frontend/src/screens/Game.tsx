@@ -10,6 +10,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
 import { UserAvatar } from '../components/UserAvatar';
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/Avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../components/ui/DropDownMenu"
+
 
 // TODO: Move together, there's code repetition here
 export const INIT_GAME = 'init_game';
@@ -59,6 +67,9 @@ export const Game = () => {
   const [moves, setMoves] = useState<IMove[]>([]);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
+  const nameParts = user.name.split(" ");
+  const firstNameInitial = nameParts[0] ? nameParts[0][0] : "";
+  const lastNameInitial = nameParts[1] ? nameParts[1][0] : "";
 
   useEffect(() => {
     if (!socket) {
@@ -199,6 +210,40 @@ export const Game = () => {
 
   return (
     <div className="">
+      <header className="bg-[#262522] font-mono text-white pt-8 pb-9 w-full shadow-lg">
+          <div className="w-[96%] max-w-screen-lg mx-auto">
+              <div className="flex justify-between items-center">
+                  <div className="flex">
+                      <img className="w-8 h-8 mt-[-5px]" src="https://res.cloudinary.com/dcugqfvvg/image/upload/v1713654408/chess-svgrepo-com_m9g5p1.svg" />
+                      <h2 className="text-2xl">chess.100x</h2>
+                  </div>
+
+                  <div className="flex gap-6 lg:gap-14 items-center">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                            <Avatar>
+                              <AvatarImage src={user.picture} />
+                              <AvatarFallback>{firstNameInitial}{lastNameInitial}</AvatarFallback>
+                          </Avatar>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem className='cursor-pointer text-white' onClick={() => {
+                            fetch('http://localhost:3000/auth/logout', { method: 'GET' })
+                            .then(response => {
+                                if (response.redirected) {
+                                    window.location.href = response.url;
+                                }
+                            })
+                            .catch(function(err) {
+                                console.info(err);
+                            });
+                          }}>Logout</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                  </div>
+              </div>
+          </div>
+      </header> 
       {result && (
         <div className="justify-center flex pt-4 text-white">
           {result === 'WHITE_WINS' && 'White wins'}

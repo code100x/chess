@@ -30,6 +30,7 @@ router.get('/refresh', async (req: Request, res: Response) => {
       token,
       id: user.id,
       name: userDb?.name,
+      picture: userDb?.picture
     });
   } else {
     res.status(401).json({ success: false, message: 'Unauthorized' });

@@ -6,6 +6,7 @@ export interface User {
   token: string;
   id: string;
   name: string;
+  picture: string;
 }
 
 export const userAtom = atom<User>({
