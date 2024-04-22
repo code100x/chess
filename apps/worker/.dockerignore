@@ -1,0 +1,10 @@
+node_modules
+.build
+.next
+out
+.env
+dist
+.DS_Store
+npm-debug.log
+yarn-error.log
+.turbo
