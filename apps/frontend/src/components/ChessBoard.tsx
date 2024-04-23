@@ -1,40 +1,14 @@
 import { Chess, Color, PieceSymbol, Square } from 'chess.js';
 import { MouseEvent, useEffect, useState } from 'react';
-import { IMove, MOVE } from '../screens/Game';
-import LetterNotation from './chess-board/LetterNotation';
-import LegalMoveIndicator from './chess-board/LegalMoveIndicator';
-import ChessSquare from './chess-board/ChessSquare';
-import NumberNotation from './chess-board/NumberNotation';
-import { drawArrow } from '../utils/canvas';
-import useWindowSize from '../hooks/useWindowSize';
 import Confetti from 'react-confetti';
-import MoveSound from '../../public/move.wav';
-import CaptureSound from '../../public/capture.wav';
+import useWindowSize from '../hooks/useWindowSize';
+import { IMove } from '../screens/Game';
+import { drawArrow } from '../utils/canvas';
+import NumberNotation from './chess-board/NumberNotation';
 
-export function isPromoting(chess: Chess, from: Square, to: Square) {
-  if (!from) {
-    return false;
-  }
-
-  const piece = chess.get(from);
-
-  if (piece?.type !== 'p') {
-    return false;
-  }
-
-  if (piece.color !== chess.turn()) {
-    return false;
-  }
-
-  if (!['1', '8'].some((it) => to.endsWith(it))) {
-    return false;
-  }
-
-  return chess
-    .moves({ square: from, verbose: true })
-    .map((it) => it.to)
-    .includes(to);
-}
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import ChessSquare from './chess-board/ChessSquare';
 
 export const ChessBoard = ({
   gameId,
@@ -81,7 +55,6 @@ export const ChessBoard = ({
   const isMyTurn = myColor === chess.turn();
   const [legalMoves, setLegalMoves] = useState<string[]>([]);
 
-  const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
   const isFlipped = myColor === 'b';
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
   const OFFSET = 100;
@@ -90,14 +63,11 @@ export const ChessBoard = ({
       ? Math.floor((height - OFFSET) / 8)
       : Math.floor((width - OFFSET) / 8);
   const [gameOver, setGameOver] = useState(false);
-  const moveAudio = new Audio(MoveSound);
-  const captureAudio = new Audio(CaptureSound);
 
   const handleMouseDown = (
     e: MouseEvent<HTMLDivElement>,
     squareRep: string,
   ) => {
-    e.preventDefault();
     if (e.button === 2) {
       setArrowStart(squareRep);
     }
@@ -153,7 +123,7 @@ export const ChessBoard = ({
   }, [moves]);
 
   return (
-    <>
+    <DndProvider backend={HTML5Backend}>
       {gameOver && <Confetti />}
       <div className="flex relative">
         <div className="text-white-200 mr-10 rounded-md overflow-hidden">
@@ -182,119 +152,33 @@ export const ChessBoard = ({
                     rightClickedSquares.includes(squareRepresentation);
 
                   return (
-                    <div
-                      onClick={() => {
-                        if (!started) {
-                          return;
-                        }
-                        if (!from && square?.color !== chess.turn()) return;
-                        if (!isMyTurn) return;
-                        if (from === squareRepresentation) {
-                          setFrom(null);
-                        }
-
-                        if (!from) {
-                          setFrom(squareRepresentation);
-                          setLegalMoves(
-                            chess
-                              .moves({ verbose: true, square: square?.square })
-                              .map((move) => move.to),
-                          );
-                        } else {
-                          try {
-                            let moveResult;
-                            if (
-                              isPromoting(chess, from, squareRepresentation)
-                            ) {
-                              moveResult = chess.move({
-                                from,
-                                to: squareRepresentation,
-                                promotion: 'q',
-                              });
-                            } else {
-                              moveResult = chess.move({
-                                from,
-                                to: squareRepresentation,
-                              });
-                            }
-                            if (moveResult) {
-                              moveAudio.play();
-
-                              if (moveResult?.captured) {
-                                captureAudio.play();
-                              }
-
-                              if (moveResult.san.includes('#')) {
-                                setGameOver(true);
-                              }
-                            }
-                            socket.send(
-                              JSON.stringify({
-                                type: MOVE,
-                                payload: {
-                                  gameId,
-                                  move: {
-                                    from,
-                                    to: squareRepresentation,
-                                  },
-                                },
-                              }),
-                            );
-                            setFrom(null);
-                            setLegalMoves([]);
-                            setBoard(chess.board());
-                            console.log({
-                              from,
-                              to: squareRepresentation,
-                            });
-                            const piece=chess.get(squareRepresentation)?.type
-                            setMoves((moves) => [
-                              ...moves,
-                              { from, to: squareRepresentation,piece },
-                            ]);
-                          } catch (e) {}
-                        }
-                      }}
-                      style={{
-                        width: boxSize,
-                        height: boxSize,
-                      }}
+                    <ChessSquare
                       key={j}
-                      className={`${isRightClickedSquare ? (isMainBoxColor ? 'bg-[#CF664E]' : 'bg-[#E87764]') : isHighlightedSquare ? `${isMainBoxColor ? 'bg-[#BBCB45]' : 'bg-[#F4F687]'}` : isMainBoxColor ? 'bg-[#739552]' : 'bg-[#EBEDD0]'} ${''}`}
-                      onContextMenu={(e) => {
-                        e.preventDefault();
-                      }}
-                      onMouseDown={(e) => {
-                        handleMouseDown(e, squareRepresentation);
-                      }}
-                      onMouseUp={(e) => {
-                        handleMouseUp(e, squareRepresentation);
-                      }}
-                    >
-                      <div className="w-full justify-center flex h-full relative">
-                        {square && <ChessSquare square={square} />}
-                        {isFlipped
-                          ? i === 8 && (
-                              <LetterNotation
-                                label={labels[j]}
-                                isMainBoxColor={j % 2 !== 0}
-                              />
-                            )
-                          : i === 1 && (
-                              <LetterNotation
-                                label={labels[j]}
-                                isMainBoxColor={j % 2 !== 0}
-                              />
-                            )}
-                        {!!from &&
-                          legalMoves.includes(squareRepresentation) && (
-                            <LegalMoveIndicator
-                              isMainBoxColor={isMainBoxColor}
-                              isPiece={!!square?.type}
-                            />
-                          )}
-                      </div>
-                    </div>
+                      i={i}
+                      j={j}
+                      boxSize={boxSize}
+                      chess={chess}
+                      from={from}
+                      gameId={gameId}
+                      handleMouseDown={handleMouseDown}
+                      handleMouseUp={handleMouseUp}
+                      isFlipped={isFlipped}
+                      isHighlightedSquare={isHighlightedSquare}
+                      isMainBoxColor={isMainBoxColor}
+                      isRightClickedSquare={isRightClickedSquare}
+                      legalMoves={legalMoves}
+                      myColor={myColor}
+                      setBoard={setBoard}
+                      setFrom={setFrom}
+                      setGameOver={setGameOver}
+                      setLegalMoves={setLegalMoves}
+                      setMoves={setMoves}
+                      socket={socket}
+                      square={square}
+                      squareRepresentation={squareRepresentation}
+                      started={started}
+                      isMyTurn={isMyTurn}
+                    />
                   );
                 })}
               </div>
@@ -319,6 +203,6 @@ export const ChessBoard = ({
           onMouseUp={(e) => e.preventDefault()}
         ></canvas>
       </div>
-    </>
+    </DndProvider>
   );
 };
