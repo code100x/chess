@@ -21,7 +21,7 @@ export const getToken = async () => {
 
 export const clearToken = async () => {
   try {
-    await AsyncStorage.removeItem(TOKEN_KEY);a
+    await AsyncStorage.removeItem(TOKEN_KEY);
   } catch (error) {
     console.error('Error clearing token:', error);
   }
