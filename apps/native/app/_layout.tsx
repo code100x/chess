@@ -9,10 +9,9 @@ import { AuthProvider } from './context/authcontext';
 
 
 export default function RootLayoutNav() {
-    useEffect(() => {
-
-      router.replace("/login");
-    }, []);
+  useEffect(() => {
+    router.replace('/login');
+  }, []);
 
   return (
     <AuthProvider>
@@ -36,5 +35,6 @@ export default function RootLayoutNav() {
         </SafeAreaProvider>
       </GestureHandlerRootView>
     </AuthProvider>
+
   );
 }
