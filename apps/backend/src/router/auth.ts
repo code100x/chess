@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
-import { db } from '../db';
+import db from '@repo/db/client';
 const router = Router();
 
 const CLIENT_URL =

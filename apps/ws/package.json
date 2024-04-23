@@ -1,10 +1,10 @@
 {
-  "name": "backend1",
+  "name": "ws",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js --sourcemap && node dist/index.js"
+    "dev": "npx esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js --sourcemap && node dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +14,8 @@
     "@repo/db": "*",
     "@types/ws": "^8.5.10",
     "chess.js": "^1.0.0-beta.8",
+    "esbuild": "^0.20.2",
+    "eslint": "^8.57.0",
     "jsonwebtoken": "^9.0.2",
     "ws": "^8.16.0"
   },

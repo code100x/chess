@@ -1,0 +1,90 @@
+version: '3.8'
+
+networks:
+  chess100x:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+services:
+  postgres:
+    healthcheck:
+      test: pg_isready -h localhost -U postgres
+      interval: 2s
+      timeout: 5s
+      retries: 15
+    networks:
+      chess100x:
+        ipv4_address: 172.20.0.8
+    image: postgres:14-alpine
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=chess100x
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=chess100x
+  backend:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      chess100x:
+        ipv4_address: 172.20.0.5
+    ports:
+      - 3000:3000
+    command: yarn workspace backend dev
+    environment:
+      - PORT=3000
+    build:
+      args:
+        APP: backend
+        START_COMMAND: dev
+      context: .
+      dockerfile: ./Dockerfile.dev
+    entrypoint: '/bin/sh /usr/app/packages/db/init-db.sh'
+    volumes:
+      - ./init-db.sh:/usr/app/packages/db/init-db.sh
+      - ./apps/backend:/app/apps/backend
+      - /app/apps/backend/node_modules
+  frontend:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      chess100x:
+        ipv4_address: 172.20.0.6
+    ports:
+      - 5173:5173
+    command: yarn workspace frontend dev
+    environment:
+      - PORT=5173
+    build:
+      args:
+        APP: frontend
+        START_COMMAND: dev
+      context: .
+      dockerfile: ./Dockerfile.dev
+    volumes:
+      - ./apps/frontend:/app/apps/frontend
+      - /app/apps/frontend/node_modules
+  ws:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      chess100x:
+        ipv4_address: 172.20.0.7
+    ports:
+      - 8080:8080
+    command: yarn workspace ws dev
+    environment:
+      - PORT=8080
+    build:
+      args:
+        APP: ws
+        START_COMMAND: dev
+      context: .
+      dockerfile: ./Dockerfile.dev
+    volumes:
+      - ./apps/ws:/app/apps/ws
+      - /app/apps/ws/node_modules

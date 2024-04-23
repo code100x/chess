@@ -3,7 +3,7 @@ const GithubStrategy = require('passport-github2').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
 import passport from 'passport';
 import dotenv from 'dotenv';
-import { db } from './db';
+import db from '@repo/db/client';
 
 dotenv.config();
 const GOOGLE_CLIENT_ID =
