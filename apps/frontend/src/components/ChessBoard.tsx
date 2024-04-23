@@ -148,10 +148,27 @@ export const ChessBoard = ({
     }
   };
 
+  const getKingInCheckSquare = () => {
+    const kingColor = chess.turn();
+    const kingPiece = `k${kingColor}` as PieceSymbol;
+    const kingSquare = chess.board().flat().find((square) => square?.type === kingPiece);
+    return kingSquare?.square || '';
+  };
+
+  const clearCanvas = () => {
+    setRightClickedSquares([]);
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      ctx?.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  };
+  
   useEffect(() => {
     clearCanvas();
   }, [moves]);
 
+  let kingSquare: string = getKingInCheckSquare();
+  
   return (
     <>
       {gameOver && <Confetti />}
@@ -178,6 +195,7 @@ export const ChessBoard = ({
                     from === squareRepresentation ||
                     squareRepresentation === lastMoveFrom ||
                     squareRepresentation === lastMoveTo;
+                  const isKingInCheckSquare = kingSquare === squareRepresentation;
                   const isRightClickedSquare =
                     rightClickedSquares.includes(squareRepresentation);
 
@@ -260,7 +278,7 @@ export const ChessBoard = ({
                         height: boxSize,
                       }}
                       key={j}
-                      className={`${isRightClickedSquare ? (isMainBoxColor ? 'bg-[#CF664E]' : 'bg-[#E87764]') : isHighlightedSquare ? `${isMainBoxColor ? 'bg-[#BBCB45]' : 'bg-[#F4F687]'}` : isMainBoxColor ? 'bg-[#739552]' : 'bg-[#EBEDD0]'} ${''}`}
+                      className={`${isRightClickedSquare ? (isMainBoxColor ? 'bg-[#CF664E]' : 'bg-[#E87764]') : isKingInCheckSquare ? 'bg-[#FF6347]' : isHighlightedSquare ? `${isMainBoxColor ? 'bg-[#BBCB45]' : 'bg-[#F4F687]'}` : isMainBoxColor ? 'bg-[#739552]' : 'bg-[#EBEDD0]'} ${''}`}
                       onContextMenu={(e) => {
                         e.preventDefault();
                       }}
