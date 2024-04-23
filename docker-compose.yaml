@@ -67,6 +67,27 @@ services:
     volumes:
       - ./apps/frontend:/app/apps/frontend
       - /app/apps/frontend/node_modules
+  native:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      chess100x:
+        ipv4_address: 172.20.0.9
+    ports:
+      - 19000:19000
+    command: yarn workspace native dev
+    environment:
+      - PORT=19000
+    build:
+      args:
+        APP: native
+        START_COMMAND: dev
+      context: .
+      dockerfile: ./Dockerfile.dev
+    volumes:
+      - ./apps/native:/app/apps/native
+      - /app/apps/native/node_modules
   ws:
     depends_on:
       postgres:
