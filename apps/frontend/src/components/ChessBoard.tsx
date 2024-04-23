@@ -167,7 +167,7 @@ export const ChessBoard = ({
                 />
                 {(isFlipped ? row.slice().reverse() : row).map((square, j) => {
                   j = isFlipped ? 7 - (j % 8) : j % 8;
-
+                  const isPiece: boolean = !!square;
                   const isMainBoxColor = isFlipped
                     ? (i + j) % 2 === 0
                     : (i + j) % 2 !== 0;
@@ -175,9 +175,10 @@ export const ChessBoard = ({
                     '' +
                     i) as Square;
                   const isHighlightedSquare =
-                    from === squareRepresentation ||
-                    squareRepresentation === lastMoveFrom ||
-                    squareRepresentation === lastMoveTo;
+                    (from === squareRepresentation ||
+                      squareRepresentation === lastMoveFrom ||
+                      squareRepresentation === lastMoveTo) &&
+                    isPiece;
                   const isRightClickedSquare =
                     rightClickedSquares.includes(squareRepresentation);
 
@@ -187,26 +188,36 @@ export const ChessBoard = ({
                         if (!started) {
                           return;
                         }
+
                         if (!from && square?.color !== chess.turn()) return;
                         if (!isMyTurn) return;
-
-                        if (from === squareRepresentation) {
-                          setFrom(null);
-                        } else {
+                        if (from != squareRepresentation) {
                           setFrom(squareRepresentation);
-
-                          setLegalMoves(
-                            chess
-                              .moves({ verbose: true, square: square?.square })
-                              .map((move) => move.to),
-                          );
+                          if (isPiece) {
+                            setLegalMoves(
+                              chess
+                                .moves({
+                                  verbose: true,
+                                  square: square?.square,
+                                })
+                                .map((move) => move.to),
+                            );
+                          }
+                        } else {
+                          setFrom(null);
+                        }
+                        if (!isPiece) {
+                          setLegalMoves([]);
                         }
 
                         if (!from) {
                           setFrom(squareRepresentation);
                           setLegalMoves(
                             chess
-                              .moves({ verbose: true, square: square?.square })
+                              .moves({
+                                verbose: true,
+                                square: square?.square,
+                              })
                               .map((move) => move.to),
                           );
                         } else {
@@ -256,10 +267,10 @@ export const ChessBoard = ({
                               from,
                               to: squareRepresentation,
                             });
-                            const piece=chess.get(squareRepresentation)?.type
+                            const piece = chess.get(squareRepresentation)?.type;
                             setMoves((moves) => [
                               ...moves,
-                              { from, to: squareRepresentation,piece },
+                              { from, to: squareRepresentation, piece },
                             ]);
                           } catch (e) {}
                         }
