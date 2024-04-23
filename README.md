@@ -6,7 +6,6 @@
 - [Setup](#setup)
   - [Using Docker](#using-docker)
   - [Without Docker](#without-docker)
-- [Usage](#usage)
 - [Contributing](#contributing)
 
 ## Prerequisites
@@ -36,7 +35,12 @@ Before you begin, ensure you have met the following requirements
    `/packages/db`
    to `.env` in the same directory
 4. Replace the Google Client ID and Secret in the `/apps/backend/.env` file.
-5. Run the following command to start the application:
+5. Update the DatabaseURL in the `/packages/db/.env`
+    ```bash
+   DATABASE_URL="postgresql://postgres:chess100x@172.20.0.8:5432/chess100x"
+    ```
+7. Run `yarn db:dev` in the `/packages/db`
+8. Run the following command to start the application:
    ```bash
    docker-compose up
    ```
@@ -71,7 +75,7 @@ Before you begin, ensure you have met the following requirements
    `/packages/db`
    to `.env` in the same directory
 5. Replace the Google Client ID and Secret in the `/apps/backend/.env` file.
-6. Install dependencies:
+6. Install dependencies in the root dir:
    ```bash
    yarn install
    ```
@@ -79,14 +83,14 @@ Before you begin, ensure you have met the following requirements
    ```bash
    yarn run db:dev
    ```
-8. Start the development server:
+8. Start the development server in the root dir:
    ```bash
    yarn run dev
    ```
    
 ## Contributing
 
-We welcome contributions from the community! To contribute to CMS, follow these steps:
+We welcome contributions from the community! To contribute to Chess, follow these steps:
 
 1. Fork the repository.
 2. Create a new branch (`git checkout -b feature/fooBar`).
