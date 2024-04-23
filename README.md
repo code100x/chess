@@ -39,8 +39,7 @@ Before you begin, ensure you have met the following requirements
     ```bash
    DATABASE_URL="postgresql://postgres:chess100x@172.20.0.8:5432/chess100x"
     ```
-7. Run `yarn db:dev` in the `/packages/db`
-8. Run the following command to start the application:
+6. Run the following command in the root dir to launch all the services:
    ```bash
    docker-compose up
    ```
