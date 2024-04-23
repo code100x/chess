@@ -82,7 +82,7 @@ services:
     build:
       args:
         APP: native
-        START_COMMAND: dev
+        START_COMMAND: start
       context: .
       dockerfile: ./Dockerfile.dev
     volumes:
