@@ -9,6 +9,10 @@ import passport from 'passport';
 
 const app = express();
 
+const allowedHosts = process.env.ALLOWED_HOSTS
+  ? process.env.ALLOWED_HOSTS.split(',')
+  : ['http://localhost:5173'];
+
 dotenv.config();
 app.use(
   session({
@@ -22,10 +26,6 @@ app.use(
 initPassport();
 app.use(passport.initialize());
 app.use(passport.authenticate('session'));
-
-const allowedHosts = process.env.ALLOWED_HOSTS
-  ? process.env.ALLOWED_HOSTS.split(',')
-  : [];
 
 app.use(
   cors({

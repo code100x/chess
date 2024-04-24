@@ -247,12 +247,14 @@ export const ChessBoard = ({
                               from,
                               to: squareRepresentation,
                             });
-                            const piece=chess.get(squareRepresentation)?.type
+                            const piece = chess.get(squareRepresentation)?.type;
                             setMoves((moves) => [
                               ...moves,
-                              { from, to: squareRepresentation,piece },
+                              { from, to: squareRepresentation, piece },
                             ]);
-                          } catch (e) {}
+                          } catch (e) {
+                            console.error(e);
+                          }
                         }
                       }}
                       style={{

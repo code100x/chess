@@ -1,5 +1,5 @@
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const GithubStrategy = require('passport-github2').Strategy;
+const GithubStrategy = require('passport-github').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
 import passport from 'passport';
 import dotenv from 'dotenv';
@@ -69,7 +69,7 @@ export function initPassport() {
       {
         clientID: GITHUB_CLIENT_ID,
         clientSecret: GITHUB_CLIENT_SECRET,
-        callbackURL: '/auth/github/callback',
+        callbackURL: '/auth/oauth/github/callback',
       },
       async function (
         accessToken: string,
