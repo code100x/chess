@@ -2743,13 +2743,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/dotenv@^8.2.0":
-  "integrity" "sha512-ylSC9GhfRH7m1EUXBXofhgx4lUWmFeQDINW5oLuS+gxWdfUeW4zJdeVTYVkexEW+e2VUvlZR2kGnGGipAWR7kw=="
-  "resolved" "https://registry.npmjs.org/@types/dotenv/-/dotenv-8.2.0.tgz"
-  "version" "8.2.0"
-  dependencies:
-    "dotenv" "*"
-
 "@types/eslint@^8.56.5":
   "integrity" "sha512-Shavhk87gCtY2fhXDctcfS3e6FdxWkCx1iUZ9eEUbh7rTqlZT0/IzOkCOVt0fCjcFuZ9FPYfuezTBImfHCDBGQ=="
   "resolved" "https://registry.npmjs.org/@types/eslint/-/eslint-8.56.10.tgz"
