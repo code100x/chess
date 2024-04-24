@@ -29,6 +29,8 @@
     "express": "^4.19.2",
     "passport-github": "^1.1.0",
     "react": "^18.2.0",
+    "react-native-web": "^0.19.11",
+    "react-native-webview": "^13.6.4",
     "yarn": "^1.22.22"
   }
 }
