@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 import nock from 'nock';
-import router from '../apps/backend/src/router/auth.ts';
+import router from '../apps/backend/src/router/auth';
 
 const app = express();
 app.use(express.json());
@@ -10,8 +10,9 @@ app.use(router);
 describe("Authentication Routes", () => {
   beforeEach(() => {
     nock('https://github.com')
-      .get('/login/oauth/authorize')
-      .reply(302, {}, { 'Location': 'https://github.com/login/oauth/authorize?client_id=yourClientId&redirect_uri=yourRedirectUri&scope=user' });
+    .get('/login/oauth/authorize')
+    .reply(302, {}, { 'Location': 'https://github.com/login/oauth/authorize?client_id=yourClientId&redirect_uri=yourRedirectUri&scope=user' });
+    
   });
 
   afterEach(() => {

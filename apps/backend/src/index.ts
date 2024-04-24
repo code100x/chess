@@ -21,11 +21,11 @@ app.use(
     saveUninitialized: false,
     cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 },
   }),
-);
-
-initPassport();
-app.use(passport.initialize());
-app.use(passport.session());
+  );
+  
+  initPassport();
+  app.use(passport.initialize());
+  app.use(passport.session());
 
 app.use(
   cors({
