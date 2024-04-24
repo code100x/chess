@@ -67,7 +67,7 @@ router.get(
 
 router.get(
   '/github',
-  passport.authenticate('github', { scope: ['user', 'user:email'] }),
+  passport.authenticate('github', { scope: ['profile', 'email'] }),
 );
 
 router.get(
