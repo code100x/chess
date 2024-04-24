@@ -54,7 +54,8 @@ Before you begin, ensure you have met the following requirements
    ```bash
    cd chess
    ```
-3. (optional) Start a PostgreSQL database using Docker:
+3. `Either`\
+   Start a PostgreSQL database using Docker:
    ```bash
    docker run -d \
        --name chess100x \
@@ -68,6 +69,9 @@ Before you begin, ensure you have met the following requirements
    ```
    DATABASE_URL=postgresql://postgres:chess100x@localhost:5432/chess100x?schema=public
    ```
+   `Or`\
+   Get a PostgreSQL any cloud provider. \
+   Update the `DATABASE_URL` in the `/packages/db/.env.example`.
 4. Copy the `.env.example` in
    `/apps/frontend`
    `/apps/backend`
