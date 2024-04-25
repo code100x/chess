@@ -4,8 +4,8 @@ import { useStorageState } from "~/hooks/useStorageState";
 interface IAuthContext {
   signIn:()=> void;
   signOut:()=> void;
-  session:string | null;
-  isLoading:boolean;
+  session: ApiResponse | null;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<IAuthContext>({
