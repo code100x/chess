@@ -134,9 +134,6 @@ export const Game = () => {
           ]);
           break;
         case GAME_OVER:
-          console.log(
-            '\n\n\n\n\n\n\n\nhi\n\n\n\n\n\n\n\n\n\n\n\n\\n\n\n\n\n\n',
-          );
           setResult(message.payload.result);
           break;
 
