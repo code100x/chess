@@ -201,7 +201,7 @@ export const ChessBoard = ({
                   const piece = square && square.type;
                   const isKingInCheckSquare =
                     piece === 'k' &&
-                    square.color === chess.turn() &&
+                    square?.color === chess.turn() &&
                     chess.inCheck();
 
                   return (
