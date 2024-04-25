@@ -1,12 +1,15 @@
 import Google from '../assets/google.png';
 import Github from '../assets/github.png';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@repo/store/useUser';
+import { useEffect } from 'react';
 
 const BACKEND_URL =
   import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
 
 const Login = () => {
   const navigate = useNavigate();
+  const user = useUser();
 
   const google = () => {
     window.open(`${BACKEND_URL}/auth/google`, '_self');
@@ -15,6 +18,13 @@ const Login = () => {
   const github = () => {
     window.open(`${BACKEND_URL}/auth/github`, '_self');
   };
+
+  useEffect(()=>{
+    if(user){
+      navigate("/game/random");
+      return;
+    }
+  }, [])
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
