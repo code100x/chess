@@ -63,11 +63,22 @@ export const Game = () => {
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
 
   const leaveGame = () => {
+    if (!socket) {
+      return;
+    }
     const response = confirm('Are you sure you want to Resign?');
     if (response === true) {
       const result =
         user.id === gameMetadata?.blackPlayer.id ? 'WHITE_WINS' : 'BLACK_WINS';
       setResult(result);
+      socket.send(
+        JSON.stringify({
+          type: 'GAME_OVER',
+          payload: {
+            gameId,
+          },
+        }),
+      );
       navigate('/');
     }
   };
@@ -123,6 +134,9 @@ export const Game = () => {
           ]);
           break;
         case GAME_OVER:
+          console.log(
+            '\n\n\n\n\n\n\n\nhi\n\n\n\n\n\n\n\n\n\n\n\n\\n\n\n\n\n\n',
+          );
           setResult(message.payload.result);
           break;
 
