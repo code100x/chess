@@ -14,6 +14,8 @@ interface User {
 }
 
 router.get('/refresh', async (req: Request, res: Response) => {
+  console.log(req.headers.cookie);
+  
   if (req.user) {
     const user = req.user as User;
 
@@ -65,11 +67,15 @@ router.get(
     failureRedirect: '/login/failed',
   }),
   (req, res)=>{
+    console.log((req as any).user);
+    console.log(req.headers.cookie);
+    
     const ua =req.useragent;
     if(ua?.isMobile){
-      res.redirect("chess-mobile://");
+      res.redirect("chess-mobile://details");
     }else{
-      res.redirect(CLIENT_URL);
+      res.redirect("http://localhost:3000/auth/refresh");
+      // res.redirect(CLIENT_URL);
     }
   }
 );

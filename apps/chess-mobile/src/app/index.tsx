@@ -1,20 +1,26 @@
-import { Image, Text, View } from 'react-native';
+import { Image, Linking, Text, View } from 'react-native';
 import BackgroundSvg from '~/components/BackgroundSvg';
 
 import { LinearGradient } from 'expo-linear-gradient';
 import { Button } from '~/components/Button';
 import { Container } from '~/components/Container';
 import * as AuthSession from "expo-auth-session";
+import { openAuthSessionAsync } from 'expo-web-browser';
 
 const SERVER= "https://dynamic-honeybee-humorous.ngrok-free.app";
-const redirectUri = AuthSession.makeRedirectUri();
 
 export default function Home() {
 
   const handlePress = async() =>{
     console.log("hhaha");
-    console.log(redirectUri);
-    
+    try {
+      const authUrl = `${SERVER}/auth/google`;
+      await openAuthSessionAsync(authUrl);
+
+    } catch (error) {
+      console.log(error);
+      
+    }
   }
   
   return (
