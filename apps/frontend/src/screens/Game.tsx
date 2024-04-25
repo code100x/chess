@@ -231,7 +231,7 @@ export const Game = () => {
               onClick={leaveGame}
               className="bg-red-600 text-white font-bold rounded px-5 py-2"
             >
-              Leave
+              Resign
             </button>
           </div>
         </div>
