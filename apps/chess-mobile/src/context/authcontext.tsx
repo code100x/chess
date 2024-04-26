@@ -1,5 +1,8 @@
+import { openAuthSessionAsync } from "expo-web-browser";
 import { ReactNode, createContext, useContext } from "react";
 import { useStorageState } from "~/hooks/useStorageState";
+
+const SERVER= process.env.EXPO_PUBLIC_API_URL;
 
 interface IAuthContext {
   signIn:()=> void;
@@ -27,7 +30,15 @@ export function useAuth(){
 
 export function AuthProvider({children}:{children:ReactNode}){
   const [[isLoading, session], setSession] = useStorageState('session');
-  const signIn = () =>{}
+  const signIn = async () => {
+    try {
+      const authUrl = `${SERVER}/auth/google`;
+      await openAuthSessionAsync(authUrl);
+    } catch (error) {
+      console.log(error);
+      
+    }
+  }
   const signOut = () =>{}
 
   return (

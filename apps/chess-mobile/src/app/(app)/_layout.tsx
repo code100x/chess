@@ -13,8 +13,9 @@ export default function Layout() {
       </View>
     )
   }
+  if(!session) {
+    return <Redirect href="/sign-in" />
+  }
 
-  return (
-    <Text>Hell</Text>
-  );
+  return <Stack/>
 }
