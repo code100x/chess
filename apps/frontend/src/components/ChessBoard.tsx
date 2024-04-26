@@ -125,7 +125,7 @@ export const ChessBoard = ({
       if (canvas) {
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          drawArrow(ctx, arrowStart, stoppedAtSquare, isFlipped);
+          drawArrow(ctx, arrowStart, stoppedAtSquare, isFlipped , boxSize);
         }
       }
       setArrowStart(null);
@@ -185,7 +185,7 @@ export const ChessBoard = ({
                   const piece = square && square.type;
                   const isKingInCheckSquare =
                     piece === 'k' &&
-                    square.color === chess.turn() &&
+                    square?.color === chess.turn() &&
                     chess.inCheck();
 
                   return (
