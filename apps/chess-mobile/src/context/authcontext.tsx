@@ -6,7 +6,8 @@ const SERVER= process.env.EXPO_PUBLIC_API_URL;
 
 interface IAuthContext {
   signIn:()=> void;
-  signOut:()=> void;
+  signOut: () => void;
+  setCookie: (value: string) => void;
   session: ApiResponse | null;
   isLoading: boolean;
 }
@@ -15,7 +16,8 @@ const AuthContext = createContext<IAuthContext>({
   isLoading:false,
   session:null,
   signIn:() => {},
-  signOut:() => {},
+  signOut: () => { },
+  setCookie: () => {}
 });
 
 export function useAuth(){
@@ -36,13 +38,17 @@ export function AuthProvider({children}:{children:ReactNode}){
       await openAuthSessionAsync(authUrl);
     } catch (error) {
       console.log(error);
-      
     }
   }
+  
+  const setCookie = (value: string) => {
+    setSession(value);
+  }
+
   const signOut = () =>{}
 
   return (
-    <AuthContext.Provider value={{session, isLoading, signIn, signOut}}>
+    <AuthContext.Provider value={{session, isLoading, signIn, signOut, setCookie}}>
       {children}
     </AuthContext.Provider>
   )

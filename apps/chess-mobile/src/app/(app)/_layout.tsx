@@ -4,8 +4,7 @@ import { Text, View } from 'react-native';
 
 export default function Layout() {
   const { session, isLoading } = useAuth();
-  console.log(isLoading);
-  console.log(session);
+  
   if (isLoading) {
     return (
       <View className='bg-red-500 flex-1 justify-center'>
@@ -14,7 +13,7 @@ export default function Layout() {
     )
   }
   if(!session) {
-    return <Redirect href="/sign-in" />
+    return <Redirect href={"/sign-in"} />
   }
 
   return <Stack/>
