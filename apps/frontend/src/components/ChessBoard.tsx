@@ -13,7 +13,11 @@ import CaptureSound from '../../public/capture.wav';
 
 import { useRecoilState } from 'recoil';
 
-import { isBoardFlippedAtom, movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
+import {
+  isBoardFlippedAtom,
+  movesAtom,
+  userSelectedMoveIndexAtom,
+} from '@repo/store/chessBoard';
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
   if (!from) {
@@ -71,7 +75,7 @@ export const ChessBoard = ({
 }) => {
   const { height, width } = useWindowSize();
 
-  const [isFlipped, setIsFlipped] = useRecoilState(isBoardFlippedAtom)
+  const [isFlipped, setIsFlipped] = useRecoilState(isBoardFlippedAtom);
   const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
     userSelectedMoveIndexAtom,
   );
@@ -107,11 +111,11 @@ export const ChessBoard = ({
     }
   };
 
-  useEffect(()=>{
-    if(myColor === "b") {
-      setIsFlipped(true)
+  useEffect(() => {
+    if (myColor === 'b') {
+      setIsFlipped(true);
     }
-  },[myColor])
+  }, [myColor]);
 
   const clearCanvas = () => {
     setRightClickedSquares([]);
@@ -230,6 +234,12 @@ export const ChessBoard = ({
                   const isRightClickedSquare =
                     rightClickedSquares.includes(squareRepresentation);
 
+                  const piece = square && square.type;
+                  const isKingInCheckSquare =
+                    piece === 'k' &&
+                    square?.color === chess.turn() &&
+                    chess.inCheck();
+
                   return (
                     <div
                       onClick={() => {
@@ -307,7 +317,7 @@ export const ChessBoard = ({
                         height: boxSize,
                       }}
                       key={j}
-                      className={`${isRightClickedSquare ? (isMainBoxColor ? 'bg-[#CF664E]' : 'bg-[#E87764]') : isHighlightedSquare ? `${isMainBoxColor ? 'bg-[#BBCB45]' : 'bg-[#F4F687]'}` : isMainBoxColor ? 'bg-[#739552]' : 'bg-[#EBEDD0]'}`}
+                      className={`${isRightClickedSquare ? (isMainBoxColor ? 'bg-[#CF664E]' : 'bg-[#E87764]') : isKingInCheckSquare ? 'bg-[#FF6347]' : isHighlightedSquare ? `${isMainBoxColor ? 'bg-[#BBCB45]' : 'bg-[#F4F687]'}` : isMainBoxColor ? 'bg-[#739552]' : 'bg-[#EBEDD0]'} ${''}`}
                       onContextMenu={(e) => {
                         e.preventDefault();
                       }}
