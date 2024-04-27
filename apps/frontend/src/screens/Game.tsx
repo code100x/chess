@@ -22,6 +22,7 @@ export const GAME_ALERT = 'game_alert';
 export const GAME_ADDED = 'game_added';
 export const USER_TIMEOUT = 'user_timeout';
 export const GAME_TIME = 'game_time';
+export const GAME_ENDED = 'game_ended';
 
 const GAME_TIME_MS = 10 * 60 * 1000;
 
@@ -147,6 +148,16 @@ export const Game = () => {
             setOppotentTimer(message.payload.player2Time);
           }
           break;
+        
+        case GAME_ENDED:
+            setResult((p)=>message.payload.result);
+            setStarted(false);
+            setPlayer1TimeConsumed(p => 0);
+            setPlayer2TimeConsumed(p => 0);
+            setTimeout(()=>{
+              navigate("/");
+            },4000);
+            break;
 
         default:
           alert(message.payload.message);
@@ -201,8 +212,8 @@ export const Game = () => {
     <div className="">
       {result && (
         <div className="justify-center flex pt-4 text-white">
-          {result === 'WHITE_WINS' && 'White wins'}
-          {result === 'BLACK_WINS' && 'Black wins'}
+          {result === 'WHITE_WINS' && (user.id === gameMetadata?.whitePlayer.id ? 'You won' : `${gameMetadata?.whitePlayer.name} wins`)}
+          {result === 'BLACK_WINS' && (user.id === gameMetadata?.blackPlayer.id ? 'You won' : `${gameMetadata?.blackPlayer.name} wins`)}
           {result === 'DRAW' && 'Draw'}
         </div>
       )}
