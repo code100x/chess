@@ -32,6 +32,35 @@ export function initPassport() {
     );
   }
 
+  async function addUserToDb(profile: any, provider: any) {
+    const user = await db.user.upsert({
+      create: {
+        email: profile.emails[0].value,
+        name: profile.displayName,
+        provider: provider,
+      },
+      update: {
+        name: profile.displayName,
+      },
+      where: {
+        email: profile.emails[0].value,
+      },
+    });
+    if (user){
+      await db.rating.upsert({
+        create: {
+          userId:user.id
+        },
+        update: {
+  
+        },
+        where: {
+          userId : user.id
+        },
+      });
+    }
+    return user
+  }
   passport.use(
     new GoogleStrategy(
       {
@@ -45,19 +74,7 @@ export function initPassport() {
         profile: any,
         done: (error: any, user?: any) => void,
       ) {
-        const user = await db.user.upsert({
-          create: {
-            email: profile.emails[0].value,
-            name: profile.displayName,
-            provider: 'GOOGLE',
-          },
-          update: {
-            name: profile.displayName,
-          },
-          where: {
-            email: profile.emails[0].value,
-          },
-        });
+        const user = await addUserToDb(profile,'GOOGLE')
 
         done(null, user);
       },
@@ -77,19 +94,7 @@ export function initPassport() {
         profile: any,
         done: (error: any, user?: any) => void,
       ) {
-        const user = await db.user.upsert({
-          create: {
-            email: profile.emails[0].value,
-            name: profile.displayName,
-            provider: 'GITHUB',
-          },
-          update: {
-            name: profile.displayName,
-          },
-          where: {
-            email: profile.emails[0].value,
-          },
-        });
+        const user = await addUserToDb(profile,'GITHUB')
 
         done(null, user);
       },

@@ -38,6 +38,98 @@ export function isPromoting(chess: Chess, from: Square, to: Square) {
     .includes(to);
 }
 
+export async function fetchPlayerRatings(userId: string, timeControl: string) {
+  const rating = await db.rating.findFirst({
+    where: {
+      userId: userId
+    }
+  })
+  if (rating) {
+    if (timeControl == 'CLASSICAL') {
+      return rating.classic
+    } else if (timeControl == 'RAPID') {
+      return rating.rapid
+    } else if (timeControl == 'BLITZ') {
+      return rating.blitz
+    } else if (timeControl == 'BULLET') {
+      return rating.bullet
+    }
+  }
+}
+
+export async function fetchExpectedRating(playerRating: number, opponenetRating: number) {
+  let qA = Math.pow(10, (playerRating / 400))
+  let qB = Math.pow(10, (opponenetRating / 400))
+  let eA = qA / (qA + qB)
+  let k = 20 // TODO:need to add a method to select different K-factor based on condition. 
+  let win = Math.round(k * (1 - eA))
+  let draw = Math.round(k * (0.5 - eA))
+  let lose = Math.round(k * (0 - eA))
+  return {
+    win,
+    draw,
+    lose
+  }
+}
+
+export async function updatePlayersRating(gameFromDb:any) {
+  console.log("gameFromDb -- ",gameFromDb)
+  let whitePlayerRating = await fetchPlayerRatings(gameFromDb?.whitePlayerId, gameFromDb?.timeControl) as number
+  let blackPlayerRating = await fetchPlayerRatings(gameFromDb?.blackPlayerId, gameFromDb?.timeControl) as number
+
+  const whitePlayerExpected = await fetchExpectedRating(whitePlayerRating, blackPlayerRating)
+  const blackPlayerExpected = await fetchExpectedRating(blackPlayerRating, whitePlayerRating)
+
+
+  if (gameFromDb.result == 'WHITE_WINS') {
+    whitePlayerRating = whitePlayerRating + whitePlayerExpected.win
+    blackPlayerRating = blackPlayerRating + blackPlayerExpected.lose
+  } else if (gameFromDb.result == 'BLACK_WINS') {
+    whitePlayerRating = whitePlayerRating + whitePlayerExpected.lose
+    blackPlayerRating = blackPlayerRating + blackPlayerExpected.win
+  } else {
+    whitePlayerRating = whitePlayerRating + whitePlayerExpected.draw
+    blackPlayerRating = blackPlayerRating + blackPlayerExpected.draw
+  }
+
+ let whitePlayerRatingDb = await db.rating.findFirst({
+    where : {
+      userId : gameFromDb?.whitePlayerId
+    }
+  })
+
+  await db.rating.update({
+    data:{
+      classic : gameFromDb?.timeControl == 'CLASSICAL' ? whitePlayerRating : whitePlayerRatingDb?.classic,
+      bullet : gameFromDb?.timeControl == 'BULLET' ? whitePlayerRating : whitePlayerRatingDb?.bullet,
+      rapid : gameFromDb?.timeControl == 'RAPID' ? whitePlayerRating : whitePlayerRatingDb?.rapid,
+      blitz : gameFromDb?.timeControl == 'BLITZ' ? whitePlayerRating : whitePlayerRatingDb?.blitz
+    },
+    where :{
+      userId : gameFromDb.whitePlayerId
+    }
+  })
+
+  let blackPlayerRatingDb = await db.rating.findFirst({
+    where : {
+      userId : gameFromDb?.whitePlayerId
+    }
+  })
+
+  await db.rating.update({
+    data:{
+      classic : gameFromDb?.timeControl == 'CLASSICAL' ? blackPlayerRating : blackPlayerRatingDb?.classic,
+      bullet : gameFromDb?.timeControl == 'BULLET' ? blackPlayerRating : blackPlayerRatingDb?.bullet,
+      rapid : gameFromDb?.timeControl == 'RAPID' ? blackPlayerRating : blackPlayerRatingDb?.rapid,
+      blitz : gameFromDb?.timeControl == 'BLITZ' ? blackPlayerRating : blackPlayerRatingDb?.blitz
+    },
+    where :{
+      userId : gameFromDb?.blackPlayerId
+    }
+  })
+
+}
+
 export class Game {
   public gameId: string;
   public player1UserId: string;
@@ -51,6 +143,7 @@ export class Game {
   private player2TimeConsumed = 0;
   private startTime = new Date(Date.now());
   private lastMoveTime = new Date(Date.now());
+  private timeControl = ''
 
   constructor(player1UserId: string, player2UserId: string | null, gameId?: string, startTime?: Date) {
     this.player1UserId = player1UserId;
@@ -124,6 +217,9 @@ export class Game {
       return;
     }
 
+    const player1rating = await fetchPlayerRatings(this.player1UserId, this.timeControl) as number
+    const player2rating = await fetchPlayerRatings(this.player2UserId, this.timeControl) as number
+
     SocketManager.getInstance().broadcast(
       this.gameId,
       JSON.stringify({
@@ -133,10 +229,14 @@ export class Game {
           whitePlayer: {
             name: users.find((user) => user.id === this.player1UserId)?.name,
             id: this.player1UserId,
+            rating: player1rating,
+            expectedRating: await fetchExpectedRating(player1rating, player2rating)
           },
           blackPlayer: {
             name: users.find((user) => user.id === this.player2UserId)?.name,
             id: this.player2UserId,
+            rating: player2rating,
+            expectedRating: await fetchExpectedRating(player2rating, player1rating)
           },
           fen: this.board.fen(),
           moves: [],
@@ -152,7 +252,7 @@ export class Game {
     const game = await db.game.create({
       data: {
         id: this.gameId,
-        timeControl: 'CLASSICAL',
+        timeControl: 'RAPID',
         status: 'IN_PROGRESS',
         startAt: this.startTime,
         currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
@@ -173,6 +273,7 @@ export class Game {
       },
     });
     this.gameId = game.id;
+    this.timeControl = game.timeControl
   }
 
   async addMoveToDb(move: { from: string; to: string }, moveTimestamp: Date) {
@@ -267,11 +368,11 @@ export class Game {
 
     if (this.board.isGameOver()) {
       const result = this.board.isDraw()
-      ? 'DRAW'
-      : this.board.turn() === 'b'
-        ? 'WHITE_WINS'
-        : 'BLACK_WINS';
-        
+        ? 'DRAW'
+        : this.board.turn() === 'b'
+          ? 'WHITE_WINS'
+          : 'BLACK_WINS';
+
       this.endGame("COMPLETED", result);
     }
 
@@ -314,7 +415,17 @@ export class Game {
   }
 
   async endGame(status: GAME_STATUS, result: GAME_RESULT) {
-    await db.game.update({
+
+    let gameDb = await db.game.findFirst({
+      where :{
+        id : this.gameId
+      }
+    })
+    if (!gameDb){
+      return
+    }
+    if (gameDb?.status == "IN_PROGRESS"){
+    gameDb = await db.game.update({
       data: {
         status,
         result: result,
@@ -323,7 +434,7 @@ export class Game {
         id: this.gameId,
       },
     });
-
+    await updatePlayersRating(gameDb)
     SocketManager.getInstance().broadcast(
       this.gameId,
       JSON.stringify({
@@ -335,7 +446,7 @@ export class Game {
       }),
     );
   }
-
+}
   setTimer(timer: NodeJS.Timeout) {
     this.timer = timer;
   }

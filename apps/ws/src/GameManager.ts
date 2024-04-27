@@ -10,8 +10,9 @@ import {
   GAME_NOT_FOUND,
   GAME_ALERT,
   GAME_ADDED,
+  GAME_ENDED,
 } from './messages';
-import { Game, isPromoting } from './Game';
+import { Game, fetchExpectedRating, fetchPlayerRatings, isPromoting } from './Game';
 import { db } from './db';
 import { SocketManager, User } from './SocketManager';
 import { Square } from 'chess.js';
@@ -139,7 +140,37 @@ export class GameManager {
 
         console.log(availableGame.getPlayer1TimeConsumed());
         console.log(availableGame.getPlayer2TimeConsumed());
+        let blackPlayerRating = await fetchPlayerRatings(gameFromDb.blackPlayer.id,gameFromDb.timeControl) as number
+        let whitePlayerRating = await fetchPlayerRatings(gameFromDb.whitePlayer.id,gameFromDb.timeControl) as number
+        console.log("gameFromDb?.status 0:: ",gameFromDb?.status )
+        if (gameFromDb?.status != 'IN_PROGRESS'){
+          user.socket.send(
+            JSON.stringify({
+              type: GAME_ENDED,
+              payload: {
+                result : gameFromDb?.result,
+                status : gameFromDb?.status,
+                gameId,
+                moves: gameFromDb.moves,
+                blackPlayer: {
+                  id: gameFromDb.blackPlayer.id,
+                  name: gameFromDb.blackPlayer.name,
+                  rating: blackPlayerRating
+                },
+                whitePlayer: {
+                  id: gameFromDb.whitePlayer.id,
+                  name: gameFromDb.whitePlayer.name,
+                  rating: whitePlayerRating
+                },
+                player1TimeConsumed: availableGame.getPlayer1TimeConsumed(),
+                player2TimeConsumed: availableGame.getPlayer2TimeConsumed(),
+              },
+            }),
+          );
+          return;
+        }
 
+        console.log("gameFromDb?.status :: ",gameFromDb?.status )
         user.socket.send(
           JSON.stringify({
             type: GAME_JOINED,
@@ -149,10 +180,14 @@ export class GameManager {
               blackPlayer: {
                 id: gameFromDb.blackPlayer.id,
                 name: gameFromDb.blackPlayer.name,
+                rating: blackPlayerRating,
+                expectedRating : await fetchExpectedRating(blackPlayerRating,whitePlayerRating)
               },
               whitePlayer: {
                 id: gameFromDb.whitePlayer.id,
                 name: gameFromDb.whitePlayer.name,
+                rating: whitePlayerRating,
+                expectedRating : await fetchExpectedRating(whitePlayerRating,blackPlayerRating)
               },
               player1TimeConsumed: availableGame.getPlayer1TimeConsumed(),
               player2TimeConsumed: availableGame.getPlayer2TimeConsumed(),
