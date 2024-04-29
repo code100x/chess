@@ -12,6 +12,7 @@
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
     "@react-navigation/native": "^6.1.7",
+    "base-64": "^1.0.0",
     "expo": "~50.0.7",
     "expo-auth-session": "~5.4.0",
     "expo-constants": "~15.4.5",

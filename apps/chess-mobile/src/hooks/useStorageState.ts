@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useCallback, useEffect, useReducer } from 'react';
 
@@ -60,6 +61,7 @@ export function useStorageState(key: string): [AuthState<ApiResponse>, (value:st
       if (value) {
         await authStatus();
       }
+      router.replace('/');
     },
     [key]
   );

@@ -3,7 +3,7 @@ import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import useragent from 'express-useragent';
 import { db } from '../db';
-import fs from "fs/promises";
+import base64 from "base-64";
 const router = Router();
 router.use(useragent.express());
 const CLIENT_URL =
@@ -15,11 +15,7 @@ interface User {
 }
 
 router.get('/refresh', async (req: Request, res: Response) => {
-  console.log(req);
-  // fs.writeFile('test.json',req,{})
-  
   console.log(req.headers.cookie);
-  
   if (req.user) {
     const user = req.user as User;
 
@@ -71,20 +67,24 @@ router.get(
     failureRedirect: '/login/failed',
   }),
   (req, res) => {
-    const cookies = req.headers.cookie?.split(";").map(cookie => cookie.trim());
-    const authCookie = cookies?.find(cookie => cookie.startsWith("connect.sid"));
-    console.log("authCookie", authCookie);
-    
-    const ua =req.useragent;
-    if(ua?.isMobile){
-      res.redirect(`chess-mobile://sign-in?cookie=${authCookie}`);
-    }else{
-      res.redirect("http://localhost:3000/auth/refresh");
-      // res.redirect(CLIENT_URL);
-    }
+    res.redirect("/auth/capture-mode")
   }
 );
 
+router.get("/capture-mode", (req, res) => {
+  const cookies = req.headers.cookie?.split(";").map(cookie => cookie.trim());
+  const authCookie = cookies?.find(cookie => cookie.startsWith("connect.sid"));
+  const token = base64.encode(authCookie!);
+  console.log("authCookie", token);
+
+  const ua =req.useragent;
+  if(ua?.isMobile){
+    res.redirect(`chess-mobile://sign-in?cookie=${token}`);
+  }else{
+    res.redirect(`/auth/refresh`);
+    // res.redirect(CLIENT_URL);
+  }
+});
 router.get(
   '/github',
   passport.authenticate('github', { scope: ['profile', 'email'] }),
