@@ -108,33 +108,42 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-        ) : item.title === 'login' && !user ? null : item.title === 'logout' &&
-          user ? null : (
-          <a
-            key={item.title}
-            href={item.href}
-            onClick={() => {
-              if (setOpen) setOpen(false);
-            }}
-            className={cn(
-              buttonVariants({ variant: 'ghost' }),
-              'group relative flex h-12 justify-start',
-              location.pathname === item.href &&
-                'bg-muted font-bold hover:bg-muted',
-            )}
+        ) : (
+          <div
+            hidden={
+              (user && item.title == 'Login') ||
+              (!user && item.title == 'Logout')
+                ? true
+                : false
+            }
           >
-            <item.icon className={cn('h-5 w-5', item.color)} />
-            <span
+            {' '}
+            <a
+              key={item.title}
+              href={item.href}
+              onClick={() => {
+                if (setOpen) setOpen(false);
+              }}
               className={cn(
-                'absolute left-12 text-base duration-200',
-                !isOpen && className,
+                buttonVariants({ variant: 'ghost' }),
+                'group relative flex h-12 justify-start',
+                location.pathname === item.href &&
+                  'bg-muted font-bold hover:bg-muted',
               )}
             >
-              {item.title}
-            </span>
-          </a>
+              <item.icon className={cn('h-5 w-5', item.color)} />
+              <span
+                className={cn(
+                  'absolute left-12 text-base duration-200',
+                  !isOpen && className,
+                )}
+              >
+                {item.title}
+              </span>
+            </a>
+          </div>
         ),
-      )}{' '}
+      )}
     </nav>
   );
 }
