@@ -1,4 +1,4 @@
-import { Chess, Square } from 'chess.js';
+import { Chess, Move, Square } from 'chess.js';
 import {
   GAME_ENDED,
   INIT_GAME,
@@ -175,7 +175,8 @@ export class Game {
     this.gameId = game.id;
   }
 
-  async addMoveToDb(move: { from: string; to: string }, moveTimestamp: Date) {
+  async addMoveToDb(move: Move, moveTimestamp: Date) {
+    
     await db.$transaction([
       db.move.create({
         data: {
@@ -183,16 +184,16 @@ export class Game {
           moveNumber: this.moveCount + 1,
           from: move.from,
           to: move.to,
-          // Todo: Fix start fen
-          startFen: this.board.fen(),
-          endFen: this.board.fen(),
+          before: move.before,
+          after: move.after,
           createdAt: moveTimestamp,
           timeTaken: moveTimestamp.getTime() - this.lastMoveTime.getTime(),
+          san: move.san
         },
       }),
       db.game.update({
         data: {
-          currentFen: this.board.fen(),
+          currentFen: move.after,
         },
         where: {
           id: this.gameId,
@@ -203,11 +204,9 @@ export class Game {
 
   async makeMove(
     user: User,
-    move: {
-      from: Square;
-      to: Square;
-    },
+    move: Move
   ) {
+    
     // validate the type of move using zod
     if (this.board.turn() === 'w' && user.userId !== this.player1UserId) {
       return;
