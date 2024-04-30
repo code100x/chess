@@ -10,7 +10,6 @@ import {
 } from '@/components/subnav-accordian';
 import { useEffect, useState } from 'react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
-
 import { type LucideIcon } from 'lucide-react';
 
 export interface NavItem {
@@ -44,7 +43,7 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
   }, [isOpen]);
 
   return (
-    <nav className="space-y-2 dark">
+    <nav className="dark">
       {items.map((item) =>
         item.isChidren ? (
           <Accordion
