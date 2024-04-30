@@ -23,7 +23,7 @@ export function PlayCard() {
       </CardHeader>
       <CardContent className="grid gap-1">
         <GameModeComponent
-          icon={<LightningBoltIcon className="mt-px h-5 w-5" />}
+          icon={<LightningBoltIcon />}
           title="Play Online"
           description="Play vs a Person of Similar Skill"
           onClick={() => {

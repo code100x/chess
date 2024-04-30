@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { MenuIcon } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { SideNav } from '@/components/side-nav';
-import { NavItems } from '@/components/constants/side-nav';
+import { UpperNavItems, LowerNavItems } from '@/components/constants/side-nav';
 
 export const MobileSidebar = () => {
   const [open, setOpen] = useState(false);
@@ -27,7 +27,8 @@ export const MobileSidebar = () => {
         </SheetTrigger>
         <SheetContent side="left" className="w-72 text-muted-foreground">
           <div className="px-1 py-6 pt-16">
-            <SideNav items={NavItems} setOpen={setOpen} />
+            <SideNav items={UpperNavItems} setOpen={setOpen} />
+            <SideNav items={LowerNavItems} setOpen={setOpen} />
           </div>
         </SheetContent>
       </Sheet>
