@@ -201,8 +201,6 @@ export const Game = () => {
   };
 
   if (!socket) return <div>Connecting...</div>;
-  console.log('blackPlayer', gameMetadata?.blackPlayer.avatar);
-  console.log('whitePlayer', gameMetadata?.whitePlayer.avatar);
   return (
     <div className="">
       {result && (
