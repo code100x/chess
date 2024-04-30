@@ -80,7 +80,7 @@ export const ChessBoard = ({
     userSelectedMoveIndexAtom,
   );
   const [moves, setMoves] = useRecoilState(movesAtom);
-  const [lastMove, setLastMove] = useState<{ from: String; to: string } | null>(
+  const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(
     null,
   );
   const [rightClickedSquares, setRightClickedSquares] = useState<string[]>([]);
