@@ -32,8 +32,8 @@ import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
 const moveAudio = new Audio(MoveSound);
 
 interface Metadata {
-  blackPlayer: { id: string; name: string };
-  whitePlayer: { id: string; name: string };
+  blackPlayer: { id: string; name: string , avatar:string };
+  whitePlayer: { id: string; name: string , avatar:string };
 }
 
 export const Game = () => {
@@ -201,7 +201,8 @@ export const Game = () => {
   };
 
   if (!socket) return <div>Connecting...</div>;
-
+  console.log('blackPlayer', gameMetadata?.blackPlayer.avatar);
+  console.log('whitePlayer', gameMetadata?.whitePlayer.avatar);
   return (
     <div className="">
       {result && (
@@ -227,12 +228,19 @@ export const Game = () => {
                 <div>
                   <div className="mb-4">
                     {started && (
-                      <div className="flex justify-between">
+
+                        <div className="flex justify-between">
                         <UserAvatar
                           name={
                             user.id === gameMetadata?.whitePlayer?.id
                               ? gameMetadata?.blackPlayer?.name
                               : gameMetadata?.whitePlayer?.name ?? ''
+                          }
+
+                          avatar={
+                            user.id === gameMetadata?.whitePlayer?.id
+                              ? gameMetadata?.blackPlayer?.avatar
+                              : gameMetadata?.whitePlayer?.avatar ?? ''
                           }
                         />
                         {getTimer(
@@ -267,6 +275,11 @@ export const Game = () => {
                           user.id === gameMetadata?.blackPlayer?.id
                             ? gameMetadata?.blackPlayer?.name
                             : gameMetadata?.whitePlayer?.name ?? ''
+                        }
+                        avatar={
+                          user.id === gameMetadata?.blackPlayer?.id
+                            ? gameMetadata?.blackPlayer?.avatar
+                            : gameMetadata?.whitePlayer?.avatar ?? ''
                         }
                       />
                       {getTimer(
