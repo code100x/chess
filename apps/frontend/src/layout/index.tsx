@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/sidebar';
-import { Footer } from '@/components/Footer';
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
   return (

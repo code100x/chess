@@ -33,7 +33,7 @@ function AuthApp() {
         />
         <Route
           path="/game/:gameId"
-          element={user ? <Layout children={<Game />} /> : <Login />}
+          element={<Layout children={<Game />} />}
         />
       </Routes>
     </BrowserRouter>

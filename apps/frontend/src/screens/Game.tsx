@@ -61,6 +61,13 @@ export const Game = () => {
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
 
   useEffect(() => {
+    if (!user) {
+      window.location.href = '/login';
+    }
+  }, [user])
+
+
+  useEffect(() => {
     if (!socket) {
       return;
     }
