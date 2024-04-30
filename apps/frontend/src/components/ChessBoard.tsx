@@ -224,6 +224,7 @@ export const ChessBoard = ({
                   j = isFlipped ? 7 - (j % 8) : j % 8;
 
                   const isMainBoxColor = (i + j) % 2 !== 0;
+                  const isPiece: boolean = !!square;
                   const squareRepresentation = (String.fromCharCode(97 + j) +
                     '' +
                     i) as Square;
@@ -257,15 +258,33 @@ export const ChessBoard = ({
                         }
                         if (!from && square?.color !== chess.turn()) return;
                         if (!isMyTurn) return;
-                        if (from === squareRepresentation) {
+                        if (from != squareRepresentation) {
+                          setFrom(squareRepresentation);
+                          if (isPiece) {
+                            setLegalMoves(
+                              chess
+                                .moves({
+                                  verbose: true,
+                                  square: square?.square,
+                                })
+                                .map((move) => move.to),
+                            );
+                          }
+                        } else {
                           setFrom(null);
+                        }
+                        if (!isPiece) {
+                          setLegalMoves([]);
                         }
 
                         if (!from) {
                           setFrom(squareRepresentation);
                           setLegalMoves(
                             chess
-                              .moves({ verbose: true, square: square?.square })
+                              .moves({
+                                verbose: true,
+                                square: square?.square,
+                              })
                               .map((move) => move.to),
                           );
                         } else {
