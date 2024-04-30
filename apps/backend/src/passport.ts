@@ -94,7 +94,25 @@ export function initPassport() {
         profile: any,
         done: (error: any, user?: any) => void,
       ) {
-        const user = await addUserToDb(profile,'GITHUB')
+        const res = await fetch('https://api.github.com/user/emails', {
+          headers: {
+            Authorization: `token ${accessToken}`,
+          },
+        });
+        const data = await res.json();
+        const user = await db.user.upsert({
+          create: {
+            email: data[0].email,
+            name: profile.displayName,
+            provider: 'GITHUB',
+          },
+          update: {
+            name: profile.displayName,
+          },
+          where: {
+            email: data[0].email,
+          },
+        });
 
         done(null, user);
       },
