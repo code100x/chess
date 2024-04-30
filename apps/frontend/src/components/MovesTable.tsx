@@ -1,117 +1,156 @@
-import bb from '../../public/bb.png';
-import bk from '../../public/bk.png';
-import bn from '../../public/bn.png';
-import bq from '../../public/bq.png';
-import br from '../../public/br.png';
-import bp from '../../public/bp.png';
-import wb from '../../public/wb.png';
-import wk from '../../public/wk.png';
-import wn from '../../public/wn.png';
-import wp from '../../public/wp.png';
-import wq from '../../public/wq.png';
-import wr from '../../public/wr.png';
+import {
+  isBoardFlippedAtom,
+  movesAtom,
+  userSelectedMoveIndexAtom,
+} from '@repo/store/chessBoard';
+import { Move } from 'chess.js';
+import { useEffect, useRef } from 'react';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import {
+  HandshakeIcon,
+  FlagIcon,
+  ChevronFirst,
+  ChevronLast,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+} from 'lucide-react';
 
-import React, { useState, useEffect } from 'react';
-import { Square } from 'chess.js';
-interface Move {
-  from: Square;
-  to: Square;
-  piece: string;
-}
-
-interface MovesTableProps {
-  moves: Move[];
-}
-
-const BlackPiece = {
-  p: bp,
-  n: bn,
-  b: bb,
-  r: br,
-  q: bq,
-  k: bk,
-};
-const WhitePieces = {
-  p: wp,
-  n: wn,
-  b: wb,
-  r: wr,
-  q: wq,
-  k: wk,
-};
-
-const MovesTable: React.FC<MovesTableProps> = ({ moves }) => {
-  const [movesData, setMovesData] = useState<Move[]>([]);
+const MovesTable = () => {
+  const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
+    userSelectedMoveIndexAtom,
+  );
+  const setIsFlipped = useSetRecoilState(isBoardFlippedAtom);
+  const moves = useRecoilValue(movesAtom);
+  const movesTableRef = useRef<HTMLInputElement>(null);
+  const movesArray = moves.reduce((result, _, index: number, array: Move[]) => {
+    if (index % 2 === 0) {
+      result.push(array.slice(index, index + 2));
+    }
+    return result;
+  }, [] as Move[][]);
 
   useEffect(() => {
-    setMovesData(moves);
+    if (movesTableRef && movesTableRef.current) {
+      movesTableRef.current.scrollTo({
+        top: movesTableRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
   }, [moves]);
   return (
-    <div className="bg-black">
-      <div className="bg-brown-600 rounded shadow">
-        <h2 className="text-lg font-bold mb-4 text-white text-center pt-2 ">
-          Moves Table
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <tbody>
-              {Array.from(
-                { length: Math.ceil(movesData.length / 2) },
-                (_, i) => i,
-              ).map((_, i) => (
-                <tr
-                  key={i}
-                  className={i % 2 === 0 ? 'bg-brown-600' : 'bg-brown-500'}
-                >
-                  <td className="px-4 py-4 text-white  border-gray-700  w-12 ">
-                    {i + 1 + '.'}
-                  </td>
-                  <td className="px-4 py-4 text-white border-gray-700  ">
-                    {movesData[i * 2] && (
-                      <>
-                        {console.log(movesData)}
-                        <div className="flex">
-                          <img
-                            className="h-4 w-4 mt-1"
-                            src={
-                              WhitePieces[
-                                movesData[i * 2]
-                                  .piece as keyof typeof WhitePieces
-                              ]
-                            }
-                          />
-                          {movesData[i * 2].from + 'x' + movesData[i * 2].to}
-                        </div>
-                      </>
-                    )}
-                  </td>
-                  <td className=" py-4 px-6 text-white border-gray-700  ">
-                    {movesData[i * 2 + 1] && (
-                      <>
-                        {console.log(movesData)}
-                        <div className="flex">
-                          <img
-                            className="h-4 w-4 mt-1"
-                            src={
-                              BlackPiece[
-                                movesData[i * 2 + 1]
-                                  .piece as keyof typeof BlackPiece
-                              ]
-                            }
-                          />
-                          {movesData[i * 2 + 1].from +
-                            'x' +
-                            movesData[i * 2 + 1].to}
-                        </div>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+    <div className="text-[#C3C3C0] relative w-full ">
+      <div
+        className="text-sm h-[45vh] max-h-[45vh] overflow-y-auto"
+        ref={movesTableRef}
+      >
+        {movesArray.map((movePairs, index) => {
+          return (
+            <div
+              key={index}
+              className={`w-full py-px px-4 font-bold items-stretch ${index % 2 !== 0 ? 'bg-[#2B2927]' : ''}`}
+            >
+              <div className="grid grid-cols-6 gap-16 w-4/5">
+                <span className="text-[#C3C3C0] px-2 py-1.5">{`${index + 1}.`}</span>
+
+                {movePairs.map((move, movePairIndex) => {
+                  const isLastIndex =
+                    movePairIndex === movePairs.length - 1 &&
+                    movesArray.length - 1 === index;
+                  const isHighlighted =
+                    userSelectedMoveIndex !== null
+                      ? userSelectedMoveIndex === index * 2 + movePairIndex
+                      : isLastIndex;
+                  const { san } = move;
+
+                  return (
+                    <div
+                      key={movePairIndex}
+                      className={`col-span-2 cursor-pointer flex items-center w-full pl-1 ${isHighlighted ? 'bg-[#484644] rounded border-b-[#5A5858] border-b-[3px]' : ''}`}
+                      onClick={() => {
+                        setUserSelectedMoveIndex(index * 2 + movePairIndex);
+                      }}
+                    >
+                      <span className="text-[#C3C3C0]">{san}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </div>
+      {moves.length && (
+        <div className="w-full p-2 bg-[#20211D] flex items-center justify-between">
+          <div className="flex gap-4">
+            <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
+              {<HandshakeIcon size={16} />}
+              Draw
+            </button>
+            <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
+              {<FlagIcon size={16} />}
+              Resign
+            </button>
+          </div>
+          <div className="flex gap-1">
+            <button
+              onClick={() => {
+                setUserSelectedMoveIndex(0);
+              }}
+              disabled={userSelectedMoveIndex === 0}
+              className="hover:text-white"
+              title="Go to first move"
+            >
+              <ChevronFirst />
+            </button>
+
+            <button
+              onClick={() => {
+                setUserSelectedMoveIndex((prev) =>
+                  prev !== null ? prev - 1 : moves.length - 2,
+                );
+              }}
+              disabled={userSelectedMoveIndex === 0}
+              className="hover:text-white"
+            >
+              <ChevronLeft />
+            </button>
+            <button
+              onClick={() => {
+                setUserSelectedMoveIndex((prev) =>
+                  prev !== null
+                    ? prev + 1 >= moves.length - 1
+                      ? moves.length - 1
+                      : prev + 1
+                    : null,
+                );
+              }}
+              disabled={userSelectedMoveIndex === null}
+              className="hover:text-white"
+            >
+              <ChevronRight />
+            </button>
+            <button
+              onClick={() => {
+                setUserSelectedMoveIndex(moves.length - 1);
+              }}
+              disabled={userSelectedMoveIndex === null}
+              className="hover:text-white"
+              title="Go to last move"
+            >
+              <ChevronLast />
+            </button>
+            <button
+              onClick={() => {
+                setIsFlipped((prev) => !prev);
+              }}
+              title="Flip the board"
+            >
+              <RefreshCw className="hover:text-white mx-2" size={18} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
-import { Chess, Color, PieceSymbol, Square } from 'chess.js';
+import { Chess, Color, Move, PieceSymbol, Square } from 'chess.js';
 import { MouseEvent, useEffect, useState } from 'react';
-import { IMove, MOVE } from '../screens/Game';
+import { MOVE } from '../screens/Game';
 import LetterNotation from './chess-board/LetterNotation';
 import LegalMoveIndicator from './chess-board/LegalMoveIndicator';
 import ChessSquare from './chess-board/ChessSquare';
@@ -10,6 +10,14 @@ import useWindowSize from '../hooks/useWindowSize';
 import Confetti from 'react-confetti';
 import MoveSound from '../../public/move.wav';
 import CaptureSound from '../../public/capture.wav';
+
+import { useRecoilState } from 'recoil';
+
+import {
+  isBoardFlippedAtom,
+  movesAtom,
+  userSelectedMoveIndexAtom,
+} from '@repo/store/chessBoard';
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
   if (!from) {
@@ -31,7 +39,7 @@ export function isPromoting(chess: Chess, from: Square, to: Square) {
   }
 
   return chess
-    .moves({ square: from, verbose: true })
+    .history({ verbose: true })
     .map((it) => it.to)
     .includes(to);
 }
@@ -44,15 +52,11 @@ export const ChessBoard = ({
   board,
   socket,
   setBoard,
-  setMoves,
-  moves,
 }: {
   myColor: Color;
   gameId: string;
   started: boolean;
   chess: Chess;
-  moves: IMove[];
-  setMoves: React.Dispatch<React.SetStateAction<IMove[]>>;
   setBoard: React.Dispatch<
     React.SetStateAction<
       ({
@@ -70,10 +74,15 @@ export const ChessBoard = ({
   socket: WebSocket;
 }) => {
   const { height, width } = useWindowSize();
-  const [lastMoveFrom, lastMoveTo] = [
-    moves?.at(-1)?.from || '',
-    moves?.at(-1)?.to || '',
-  ];
+
+  const [isFlipped, setIsFlipped] = useRecoilState(isBoardFlippedAtom);
+  const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
+    userSelectedMoveIndexAtom,
+  );
+  const [moves, setMoves] = useRecoilState(movesAtom);
+  const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(
+    null,
+  );
   const [rightClickedSquares, setRightClickedSquares] = useState<string[]>([]);
   const [arrowStart, setArrowStart] = useState<string | null>(null);
 
@@ -82,7 +91,6 @@ export const ChessBoard = ({
   const [legalMoves, setLegalMoves] = useState<string[]>([]);
 
   const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-  const isFlipped = myColor === 'b';
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
   const OFFSET = 100;
   const boxSize =
@@ -102,6 +110,12 @@ export const ChessBoard = ({
       setArrowStart(squareRep);
     }
   };
+
+  useEffect(() => {
+    if (myColor === 'b') {
+      setIsFlipped(true);
+    }
+  }, [myColor]);
 
   const clearCanvas = () => {
     setRightClickedSquares([]);
@@ -125,7 +139,13 @@ export const ChessBoard = ({
       if (canvas) {
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          drawArrow(ctx, arrowStart, stoppedAtSquare, isFlipped);
+          drawArrow({
+            ctx,
+            start: arrowStart,
+            end: stoppedAtSquare,
+            isFlipped,
+            squareSize: boxSize,
+          });
         }
       }
       setArrowStart(null);
@@ -150,43 +170,75 @@ export const ChessBoard = ({
 
   useEffect(() => {
     clearCanvas();
+    const lMove = moves.at(-1);
+    if (lMove) {
+      setLastMove({
+        from: lMove.from,
+        to: lMove.to,
+      });
+    } else {
+      setLastMove(null);
+    }
   }, [moves]);
 
-  let kingSquare: string = '';
+  useEffect(() => {
+    if (userSelectedMoveIndex !== null) {
+      const move = moves[userSelectedMoveIndex];
+      setLastMove({
+        from: move.from,
+        to: move.to,
+      });
+      chess.load(move.after);
+      setBoard(chess.board());
+      return;
+    }
+  }, [userSelectedMoveIndex]);
+
+  useEffect(() => {
+    if (userSelectedMoveIndex !== null) {
+      chess.reset();
+      moves.forEach((move) => {
+        chess.move({ from: move.from, to: move.to });
+      });
+      setBoard(chess.board());
+      setUserSelectedMoveIndex(null);
+    } else {
+      setBoard(chess.board());
+    }
+  }, [moves]);
+
   return (
     <>
       {gameOver && <Confetti />}
       <div className="flex relative">
-        <div className="text-white-200 mr-10 rounded-md overflow-hidden">
+        <div className="text-white-200 rounded-md overflow-hidden">
           {(isFlipped ? board.slice().reverse() : board).map((row, i) => {
             i = isFlipped ? i + 1 : 8 - i;
             return (
               <div key={i} className="flex relative">
                 <NumberNotation
-                  isMainBoxColor={i % 2 === 0}
+                  isMainBoxColor={isFlipped ? i % 2 !== 0 : i % 2 === 0}
                   label={i.toString()}
                 />
                 {(isFlipped ? row.slice().reverse() : row).map((square, j) => {
                   j = isFlipped ? 7 - (j % 8) : j % 8;
+
+                  const isMainBoxColor = (i + j) % 2 !== 0;
                   const isPiece: boolean = !!square;
-                  const isMainBoxColor = isFlipped
-                    ? (i + j) % 2 === 0
-                    : (i + j) % 2 !== 0;
                   const squareRepresentation = (String.fromCharCode(97 + j) +
                     '' +
                     i) as Square;
                   const isHighlightedSquare =
-                    (from === squareRepresentation ||
-                      squareRepresentation === lastMoveFrom ||
-                      squareRepresentation === lastMoveTo) &&
-                    isPiece;
+                    from === squareRepresentation ||
+                    squareRepresentation === lastMove?.from ||
+                    squareRepresentation === lastMove?.to;
                   const isRightClickedSquare =
                     rightClickedSquares.includes(squareRepresentation);
 
                   const piece = square && square.type;
                   const isKingInCheckSquare =
                     piece === 'k' &&
-                    square.color === chess.turn() &&
+                    square?.color === chess.turn() &&
                     chess.inCheck();
 
                   return (
@@ -195,7 +247,15 @@ export const ChessBoard = ({
                         if (!started) {
                           return;
                         }
-
+                        if (userSelectedMoveIndex !== null) {
+                          chess.reset();
+                          moves.forEach((move) => {
+                            chess.move({ from: move.from, to: move.to });
+                          });
+                          setBoard(chess.board());
+                          setUserSelectedMoveIndex(null);
+                          return;
+                        }
                         if (!from && square?.color !== chess.turn()) return;
                         if (!isMyTurn) return;
                         if (from != squareRepresentation) {
@@ -229,7 +289,7 @@ export const ChessBoard = ({
                           );
                         } else {
                           try {
-                            let moveResult;
+                            let moveResult: Move;
                             if (
                               isPromoting(chess, from, squareRepresentation)
                             ) {
@@ -250,36 +310,25 @@ export const ChessBoard = ({
                               if (moveResult?.captured) {
                                 captureAudio.play();
                               }
-
+                              setMoves((prev) => [...prev, moveResult]);
+                              setFrom(null);
+                              setLegalMoves([]);
                               if (moveResult.san.includes('#')) {
                                 setGameOver(true);
                               }
-                            }
-                            socket.send(
-                              JSON.stringify({
-                                type: MOVE,
-                                payload: {
-                                  gameId,
-                                  move: {
-                                    from,
-                                    to: squareRepresentation,
+                              socket.send(
+                                JSON.stringify({
+                                  type: MOVE,
+                                  payload: {
+                                    gameId,
+                                    move: moveResult,
                                   },
-                                },
-                              }),
-                            );
-                            setFrom(null);
-                            setLegalMoves([]);
-                            setBoard(chess.board());
-                            console.log({
-                              from,
-                              to: squareRepresentation,
-                            });
-                            const piece = chess.get(squareRepresentation)?.type;
-                            setMoves((moves) => [
-                              ...moves,
-                              { from, to: squareRepresentation, piece },
-                            ]);
-                          } catch (e) {}
+                                }),
+                              );
+                            }
+                          } catch (e) {
+                            console.log('e', e);
+                          }
                         }
                       }}
                       style={{
@@ -304,7 +353,7 @@ export const ChessBoard = ({
                           ? i === 8 && (
                               <LetterNotation
                                 label={labels[j]}
-                                isMainBoxColor={j % 2 !== 0}
+                                isMainBoxColor={j % 2 === 0}
                               />
                             )
                           : i === 1 && (
