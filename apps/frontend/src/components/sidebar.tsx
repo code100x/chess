@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { SideNav } from '@/components/side-nav';
 import { UpperNavItems, LowerNavItems } from '@/components/constants/side-nav';
 
@@ -9,11 +10,32 @@ interface SidebarProps {
 
 export default function Sidebar({ className }: SidebarProps) {
   const { isOpen, toggle } = useSidebar();
+  useEffect(() => {
+    const handleResize = () => {
+      const screenWidth = window.innerWidth;
+      const isBetweenMDAndLG = screenWidth >= 768 && screenWidth < 1024;
+      if (isBetweenMDAndLG) {
+        if (isOpen) {
+          toggle();
+        }
+      } else {
+        if (!isOpen) {
+          toggle();
+        }
+      }
+    };
 
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isOpen, toggle]);
   return (
     <nav
       className={cn(
-        `relative hidden h-screen pt-4 md:block bg-stone-800 text-muted-foreground w-[78px] lg:w-36`,
+        `relative hidden h-screen pt-4 md:block bg-stone-800 text-muted-foreground w-12 lg:w-36`,
         className,
       )}
     >
