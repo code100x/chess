@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils';
 import { useSidebar } from '@/hooks/useSidebar';
 import { buttonVariants } from '@/components/ui/button';
 import { useLocation } from 'react-router-dom';
+import { useUser } from '@repo/store/useUser';
 import {
   Accordion,
   AccordionContent,
@@ -29,6 +30,7 @@ interface SideNavProps {
 }
 
 export function SideNav({ items, setOpen, className }: SideNavProps) {
+  const user = useUser()
   const location = useLocation();
   const { isOpen } = useSidebar();
   const [openItem, setOpenItem] = useState('');
@@ -90,7 +92,7 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
                       buttonVariants({ variant: 'ghost' }),
                       'group relative flex h-12 justify-start gap-x-3',
                       location.pathname === child.href &&
-                        'bg-muted font-bold hover:bg-muted',
+                      'bg-muted font-bold hover:bg-muted',
                     )}
                   >
                     <child.icon className={cn('h-5 w-5', child.color)} />
@@ -108,29 +110,33 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
             </AccordionItem>
           </Accordion>
         ) : (
-          <a
-            key={item.title}
-            href={item.href}
-            onClick={() => {
-              if (setOpen) setOpen(false);
-            }}
-            className={cn(
-              buttonVariants({ variant: 'ghost' }),
-              'group relative flex h-12 justify-start',
-              location.pathname === item.href &&
-                'bg-muted font-bold hover:bg-muted',
-            )}
-          >
-            <item.icon className={cn('h-5 w-5', item.color)} />
-            <span
+          <div
+            hidden={(user && item.title == "Login") || (!user && item.title == "Logout") ? true : false}>
+            <a
+              key={item.title}
+              href={item.href}
+              onClick={() => {
+                if (setOpen) setOpen(false);
+              }}
               className={cn(
-                'absolute left-12 text-base duration-200',
-                !isOpen && className,
+                buttonVariants({ variant: 'ghost' }),
+                'group relative flex h-12 justify-start',
+                location.pathname === item.href &&
+                'bg-muted font-bold hover:bg-muted',
               )}
             >
-              {item.title}
-            </span>
-          </a>
+              <item.icon className={cn('h-5 w-5', item.color)} />
+              <span
+                className={cn(
+                  'absolute left-12 text-base duration-200',
+                  !isOpen && className,
+                )}
+              >
+                {item.title}
+              </span>
+            </a>
+          </div>
+
         ),
       )}
     </nav>

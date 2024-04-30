@@ -1,4 +1,7 @@
 import { PuzzleIcon, LogInIcon, SettingsIcon } from 'lucide-react';
+
+const BACKEND_URL =
+  import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
 export const NavItems = [
   {
     title: 'Play',
@@ -46,15 +49,21 @@ export const NavItems = [
   //   color: 'text-sky-500',
   // },
   {
+    title: 'Settings',
+    icon: SettingsIcon,
+    href: '/',
+    color: 'text-green-500',
+  },
+  {
     title: 'Login',
     icon: LogInIcon,
     href: '/login',
     color: 'text-green-500',
   },
   {
-    title: 'Settings',
-    icon: SettingsIcon,
-    href: '/',
+    title: 'Logout',
+    icon: LogInIcon,
+    href: `${BACKEND_URL}/auth/logout`,
     color: 'text-green-500',
   },
 ];
