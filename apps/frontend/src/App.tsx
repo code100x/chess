@@ -1,6 +1,7 @@
 import './App.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Landing } from './screens/Landing';
+import Bot from './screens/Bot';
 import { Game } from './screens/Game';
 import Login from './screens/Login';
 import { Suspense } from 'react';
@@ -30,6 +31,10 @@ function AuthApp() {
         <Route
           path="/login"
           element={<Login />}
+        />
+        <Route 
+          path="/bot" 
+          element={<Bot />} 
         />
         <Route
           path="/game/:gameId"

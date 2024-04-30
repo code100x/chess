@@ -79,3 +79,8 @@
   background-color: #302e2b;
 }
 
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}

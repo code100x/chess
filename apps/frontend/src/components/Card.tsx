@@ -35,7 +35,12 @@ export function PlayCard() {
             </p>
           </div>
         </div>
-        <div className="-mx-2 flex items-start space-x-4 rounded-md p-2 transition-all ">
+        <div 
+                  onClick={() => {
+                    navigate('/bot');
+                  }}
+        
+        className="-mx-2 flex items-start space-x-4 rounded-md p-2 transition-all ">
           <PersonIcon className="mt-px h-5 w-5" />
           <div className="space-y-1">
             <p className="text-sm font-medium leading-none">Computer</p>
