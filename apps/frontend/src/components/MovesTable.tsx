@@ -146,7 +146,7 @@ const MovesTable = () => {
               }}
               title="Flip the board"
             >
-              <RefreshCw className="hover:text-white mx-2" size={18}/>
+              <RefreshCw className="hover:text-white mx-2" size={18} />
             </button>
           </div>
         </div>
