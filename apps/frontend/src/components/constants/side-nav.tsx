@@ -1,4 +1,4 @@
-import { PuzzleIcon, LogInIcon, SettingsIcon } from 'lucide-react';
+import { PuzzleIcon, LogInIcon, LogOutIcon, SettingsIcon } from 'lucide-react';
 export const UpperNavItems = [
   {
     title: 'Play',
@@ -28,6 +28,12 @@ export const LowerNavItems = [
     href: '/login',
     color: 'text-green-500',
   },
+  // {
+  //   title: 'Logout',
+  //   icon: LogOutIcon,
+  //   href: `/logout`,
+  //   color: 'text-green-500',
+  // },
   {
     title: 'Settings',
     icon: SettingsIcon,

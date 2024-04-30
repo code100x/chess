@@ -11,6 +11,7 @@ import {
 import { useEffect, useState } from 'react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { type LucideIcon } from 'lucide-react';
+import { useUser } from '@repo/store/useUser';
 
 export interface NavItem {
   title: string;
@@ -28,6 +29,7 @@ interface SideNavProps {
 }
 
 export function SideNav({ items, setOpen, className }: SideNavProps) {
+  const user = useUser();
   const location = useLocation();
   const { isOpen } = useSidebar();
   const [openItem, setOpenItem] = useState('');
@@ -106,7 +108,8 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-        ) : (
+        ) : item.title === 'login' && !user ? null : item.title === 'logout' &&
+          user ? null : (
           <a
             key={item.title}
             href={item.href}
@@ -131,7 +134,7 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
             </span>
           </a>
         ),
-      )}
+      )}{' '}
     </nav>
   );
 }
