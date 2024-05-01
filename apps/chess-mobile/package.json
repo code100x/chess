@@ -13,12 +13,15 @@
     "@expo/vector-icons": "^14.0.0",
     "@react-navigation/native": "^6.1.7",
     "base-64": "^1.0.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
     "expo": "~50.0.7",
     "expo-auth-session": "~5.4.0",
     "expo-constants": "~15.4.5",
     "expo-crypto": "~12.8.1",
     "expo-linear-gradient": "~12.7.2",
     "expo-linking": "~6.2.2",
+    "expo-navigation-bar": "~2.8.1",
     "expo-router": "^3.4.7",
     "expo-secure-store": "~12.8.1",
     "expo-status-bar": "~1.11.1",
@@ -35,7 +38,8 @@
     "react-native-screens": "~3.29.0",
     "react-native-svg": "14.1.0",
     "react-native-web": "~0.19.10",
-    "react-native-webview": "13.6.4"
+    "react-native-webview": "13.6.4",
+    "tailwind-merge": "^2.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
