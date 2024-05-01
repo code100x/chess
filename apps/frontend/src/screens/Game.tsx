@@ -5,7 +5,7 @@ import MoveSound from '../../public/move.wav';
 import { Button } from '../components/Button';
 import { ChessBoard, isPromoting } from '../components/ChessBoard';
 import { useSocket } from '../hooks/useSocket';
-import { Chess, Move, Square } from 'chess.js';
+import { Chess, Move } from 'chess.js';
 import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
@@ -24,12 +24,6 @@ export const USER_TIMEOUT = 'user_timeout';
 export const GAME_TIME = 'game_time';
 
 const GAME_TIME_MS = 10 * 60 * 1000;
-
-export interface IMove {
-  from: Square;
-  to: Square;
-  piece: string;
-}
 
 export interface Player {
   id: string;
