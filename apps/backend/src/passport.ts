@@ -92,11 +92,9 @@ export function initPassport() {
         const data: GithubEmailRes[] = await res.json();
         const primaryEmail = data.find((item) => item.primary === true);
 
-        console.log(primaryEmail);
-
         const user = await db.user.upsert({
           create: {
-            email: data[0].email,
+            email: primaryEmail!.email,
             name: profile.displayName,
             provider: 'GITHUB',
           },
@@ -104,7 +102,7 @@ export function initPassport() {
             name: profile.displayName,
           },
           where: {
-            email: data[0].email,
+            email: primaryEmail?.email,
           },
         });
 
