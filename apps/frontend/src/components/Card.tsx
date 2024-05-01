@@ -6,12 +6,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import chessIcon from '../assets/chess.png';
-import computerIcon from '../assets/computer.png';
-import lightningIcon from '../assets/lightning-bolt.png';
-import friendIcon from '../assets/friendship.png';
-import tournamentIcon from '../assets/trophy.png';
-import variantsIcon from '../assets/strategy.png';
+import chessIcon from '../../public/chess.png';
+import computerIcon from '../../public/computer.png';
+import lightningIcon from '../../public/lightning-bolt.png';
+import friendIcon from '../../public/friendship.png';
+import tournamentIcon from '../../public/trophy.png';
+import variantsIcon from '../../public/strategy.png';
 
 export function PlayCard() {
   const navigate = useNavigate();
