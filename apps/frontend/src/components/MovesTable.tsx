@@ -4,7 +4,6 @@ import {
   movesAtom,
   userSelectedMoveIndexAtom,
 } from '@repo/store/chessBoard';
-import { Move } from 'chess.js';
 import { useEffect, useRef } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
@@ -17,22 +16,39 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
-const MovesTable = () => {
+interface MovesTableProps {
+  newMoves?: TimingMove[];
+}
+
+const MovesTable: React.FC<MovesTableProps> = ({ newMoves }) => {
   const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
     userSelectedMoveIndexAtom,
   );
   const setIsFlipped = useSetRecoilState(isBoardFlippedAtom);
   const moves = useRecoilValue(movesAtom);
   const movesTableRef = useRef<HTMLInputElement>(null);
-  const movesArray = moves.reduce(
-    (result, _, index: number, array: TimingMove[]) => {
-      if (index % 2 === 0) {
-        result.push(array.slice(index, index + 2));
-      }
-      return result;
-    },
-    [] as TimingMove[][],
-  );
+  let movesArray: TimingMove[][] = [];
+  if (newMoves) {
+    movesArray = newMoves.reduce(
+      (result, _, index: number, array: TimingMove[]) => {
+        if (index % 2 === 0) {
+          result.push(array.slice(index, index + 2));
+        }
+        return result;
+      },
+      [] as TimingMove[][],
+    );
+  } else {
+    movesArray = moves.reduce(
+      (result, _, index: number, array: TimingMove[]) => {
+        if (index % 2 === 0) {
+          result.push(array.slice(index, index + 2));
+        }
+        return result;
+      },
+      [] as TimingMove[][],
+    );
+  }
 
   useEffect(() => {
     if (movesTableRef && movesTableRef.current) {
@@ -76,9 +92,8 @@ const MovesTable = () => {
                       }}
                     >
                       <span className="text-[#C3C3C0]">{san}</span>
-                      <p className="text-xs ml-2">
-                        {((move.endTime - move.startTime) / 1000).toString() +
-                          's'}
+                      <p className="text-xs ml-2 mb-2">
+                        {(move.timeTaken / 1000).toString() + 's'}
                       </p>
                     </div>
                   );
@@ -88,7 +103,7 @@ const MovesTable = () => {
           );
         })}
       </div>
-      {moves.length && (
+      {moves.length ? (
         <div className="w-full p-2 bg-[#20211D] flex items-center justify-between">
           <div className="flex gap-4">
             <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
@@ -158,7 +173,7 @@ const MovesTable = () => {
             </button>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

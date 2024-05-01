@@ -2,8 +2,8 @@ import { Move } from 'chess.js';
 import { atom } from 'recoil';
 
 export interface TimingMove extends Move {
-  startTime: number;
-  endTime: number;
+  createdAt: Date;
+  timeTaken: number;
 }
 
 export const isBoardFlippedAtom = atom({

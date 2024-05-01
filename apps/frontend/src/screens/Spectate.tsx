@@ -2,13 +2,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
 import MoveSound from '../../public/move.wav';
-import { Button } from '../components/Button';
+
 import { ChessBoard, isPromoting } from '../components/ChessBoard';
 import { useSocket } from '../hooks/useSocket';
 import { Chess, Move, Square } from 'chess.js';
 import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { UserAvatar } from '../components/UserAvatar';
+import { useRecoilState, useSetRecoilState } from 'recoil';
+import { movesAtom } from '@repo/store/chessBoard';
 
 // TODO: Move together, there's code repetition here
 export const INIT_GAME = 'init_game';
@@ -39,6 +41,8 @@ interface Metadata {
 }
 
 export const Spectate = () => {
+  const setMoves = useSetRecoilState(movesAtom);
+  const moves = useRecoilState(movesAtom);
   const socket = useSocket();
   const { gameId } = useParams();
 
@@ -57,10 +61,11 @@ export const Spectate = () => {
     | typeof USER_TIMEOUT
     | null
   >(null);
-  const [moves, setMoves] = useState<IMove[]>([]);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
-  const [myMoveStartTime, setMyMoveStartTime] = useState(0);
+  const [myMoveStartTime, setMyMoveStartTime] = useState<Date>(
+    new Date(Date.now()),
+  );
 
   useEffect(() => {
     if (!socket) {
@@ -89,7 +94,6 @@ export const Spectate = () => {
           setPlayer1TimeConsumed(player1TimeConsumed);
           setPlayer2TimeConsumed(player2TimeConsumed);
           const moves = chess.moves({ verbose: true });
-          //TODO: Fix later
           if (
             moves.map((x) => JSON.stringify(x)).includes(JSON.stringify(move))
           ) {
@@ -110,11 +114,8 @@ export const Spectate = () => {
           setMoves((moves) => [
             ...moves,
             {
-              from: move.from,
-              to: move.to,
+              ...move,
               piece,
-              startTime: move.startTime,
-              endTime: move.endTime,
             },
           ]);
           // if (move.player2UserId === user.id) {
@@ -157,7 +158,6 @@ export const Spectate = () => {
           break;
 
         default:
-          alert(message.payload.message);
           break;
       }
     };
@@ -264,11 +264,11 @@ export const Spectate = () => {
             </div>
             <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10 overflow-y-scroll no-scrollbar">
               <div>
-                {moves.length > 0 && (
+                {moves.length > 0 ? (
                   <div className="mt-4">
                     <MovesTable />
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
           </div>

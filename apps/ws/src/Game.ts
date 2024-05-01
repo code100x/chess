@@ -10,8 +10,8 @@ type GAME_RESULT = 'WHITE_WINS' | 'BLACK_WINS' | 'DRAW';
 const GAME_TIME_MS = 10 * 60 * 60 * 1000;
 
 interface TimingMove extends Move {
-  startTime: number;
-  endTime: number;
+  createdAt: Date;
+  timeTaken: number;
 }
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
@@ -132,7 +132,6 @@ export class Game {
       return;
     }
 
-    const time = new Date(Date.now()).getTime();
     const initGameBroadcastMessage = JSON.stringify({
       type: INIT_GAME,
       payload: {
@@ -146,7 +145,7 @@ export class Game {
           id: this.player2UserId,
         },
         fen: this.board.fen(),
-        startTime: time,
+        startTime: new Date(Date.now()),
         moves: [],
       },
     });
@@ -192,7 +191,8 @@ export class Game {
     this.gameId = game.id;
   }
 
-  async addMoveToDb(move: TimingMove, moveTimestamp: Date) {
+  async addMoveToDb(move: TimingMove) {
+    console.log(move);
     await db.$transaction([
       db.move.create({
         data: {
@@ -202,8 +202,8 @@ export class Game {
           to: move.to,
           before: move.before ?? '',
           after: move.after ?? '',
-          createdAt: moveTimestamp,
-          timeTaken: moveTimestamp.getTime() - this.lastMoveTime.getTime(),
+          createdAt: move.createdAt,
+          timeTaken: move.timeTaken,
           san: move.san,
         },
       }),
@@ -268,7 +268,7 @@ export class Game {
         (moveTimestamp.getTime() - this.lastMoveTime.getTime());
     }
 
-    await this.addMoveToDb(move, moveTimestamp);
+    await this.addMoveToDb(move);
     this.resetAbandonTimer();
     this.resetMoveTimer();
 
@@ -276,11 +276,7 @@ export class Game {
     const moveBroadcastMessage = JSON.stringify({
       type: MOVE,
       payload: {
-        move: {
-          ...move,
-          startTime: move.startTime,
-          endTime: move.endTime,
-        },
+        move,
         player1TimeConsumed: this.player1TimeConsumed,
         player2TimeConsumed: this.player2TimeConsumed,
       },

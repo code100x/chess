@@ -74,8 +74,8 @@ export const ChessBoard = ({
     color: Color;
   } | null)[][];
   socket: WebSocket;
-  myMoveStartTime: number;
-  setMyMoveStartTime: React.Dispatch<React.SetStateAction<number>>;
+  myMoveStartTime: Date;
+  setMyMoveStartTime: React.Dispatch<React.SetStateAction<Date>>;
 }) => {
   const { height, width } = useWindowSize();
 
@@ -321,6 +321,9 @@ export const ChessBoard = ({
                                 to: squareRepresentation,
                               });
                             }
+                            const timeTaken =
+                              time - new Date(myMoveStartTime).getTime();
+                            const piece = chess.get(squareRepresentation)?.type;
                             if (moveResult) {
                               moveAudio.play();
 
@@ -331,8 +334,9 @@ export const ChessBoard = ({
                                 ...prev,
                                 {
                                   ...moveResult,
-                                  startTime: myMoveStartTime,
-                                  endTime: time,
+                                  piece,
+                                  createdAt: myMoveStartTime,
+                                  timeTaken,
                                 },
                               ]);
                               setFrom(null);
@@ -341,7 +345,6 @@ export const ChessBoard = ({
                                 setGameOver(true);
                               }
                             }
-                            const piece = chess.get(squareRepresentation)?.type;
                             socket.send(
                               JSON.stringify({
                                 type: MOVE,
@@ -350,9 +353,12 @@ export const ChessBoard = ({
                                   move: {
                                     from,
                                     to: squareRepresentation,
+                                    san: moveResult?.san,
+                                    before: moveResult?.before,
+                                    after: moveResult?.after,
                                     piece,
-                                    startTime: myMoveStartTime,
-                                    endTime: time,
+                                    createdAt: myMoveStartTime,
+                                    timeTaken,
                                   },
                                 },
                               }),
@@ -360,11 +366,9 @@ export const ChessBoard = ({
                             setFrom(null);
                             setLegalMoves([]);
                             setBoard(chess.board());
-                            console.log({
-                              from,
-                              to: squareRepresentation,
-                            });
-                          } catch (e) {}
+                          } catch (e) {
+                            console.log(e);
+                          }
                         }
                       }}
                       style={{

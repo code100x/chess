@@ -90,6 +90,7 @@ export class GameManager {
       if (message.type === MOVE) {
         const gameId = message.payload.gameId;
         const game = this.games.find((game) => game.gameId === gameId);
+        console.log(message.payload.move);
         if (game) {
           game.makeMove(user, message.payload.move);
           if (game.result) {

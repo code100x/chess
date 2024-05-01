@@ -10,8 +10,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
 import { UserAvatar } from '../components/UserAvatar';
-import { connectStorageEmulator } from 'firebase/storage';
-import { set } from 'firebase/database';
 
 // TODO: Move together, there's code repetition here
 export const INIT_GAME = 'init_game';
@@ -74,7 +72,7 @@ export const Game = () => {
   >(null);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
-  const [myMoveStartTime, setMyMoveStartTime] = useState(0);
+  const [myMoveStartTime, setMyMoveStartTime] = useState<Date>(new Date());
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageState, setMessageState] = useState('');
 
@@ -139,8 +137,6 @@ export const Game = () => {
               {
                 ...move,
                 piece,
-                startTime: move.startTime,
-                endTime: move.endTime,
               },
             ]);
             // }
@@ -148,9 +144,11 @@ export const Game = () => {
               chess.turn() ===
               (user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w')
             ) {
-              setMyMoveStartTime(move.startTime);
+              setMyMoveStartTime(move.createdAt);
             } else {
-              setMyMoveStartTime(move.endTime);
+              setMyMoveStartTime(
+                new Date(new Date(move.createdAt).getTime() + move.timeTaken),
+              );
             }
           } catch (error) {
             console.log('Error', error);

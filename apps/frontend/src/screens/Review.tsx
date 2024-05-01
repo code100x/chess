@@ -7,6 +7,7 @@ import { useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { UserAvatar } from '../components/UserAvatar';
 import { ReviewChessBoard } from '../components/ReviewChessBoard';
+import { TimingMove } from '@repo/store/chessBoard';
 
 // TODO: Move together, there's code repetition here
 export const INIT_GAME = 'init_game';
@@ -40,7 +41,7 @@ export const Review = () => {
   // Todo move to store/context
   const [whitePlayer, setWhitePlayer] = useState<Player | null>(null);
   const [blackPlayer, setBlackPlayer] = useState<Player | null>(null);
-  const [moves, setMoves] = useState<IMove[]>([]);
+  const [moves, setMoves] = useState<TimingMove[]>([]);
   const [activeMove, setActiveMove] = useState<number>(0);
 
   useEffect(() => {
@@ -66,15 +67,8 @@ export const Review = () => {
             id: data.blackPlayer.id,
             name: data.blackPlayer.name,
           });
-          data.moves.forEach((move: IMove) => {
-            setMoves((prevMoves) => [
-              ...prevMoves,
-              {
-                from: move.from,
-                to: move.to,
-                piece: move.piece,
-              },
-            ]);
+          data.moves.forEach((move: TimingMove) => {
+            setMoves((prevMoves) => [...prevMoves, move]);
           });
         }
       } catch (e) {
@@ -151,9 +145,9 @@ export const Review = () => {
             </div>
             <div className="col-span-2 bg-brown-500 w-full flex justify-center h-[90vh] overflow-scroll mt-10 overflow-y-scroll no-scrollbar">
               <div>
-                {moves.length > 0 && (
+                {moves.slice(0, activeMove).length > 0 && (
                   <div className="mt-4">
-                    <MovesTable />
+                    <MovesTable newMoves={moves.slice(0, activeMove)} />
                   </div>
                 )}
               </div>
