@@ -77,9 +77,15 @@ export function initPassport() {
         profile: any,
         done: (error: any, user?: any) => void,
       ) {
+        const res = await fetch('https://api.github.com/user/emails', {
+          headers: {
+            Authorization: `token ${accessToken}`,
+          },
+        });
+        const data = await res.json();
         const user = await db.user.upsert({
           create: {
-            email: profile.emails[0].value,
+            email: data[0].email,
             name: profile.displayName,
             provider: 'GITHUB',
           },
@@ -87,7 +93,7 @@ export function initPassport() {
             name: profile.displayName,
           },
           where: {
-            email: profile.emails[0].value,
+            email: data[0].email,
           },
         });
 
