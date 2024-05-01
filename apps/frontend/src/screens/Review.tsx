@@ -85,8 +85,6 @@ export const Review = () => {
     onLoad();
   }, [gameId]);
 
-  console.log(activeMove);
-
   return (
     <div className="">
       {/* {result && (
@@ -102,7 +100,7 @@ export const Review = () => {
         </div>
       )} */}
       <div className="justify-center flex">
-        <div className="pt-2 max-w-screen-xl w-full">
+        <div className="pt-2 w-full">
           <div className="grid grid-cols-7 gap-4 w-full">
             <div className="col-span-7 lg:col-span-5 w-full text-white">
               <div className="flex justify-center">
@@ -155,17 +153,7 @@ export const Review = () => {
               <div>
                 {moves.length > 0 && (
                   <div className="mt-4">
-                    <MovesTable
-                      moves={moves.slice(0, activeMove).map((m) => {
-                        return {
-                          from: m.from,
-                          to: m.to,
-                          piece: m.piece,
-                          startTime: 0,
-                          endTime: 0,
-                        };
-                      })}
-                    />
+                    <MovesTable />
                   </div>
                 )}
               </div>

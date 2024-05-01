@@ -217,7 +217,7 @@ export const Spectate = () => {
         </div>
       )}
       <div className="justify-center flex">
-        <div className="pt-2 max-w-screen-xl w-full">
+        <div className="pt-2 w-full">
           <div className="grid grid-cols-7 gap-4 w-full">
             <div className="col-span-7 lg:col-span-5 w-full text-white">
               <div className="flex justify-center">
@@ -240,8 +240,8 @@ export const Spectate = () => {
                         started={started}
                         gameId={gameId ?? ''}
                         myColor={'w'}
-                        setMoves={setMoves}
-                        moves={moves}
+                        // setMoves={setMoves}
+                        // moves={moves}
                         chess={chess}
                         setBoard={setBoard}
                         socket={socket}
@@ -266,7 +266,7 @@ export const Spectate = () => {
               <div>
                 {moves.length > 0 && (
                   <div className="mt-4">
-                    <MovesTable moves={moves} />
+                    <MovesTable />
                   </div>
                 )}
               </div>

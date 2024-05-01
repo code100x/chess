@@ -35,7 +35,7 @@ export class GameManager {
   }
 
   removeUser(socket: WebSocket) {
-    const user = this.users.find((user) => user.socket !== socket);
+    const user = this.users.find((user) => user.socket === socket);
     if (!user) {
       console.error('User not found?');
       return;
@@ -139,9 +139,6 @@ export class GameManager {
           availableGame = game;
         }
 
-        console.log(availableGame.getPlayer1TimeConsumed());
-        console.log(availableGame.getPlayer2TimeConsumed());
-
         user.socket.send(
           JSON.stringify({
             type: GAME_JOINED,
@@ -166,8 +163,6 @@ export class GameManager {
       }
 
       if (message.type === GAME_MESSAGE) {
-        console.log(message);
-        console.log(user);
         const gameId = message.payload.gameId;
         const game = this.games.find((game) => game.gameId === gameId);
         if (game) {

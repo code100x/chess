@@ -52,10 +52,11 @@ model Move {
   to          String
   piece       String?
   comments    String?
-  startFen    String
-  endFen      String
+  before      String
+  after       String
   timeTaken   Int?     @default(0)
   createdAt   DateTime @default(now())
+  san         String?   
 
   @@index([gameId])
 }

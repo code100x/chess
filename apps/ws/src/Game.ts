@@ -1,4 +1,4 @@
-import { Chess, PieceSymbol, Square } from 'chess.js';
+import { Chess, PieceSymbol, Move, Square } from 'chess.js';
 import { GAME_ENDED, GAME_MESSAGE, INIT_GAME, MOVE } from './messages';
 import { db } from './db';
 import { randomUUID } from 'crypto';
@@ -8,6 +8,11 @@ type GAME_STATUS = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'TIME_UP';
 type GAME_RESULT = 'WHITE_WINS' | 'BLACK_WINS' | 'DRAW';
 
 const GAME_TIME_MS = 10 * 60 * 60 * 1000;
+
+interface TimingMove extends Move {
+  startTime: number;
+  endTime: number;
+}
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
   if (!from) {
@@ -71,11 +76,13 @@ export class Game {
       moveNumber: number;
       from: string;
       to: string;
+      piece: string | null;
       comments: string | null;
-      startFen: string;
-      endFen: string;
+      before: string;
+      after: string;
       timeTaken: number | null;
       createdAt: Date;
+      san: string | null;
     }[],
   ) {
     moves.forEach((move) => {
@@ -185,16 +192,7 @@ export class Game {
     this.gameId = game.id;
   }
 
-  async addMoveToDb(
-    move: {
-      from: string;
-      to: string;
-      piece: PieceSymbol;
-      startTime: number;
-      endTime: number;
-    },
-    moveTimestamp: Date,
-  ) {
+  async addMoveToDb(move: TimingMove, moveTimestamp: Date) {
     await db.$transaction([
       db.move.create({
         data: {
@@ -202,16 +200,16 @@ export class Game {
           moveNumber: this.moveCount + 1,
           from: move.from,
           to: move.to,
-          piece: move.piece,
-          // Todo: Fix start fen
-          startFen: this.board.fen(),
-          endFen: this.board.fen(),
-          createdAt: new Date(Date.now()),
+          before: move.before ?? '',
+          after: move.after ?? '',
+          createdAt: moveTimestamp,
+          timeTaken: moveTimestamp.getTime() - this.lastMoveTime.getTime(),
+          san: move.san,
         },
       }),
       db.game.update({
         data: {
-          currentFen: this.board.fen(),
+          currentFen: move.after,
         },
         where: {
           id: this.gameId,
@@ -220,16 +218,7 @@ export class Game {
     ]);
   }
 
-  async makeMove(
-    user: User,
-    move: {
-      from: Square;
-      to: Square;
-      piece: PieceSymbol;
-      startTime: number;
-      endTime: number;
-    },
-  ) {
+  async makeMove(user: User, move: TimingMove) {
     // validate the type of move using zod
     if (this.board.turn() === 'w' && user.userId !== this.player1UserId) {
       return;
@@ -321,8 +310,6 @@ export class Game {
         id: userId,
       },
     });
-    console.log('User', user);
-
     const messageBroadcast = JSON.stringify({
       type: GAME_MESSAGE,
       payload: {
@@ -332,8 +319,6 @@ export class Game {
         },
       },
     });
-
-    console.log('Broadcasting message', messageBroadcast);
 
     SocketManager.getInstance().broadcast(this.gameId, messageBroadcast);
   }
