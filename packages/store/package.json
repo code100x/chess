@@ -5,7 +5,8 @@
   "main": "index.js",
   "exports": {
     "./useUser": "./src/hooks/useUser.ts",
-    "./userAtom": "./src/atoms/user.ts"
+    "./userAtom": "./src/atoms/user.ts",
+    "./chessBoard": "./src/atoms/chessBoard.ts"
   },
   "keywords": [],
   "author": "",
