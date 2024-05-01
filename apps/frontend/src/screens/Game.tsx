@@ -1,7 +1,7 @@
 /* eslint-disable no-case-declarations */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useRef, useState } from 'react';
-import MoveSound from '../../public/move.wav';
+import MoveSound from '/move.wav';
 import { Button } from '../components/Button';
 import { ChessBoard, isPromoting } from '../components/ChessBoard';
 import { useSocket } from '../hooks/useSocket';
@@ -71,8 +71,7 @@ export const Game = () => {
     if (!user) {
       window.location.href = '/login';
     }
-  }, [user])
-
+  }, [user]);
 
   useEffect(() => {
     if (!socket) {
@@ -222,7 +221,9 @@ export const Game = () => {
       <div className="justify-center flex">
         <div className="pt-2 max-w-screen-xl w-full">
           <div className="grid grid-cols-7 w-full">
-            <div className={`col-span-7 lg:col-span-4 w-full text-white ${(result === OPPONENT_DISCONNECTED || result === USER_TIMEOUT) ? 'pointer-events-none':""}`}>
+            <div
+              className={`col-span-7 lg:col-span-4 w-full text-white ${result === OPPONENT_DISCONNECTED || result === USER_TIMEOUT ? 'pointer-events-none' : ''}`}
+            >
               <div className="flex justify-center">
                 <div>
                   <div className="mb-4">
