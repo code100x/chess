@@ -23,8 +23,13 @@ export const GAME_ADDED = 'game_added';
 export const USER_TIMEOUT = 'user_timeout';
 export const GAME_TIME = 'game_time';
 export const GAME_ENDED = 'game_ended';
+export enum Result {
+  WHITE_WINS = 'WHITE_WINS',
+  BLACK_WINS = 'BLACK_WINS',
+  DRAW = 'DRAW',
+}
 export interface GameResult {
-  result: 'WHITE_WINS' | 'BLACK_WINS' | 'DRAW';
+  result: Result;
   by: string;
 }
 
@@ -230,9 +235,6 @@ export const Game = () => {
           blackPlayer={gameMetadata?.blackPlayer}
           whitePlayer={gameMetadata?.whitePlayer}
           gameResult={result}
-          onClose={() => {
-            console.log('closing');
-          }}
         ></GameEndModal>
       )}
       {started && (
