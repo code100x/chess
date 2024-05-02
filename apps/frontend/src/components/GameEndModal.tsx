@@ -55,7 +55,7 @@ const GameEndModal: React.FC<ModalProps> = ({
               <div className="flex flex-row justify-between items-center bg-gray-700 rounded-lg px-4 py-6">
                 <div className="flex items-center">
                   <div className="flex flex-col items-center">
-                    <div className={`border-4 rounded-full p-2 ${gameResult.result === 'WHITE_WINS' ? 'border-green-400' : 'border-red-400'} mr-4`}>
+                    <div className={`border-4 rounded-full p-2 ${gameResult.result === 'WHITE_WINS' ? 'border-green-400' : 'border-red-400'}`}>
                       <img src={WhiteKing} alt="White King" className="w-10 h-10" />
                     </div>
                     <div className="text-center text-xm p-2">
@@ -66,7 +66,7 @@ const GameEndModal: React.FC<ModalProps> = ({
                 <div className="text-white text-2xl font-bold">vs</div>
                 <div className="flex items-center">
                   <div className="flex flex-col items-center">
-                    <div className={`border-4 rounded-full p-2 ${gameResult.result === 'BLACK_WINS' ? 'border-green-400' : 'border-red-400'} ml-4`}>
+                    <div className={`border-4 rounded-full p-2 ${gameResult.result === 'BLACK_WINS' ? 'border-green-400' : 'border-red-400'}`}>
                       <img src={BlackKing} alt="Black King" className="w-10 h-10" />
                     </div>
                     <div className="text-center text-xm p-2">
