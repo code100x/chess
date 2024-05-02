@@ -351,6 +351,13 @@ export class Game {
         },
       }),
     );
+    // clear timers
+    this.clearTimer();
+    this.clearMoveTimer();
+  }
+
+  clearMoveTimer() {
+    if(this.moveTimer) clearTimeout(this.moveTimer);
   }
 
   setTimer(timer: NodeJS.Timeout) {
