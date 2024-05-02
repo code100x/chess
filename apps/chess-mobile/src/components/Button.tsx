@@ -1,28 +1,59 @@
+import { VariantProps, cva } from 'class-variance-authority';
 import { forwardRef } from 'react';
-import { Text, TouchableOpacity, TouchableOpacityProps } from 'react-native';
+import {  Pressable, PressableProps, View } from 'react-native';
+import { cn } from '~/lib/utils';
 
-interface ButtonProps extends TouchableOpacityProps {
-  onPress?: () => void;
-  title: string;
-  className?: string;
-  textStyle?: string;
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 transition-transform duration-100 -translate-y-1.5 active:-translate-y-0.5",
+  {
+    variants: {
+      variant: {
+        default:"bg-[#81B44C]",
+        secondary:"bg-[#1E293B]",
+      },
+      size: {
+        default:"min-h-12 py-4 px-6",
+        sm:"min-h-9 py-3 px-4",
+        lg:"min-h-16 py-5 px-8",
+        icon:"aspect-square",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    }
+  }
+)
+
+const buttonShadowVariants = cva(
+  "rounded-md",
+  {
+    variants: {
+      variant: {
+        default:"bg-[#45753C]",
+        secondary:"bg-slate-700",
+      }
+    },
+    defaultVariants: {
+      variant: "default",
+    }
+  }
+)
+
+interface ButtonProps extends PressableProps, VariantProps<typeof buttonVariants>, VariantProps<typeof buttonShadowVariants> {
+  roundClass?: string | undefined;
 }
 
-export const Button = forwardRef<TouchableOpacity, ButtonProps>(
-  ({ onPress, title, className = '', textStyle = '' }, ref) => {
+export const Button = forwardRef<View, ButtonProps>(
+  ({ className, variant, size, roundClass, ...props }, ref) => {
     return (
-      <TouchableOpacity
-        activeOpacity={0.85}
-        ref={ref}
-        className={`${styles.button} ${className}`}
-        onPress={onPress}>
-        <Text className={`${styles.buttonText} ${textStyle}`}>{title}</Text>
-      </TouchableOpacity>
+      <View className={cn(buttonShadowVariants({variant}), roundClass)}>
+        <Pressable
+          ref={ref}
+          className={cn(buttonVariants({variant, size, className}))}
+          {...props}
+        />
+      </View>
     );
   }
 );
-
-const styles = {
-  button: 'items-center bg-green-500 rounded shadow-md p-4',
-  buttonText: 'text-white text-3xl font-bold text-center',
-};
