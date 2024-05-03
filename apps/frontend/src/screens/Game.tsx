@@ -219,11 +219,9 @@ export const Game = () => {
         </div>
       )}
       <div className="justify-center flex">
-        <div className="pt-2 max-w-screen-xl w-full">
-          <div className="grid grid-cols-7 w-full">
-            <div
-              className={`col-span-7 lg:col-span-4 w-full text-white ${result === OPPONENT_DISCONNECTED || result === USER_TIMEOUT ? 'pointer-events-none' : ''}`}
-            >
+        <div className="pt-2 w-full">
+          <div className="flex flex-wrap justify-around content-around w-full">
+            <div className="text-white">
               <div className="flex justify-center">
                 <div>
                   <div className="mb-4">
