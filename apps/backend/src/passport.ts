@@ -85,8 +85,7 @@ export function initPassport() {
         const data = await res.json();
         const user = await db.user.upsert({
           create: {
-            // email: data[0].email,
-            email: `${Math.random()}@gmail.com`, // TODO: Fix this
+            email: data[0].email,
             name: profile.displayName,
             provider: 'GITHUB',
           },
@@ -94,8 +93,7 @@ export function initPassport() {
             name: profile.displayName,
           },
           where: {
-            // email: data[0].email,
-            email: `${Math.random()}@gmail.com`, // TODO: Fix this
+            email: data[0].email,
           },
         });
 
