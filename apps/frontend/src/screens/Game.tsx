@@ -22,12 +22,24 @@ export const GAME_ALERT = 'game_alert';
 export const GAME_ADDED = 'game_added';
 export const USER_TIMEOUT = 'user_timeout';
 export const GAME_TIME = 'game_time';
+export const GAME_ENDED = 'game_ended';
+export enum Result {
+  WHITE_WINS = 'WHITE_WINS',
+  BLACK_WINS = 'BLACK_WINS',
+  DRAW = 'DRAW',
+}
+export interface GameResult {
+  result: Result;
+  by: string;
+}
+
 
 const GAME_TIME_MS = 10 * 60 * 1000;
 
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
+import GameEndModal from '@/components/GameEndModal';
 
 const moveAudio = new Audio(MoveSound);
 
@@ -49,11 +61,7 @@ export const Game = () => {
   const [started, setStarted] = useState(false);
   const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
   const [result, setResult] = useState<
-    | 'WHITE_WINS'
-    | 'BLACK_WINS'
-    | 'DRAW'
-    | typeof OPPONENT_DISCONNECTED
-    | typeof USER_TIMEOUT
+    GameResult
     | null
   >(null);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
@@ -121,8 +129,26 @@ export const Game = () => {
           setResult(message.payload.result);
           break;
 
-        case OPPONENT_DISCONNECTED:
-          setResult(OPPONENT_DISCONNECTED);
+        case GAME_ENDED:
+          const wonBy = message.payload.status === 'COMPLETED' ? 
+            message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw' : 'Timeout';
+          setResult({
+            result: message.payload.result,
+            by: wonBy,
+          });
+          chess.reset();
+          setMoves(() => {
+            message.payload.moves.map((curr_move: Move) => {
+              chess.move(curr_move as Move);
+            });
+            return message.payload.moves;
+          });
+          setGameMetadata({
+            blackPlayer: message.payload.blackPlayer,
+            whitePlayer: message.payload.whitePlayer,
+          });
+          
+        
           break;
 
         case USER_TIMEOUT:
@@ -204,11 +230,11 @@ export const Game = () => {
   return (
     <div className="">
       {result && (
-        <div className="justify-center flex pt-4 text-white">
-          {result === 'WHITE_WINS' && 'White wins'}
-          {result === 'BLACK_WINS' && 'Black wins'}
-          {result === 'DRAW' && 'Draw'}
-        </div>
+        <GameEndModal
+          blackPlayer={gameMetadata?.blackPlayer}
+          whitePlayer={gameMetadata?.whitePlayer}
+          gameResult={result}
+        ></GameEndModal>
       )}
       {started && (
         <div className="justify-center flex pt-4 text-white">
@@ -244,7 +270,7 @@ export const Game = () => {
                   </div>
                   <div>
                     <div
-                      className={`col-span-4 w-full flex justify-center text-white`}
+                      className={`w-full flex justify-center text-white`}
                     >
                       <ChessBoard
                         started={started}
@@ -278,7 +304,7 @@ export const Game = () => {
                 </div>
               </div>
             </div>
-            <div className="col-span-3 rounded-md bg-brown-500 w-full h-[90vh] overflow-auto mt-10">
+            <div className="rounded-md bg-brown-500 overflow-auto h-[90vh] mt-10">
               {!started && (
                 <div className="pt-8 flex justify-center w-full">
                   {added ? (
