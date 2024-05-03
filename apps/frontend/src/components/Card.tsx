@@ -1,3 +1,4 @@
+import GameModeComponent from './GameModeComponent';
 import {
   EyeNoneIcon,
   PersonIcon,
@@ -21,58 +22,35 @@ export function PlayCard() {
         <CardDescription></CardDescription>
       </CardHeader>
       <CardContent className="grid gap-1">
-        <div
+        <GameModeComponent
+          icon={<LightningBoltIcon />}
+          title="Play Online"
+          description="Play vs a Person of Similar Skill"
           onClick={() => {
             navigate('/game/random');
           }}
-          className="-mx-2 flex items-start space-x-4 rounded-md p-2 transition-all hover:bg-accent hover:text-accent-foreground"
-        >
-          <LightningBoltIcon className="mt-px h-5 w-5" />
-          <div className="space-y-1">
-            <p className="text-sm font-medium leading-none">Play Online</p>
-            <p className="text-sm text-muted-foreground">
-              Play vs a Person of Simillar Skill
-            </p>
-          </div>
-        </div>
-        <div className="-mx-2 flex items-start space-x-4 rounded-md p-2 transition-all ">
-          <PersonIcon className="mt-px h-5 w-5" />
-          <div className="space-y-1">
-            <p className="text-sm font-medium leading-none">Computer</p>
-            <p className="text-sm text-muted-foreground">
-              Challenge a bot from easy to master (coming soon)
-            </p>
-          </div>
-        </div>
-        <div className="-mx-2 flex items-start space-x-4 rounded-md p-2 transition-all">
-          <PersonIcon className="mt-px h-5 w-5" />
-          <div className="space-y-1">
-            <p className="text-sm font-medium leading-none">Play a Friend</p>
-            <p className="text-sm text-muted-foreground">
-              Invite a Friend to a game of Chess (coming soon)
-            </p>
-          </div>
-        </div>
-        <div className="-mx-2 flex items-start space-x-4 rounded-md p-2 transition-all ">
-          <EyeNoneIcon className="mt-px h-5 w-5" />
-          <div className="space-y-1">
-            <p className="text-sm font-medium leading-none">Tournaments</p>
-            <p className="text-sm text-muted-foreground">
-              Join an Arena where anyone can Win (coming soon)
-            </p>
-          </div>
-        </div>
-
-        <div className="-mx-2 flex items-start space-x-4 rounded-md p-2 transition-all ">
-          <EyeNoneIcon className="mt-px h-5 w-5" />
-          <div className="space-y-1">
-            <p className="text-sm font-medium leading-none">Chess Variants</p>
-            <p className="text-sm text-muted-foreground">
-              Find Fun New ways to play chess (coming soon)
-            </p>
-          </div>
-        </div>
-      </CardContent>
+        />
+        <GameModeComponent
+          icon={<PersonIcon className="mt-px h-5 w-5" />}
+          title="Computer"
+          description="Challenge a bot from easy to master (coming soon)"
+        />
+        <GameModeComponent
+          icon={<PersonIcon className="mt-px h-5 w-5" />}
+          title="Play a Friend"
+          description="Invite a Friend to a game of Chess (coming soon)"
+        />
+        <GameModeComponent
+          icon={<EyeNoneIcon className="mt-px h-5 w-5" />}
+          title="Tournaments"
+          description="Join an Arena where anyone can Win (coming soon)"
+        />
+        <GameModeComponent
+          icon={<EyeNoneIcon className="mt-px h-5 w-5" />}
+          title="Chess Variants"
+          description="Find Fun New ways to play chess (coming soon)"
+        />
+      </CardContent>{' '}
     </Card>
   );
 }
