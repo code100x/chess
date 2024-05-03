@@ -34,7 +34,7 @@ function AuthApp() {
         />
         <Route 
           path="/bot" 
-          element={<Bot />} 
+          element={<Layout children={<Bot />} />}
         />
         <Route
           path="/game/:gameId"

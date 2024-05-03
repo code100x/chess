@@ -172,7 +172,7 @@ const onMouseOutSquare = (square : engine.Square) => {
 
   return (
     <>
-        <div className="flex ml-[15.3rem] mt-[2rem] gap-4">
+        <div className="flex ml-[5.3rem] gap-4">
             <img className="w-10 h-10 rounded" src={blackBot?.avatar} alt="" />
             <div className="font-medium dark:text-white text-white">
               <div>{blackBot?.name}</div>
@@ -180,7 +180,7 @@ const onMouseOutSquare = (square : engine.Square) => {
         </div>
 
         <div className="min-w-[750px] absolute flex-row right-0 no-scrollbar">
-          <div className={'float-left ml-[16vw] mt-[3vh] '}>
+          <div className={'float-left ml-[16vw] mt-[2vh] '}>
             <BotChessBoard
               fen={fen}
               onDragStart={onDragStart}
