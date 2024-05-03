@@ -34,6 +34,9 @@ export function PlayCard() {
           icon={<PersonIcon className="mt-px h-5 w-5" />}
           title="Computer"
           description="Challenge a bot from easy to master (coming soon)"
+           onClick={() => {
+            navigate('/bot');
+          }}
         />
         <GameModeComponent
           icon={<PersonIcon className="mt-px h-5 w-5" />}
