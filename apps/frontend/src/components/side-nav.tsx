@@ -1,25 +1,29 @@
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/hooks/useSidebar';
 import { buttonVariants } from '@/components/ui/button';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/subnav-accordian';
-import { useEffect, useState } from 'react';
+import { SyntheticEvent, useEffect, useState } from 'react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { type LucideIcon } from 'lucide-react';
-import { useUser } from '@repo/store/useUser';
+import { api } from '@/lib/api';
+import { useRecoilState } from 'recoil';
+import { userAtom } from '../../../../packages/store/src/atoms/user';
+import { LANDING_PAGE } from '@/constants/routes';
 
 export interface NavItem {
   title: string;
-  href: string;
+  href?: string;
   icon: LucideIcon;
   color?: string;
   isChidren?: boolean;
   children?: NavItem[];
+  action?: string;
 }
 
 interface SideNavProps {
@@ -29,7 +33,8 @@ interface SideNavProps {
 }
 
 export function SideNav({ items, setOpen, className }: SideNavProps) {
-  const user = useUser();
+  const [user, setUser] = useRecoilState(userAtom);
+  const navigate = useNavigate();
   const location = useLocation();
   const { isOpen } = useSidebar();
   const [openItem, setOpenItem] = useState('');
@@ -43,6 +48,30 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
       setOpenItem('');
     }
   }, [isOpen]);
+
+  const handleLogout = async () => {
+    await api.get('/auth/logout/');
+    // Perform Cleanup
+    setUser(null);
+    navigate(LANDING_PAGE);
+  };
+
+  const executeAction = (action: string) => {
+    switch (action) {
+      case 'logout':
+        handleLogout();
+        break;
+      default:
+        console.error('Invalid Action Identifier');
+    }
+  };
+
+  const handleNavItemClick = (event: SyntheticEvent, navItem: NavItem) => {
+    event.preventDefault();
+    if (setOpen) setOpen(false);
+    if (navItem.action) executeAction(navItem.action);
+    else if (navItem.href) navigate(navItem.href);
+  };
 
   return (
     <nav className="dark">
@@ -79,14 +108,12 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
                   <ChevronDownIcon className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
                 )}
               </AccordionTrigger>
-              <AccordionContent className="mt-2 space-y-4 pb-1">
+              <AccordionContent className="mt-2 space-y-4 pb-1 cursor-pointer">
                 {item.children?.map((child) => (
                   <a
                     key={child.title}
                     href={child.href}
-                    onClick={() => {
-                      if (setOpen) setOpen(false);
-                    }}
+                    onClick={(event) => handleNavItemClick(event, child)}
                     className={cn(
                       buttonVariants({ variant: 'ghost' }),
                       'group relative flex h-12 justify-start gap-x-3',
@@ -121,9 +148,7 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
             <a
               key={item.title}
               href={item.href}
-              onClick={() => {
-                if (setOpen) setOpen(false);
-              }}
+              onClick={(event) => handleNavItemClick(event, item)}
               className={cn(
                 buttonVariants({ variant: 'ghost' }),
                 'group relative flex h-12 justify-start',

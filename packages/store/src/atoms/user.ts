@@ -8,7 +8,7 @@ export interface User {
   name: string;
 }
 
-export const userAtom = atom<User>({
+export const userAtom = atom<User | null>({
   key: 'user',
   default: selector({
     key: 'user/default',

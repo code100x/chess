@@ -1,9 +1,7 @@
 import Google from '../assets/google.png';
 import Github from '../assets/github.png';
 import { useNavigate } from 'react-router-dom';
-
-const BACKEND_URL =
-  import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
+import { BACKEND_URL } from '@/constants/endpoints';
 
 const Login = () => {
   const navigate = useNavigate();
