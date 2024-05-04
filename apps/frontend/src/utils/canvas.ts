@@ -1,5 +1,6 @@
-const calculateX = (square: string, isFlipped: boolean) => {
-  const squareSize = 64; /* Specify the width of each square */
+
+const calculateX = (square: string, isFlipped: boolean, squareSize: number) => {
+  
   let columnIndex = square.charCodeAt(0) - 'a'.charCodeAt(0); // Convert column letter to index
   if (isFlipped) {
     columnIndex = 7 - columnIndex; // Reverse the column index if the board is flipped
@@ -8,8 +9,8 @@ const calculateX = (square: string, isFlipped: boolean) => {
   return columnIndex * squareSize + squareSize / 2;
 };
 
-const calculateY = (square: string, isFlipped: boolean) => {
-  const squareSize = 64; /* Specify the height of each square */
+const calculateY = (square: string, isFlipped: boolean, squareSize: number) => {
+  
   let rowIndex = 8 - parseInt(square[1]); // Convert row number to index (assuming rank 1 is at the bottom)
   if (isFlipped) {
     rowIndex = 7 - rowIndex; // Reverse the row index if the board is flipped
@@ -17,15 +18,17 @@ const calculateY = (square: string, isFlipped: boolean) => {
   return rowIndex * squareSize + squareSize / 2;
 };
 export const drawArrow = (
-  ctx: CanvasRenderingContext2D,
+ {
+  ctx, start, end, isFlipped, squareSize
+ }:{ ctx: CanvasRenderingContext2D,
   start: string,
   end: string,
-  isFlipped: boolean,
+  isFlipped: boolean,squareSize: number}
 ) => {
-  const startX = calculateX(start, isFlipped);
-  const startY = calculateY(start, isFlipped);
-  const endX = calculateX(end, isFlipped);
-  const endY = calculateY(end, isFlipped);
+  const startX = calculateX(start, isFlipped, squareSize);
+  const startY = calculateY(start, isFlipped, squareSize);
+  const endX = calculateX(end, isFlipped, squareSize);
+  const endY = calculateY(end, isFlipped, squareSize);
 
   // Draw arrow
   ctx.beginPath();
