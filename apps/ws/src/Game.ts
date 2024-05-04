@@ -319,7 +319,7 @@ export class Game {
   }
 
   async endGame(status: GAME_STATUS, result: GAME_RESULT) {
-    await db.game.update({
+    const updatedGame = await db.game.update({
       data: {
         status,
         result: result,
@@ -327,6 +327,15 @@ export class Game {
       where: {
         id: this.gameId,
       },
+      include: {
+        moves: {
+          orderBy: {
+            moveNumber: 'asc',
+          },
+        },
+        blackPlayer: true,
+        whitePlayer: true,
+      }
     });
 
     SocketManager.getInstance().broadcast(
@@ -335,10 +344,26 @@ export class Game {
         type: GAME_ENDED,
         payload: {
           result,
-          status
+          status,
+          moves: updatedGame.moves,
+          blackPlayer: {
+            id: updatedGame.blackPlayer.id,
+            name: updatedGame.blackPlayer.name,
+          },
+          whitePlayer: {
+            id: updatedGame.whitePlayer.id,
+            name: updatedGame.whitePlayer.name,
+          },
         },
       }),
     );
+    // clear timers
+    this.clearTimer();
+    this.clearMoveTimer();
+  }
+
+  clearMoveTimer() {
+    if(this.moveTimer) clearTimeout(this.moveTimer);
   }
 
   setTimer(timer: NodeJS.Timeout) {

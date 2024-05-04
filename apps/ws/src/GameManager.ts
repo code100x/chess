@@ -10,11 +10,13 @@ import {
   GAME_NOT_FOUND,
   GAME_ALERT,
   GAME_ADDED,
+  GAME_ENDED,
 } from './messages';
 import { Game, isPromoting } from './Game';
 import { db } from './db';
 import { SocketManager, User } from './SocketManager';
 import { Square } from 'chess.js';
+import { GameStatus } from '@prisma/client';
 
 export class GameManager {
   private games: Game[];
@@ -122,6 +124,26 @@ export class GameManager {
               type: GAME_NOT_FOUND,
             }),
           );
+          return;
+        }
+
+        if(gameFromDb.status !== GameStatus.IN_PROGRESS) {
+          user.socket.send(JSON.stringify({
+            type: GAME_ENDED,
+            payload: {
+              result: gameFromDb.result,
+              status: gameFromDb.status,
+              moves: gameFromDb.moves,
+              blackPlayer: {
+                id: gameFromDb.blackPlayer.id,
+                name: gameFromDb.blackPlayer.name,
+              },
+              whitePlayer: {
+                id: gameFromDb.whitePlayer.id,
+                name: gameFromDb.whitePlayer.name,
+              },
+            }
+          }));
           return;
         }
 
