@@ -1,7 +1,8 @@
 import { useAuth } from '~/context/authcontext';
 import { Stack, Redirect } from 'expo-router';
-import { Container } from '~/components/Container';
-import { Loading } from '~/components/Loading';
+import { Container, Loading } from '~/components';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Drawer } from 'expo-router/drawer';
 
 export default function Layout() {
   const { session, isLoading } = useAuth();
@@ -17,5 +18,19 @@ export default function Layout() {
     return <Redirect href={"/sign-in"} />
   }
 
-  return <Stack/>
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Drawer screenOptions={{ headerShown:false }}>
+        <Drawer.Screen
+          name='index'
+          options={{
+            drawerLabel: 'Home'
+          }}
+        />
+        <Drawer.Screen
+          name="details"
+        />
+      </Drawer>
+    </GestureHandlerRootView>
+  )
 }

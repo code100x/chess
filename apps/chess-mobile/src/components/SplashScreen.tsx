@@ -4,7 +4,7 @@ import Animated, { ZoomIn, ZoomOut } from 'react-native-reanimated';
 
 const AnimatedLottieView = Animated.createAnimatedComponent(LottieView);
 
-const SplashScreen = ({onAnimationFinish}:{onAnimationFinish?:(isCancelled:boolean)=>void}) => {
+export const SplashScreen = ({onAnimationFinish}:{onAnimationFinish?:(isCancelled:boolean)=>void}) => {
   return (
     <View className='flex-1 items-center justify-center bg-slate-950'>
       <AnimatedLottieView
@@ -23,5 +23,3 @@ const SplashScreen = ({onAnimationFinish}:{onAnimationFinish?:(isCancelled:boole
     </View>
   )
 }
-
-export default SplashScreen

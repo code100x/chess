@@ -4,7 +4,7 @@ import Animated, { useAnimatedProps, useSharedValue, withTiming } from 'react-na
 import Svg, { Path } from 'react-native-svg';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
-export default function BackgroundSvg() {
+export function BackgroundSvg() {
   const dashOffset = useSharedValue(1000);
 
   useEffect(() => {

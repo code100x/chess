@@ -5,7 +5,7 @@ import { setBackgroundColorAsync, setBehaviorAsync, setVisibilityAsync } from 'e
 import { Slot } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
 import { useState } from 'react';
-import SplashScreen from '~/components/SplashScreen';
+import { SplashScreen } from '~/components';
 
 export default function Layout() {
   setStatusBarStyle("light");
