@@ -424,7 +424,7 @@ export class Game {
       return
     }
     if (gameDb?.status == "IN_PROGRESS"){
-    gameDb = await db.game.update({
+    let  updatedGame = await db.game.update({
       data: {
         status,
         result: result,
@@ -432,6 +432,15 @@ export class Game {
       where: {
         id: this.gameId,
       },
+      include: {
+        moves: {
+          orderBy: {
+            moveNumber: 'asc',
+          },
+        },
+        blackPlayer: true,
+        whitePlayer: true,
+      }
     });
     await updatePlayersRating(gameDb)
     SocketManager.getInstance().broadcast(
@@ -440,10 +449,26 @@ export class Game {
         type: GAME_ENDED,
         payload: {
           result,
-          status
+          status,
+          moves: updatedGame.moves,
+          blackPlayer: {
+            id: updatedGame.blackPlayer.id,
+            name: updatedGame.blackPlayer.name,
+          },
+          whitePlayer: {
+            id: updatedGame.whitePlayer.id,
+            name: updatedGame.whitePlayer.name,
+          },
         },
       }),
     );
+    // clear timers
+    this.clearTimer();
+    this.clearMoveTimer();
+  }
+
+  clearMoveTimer() {
+    if(this.moveTimer) clearTimeout(this.moveTimer);
   }
 }
   setTimer(timer: NodeJS.Timeout) {
