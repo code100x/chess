@@ -5,7 +5,6 @@ import { Game } from './screens/Game';
 import Login from './screens/Login';
 import { Suspense } from 'react';
 import { RecoilRoot } from 'recoil';
-import { useUser } from '@repo/store/useUser';
 import { Loader } from './components/Loader';
 import { Layout } from './layout';
 
@@ -22,19 +21,12 @@ function App() {
 }
 
 function AuthApp() {
-  const user = useUser();
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout children={<Landing />} />} />
-        <Route
-          path="/login"
-          element={<Login />}
-        />
-        <Route
-          path="/game/:gameId"
-          element={<Layout children={<Game />} />}
-        />
+        <Route path="/login" element={<Login />} />
+        <Route path="/game/:gameId" element={<Layout children={<Game />} />} />
       </Routes>
     </BrowserRouter>
   );

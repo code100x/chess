@@ -33,7 +33,6 @@ export interface GameResult {
   by: string;
 }
 
-
 const GAME_TIME_MS = 10 * 60 * 1000;
 
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -60,10 +59,7 @@ export const Game = () => {
   const [added, setAdded] = useState(false);
   const [started, setStarted] = useState(false);
   const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
-  const [result, setResult] = useState<
-    GameResult
-    | null
-  >(null);
+  const [result, setResult] = useState<GameResult | null>(null);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
 
@@ -79,8 +75,7 @@ export const Game = () => {
     if (!user) {
       window.location.href = '/login';
     }
-  }, [user])
-
+  }, [user]);
 
   useEffect(() => {
     if (!socket) {
@@ -131,8 +126,12 @@ export const Game = () => {
           break;
 
         case GAME_ENDED:
-          const wonBy = message.payload.status === 'COMPLETED' ? 
-            message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw' : 'Timeout';
+          const wonBy =
+            message.payload.status === 'COMPLETED'
+              ? message.payload.result !== 'DRAW'
+                ? 'CheckMate'
+                : 'Draw'
+              : 'Timeout';
           setResult({
             result: message.payload.result,
             by: wonBy,
@@ -148,8 +147,7 @@ export const Game = () => {
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
           });
-          
-        
+
           break;
 
         case USER_TIMEOUT:
@@ -227,7 +225,7 @@ export const Game = () => {
   };
 
   if (!socket) return <div>Connecting...</div>;
-
+  if (!user) return;
   return (
     <div className="">
       {result && (
@@ -270,9 +268,7 @@ export const Game = () => {
                     )}
                   </div>
                   <div>
-                    <div
-                      className={`w-full flex justify-center text-white`}
-                    >
+                    <div className={`w-full flex justify-center text-white`}>
                       <ChessBoard
                         started={started}
                         gameId={gameId ?? ''}
