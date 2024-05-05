@@ -100,7 +100,9 @@ export class Game {
       }
     });
     this.moveCount = moves.length;
-    this.lastMoveTime = moves[moves.length - 1].createdAt;
+    if (moves[moves.length - 1]) {
+      this.lastMoveTime = moves[moves.length - 1].createdAt;
+    }
 
     moves.map((move, index) => {
       if (move.timeTaken) {
