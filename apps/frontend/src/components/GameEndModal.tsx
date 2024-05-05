@@ -76,17 +76,29 @@ const GameEndModal: React.FC<ModalProps> = ({
           <div className="relative rounded-lg shadow-lg bg-gray-800 w-96">
             <div className="px-6 py-8 items-center self-center m-auto">
               <div className="m-auto mb-6">
-                <h2 className={`text-4xl font-bold mb-2 text-yellow-400 text-center text-wrap`}>
-                 {getWinnerMessage(gameResult.result)}  
+                <h2
+                  className={`text-4xl font-bold mb-2 text-yellow-400 text-center text-wrap`}
+                >
+                  {getWinnerMessage(gameResult.result)}
                 </h2>
               </div>
               <div className="m-auto mb-6">
-                <p className="text-xl text-white text-center">by {gameResult.by}</p>
+                <p className="text-xl text-white text-center">
+                  by {gameResult.by}
+                </p>
               </div>
               <div className="flex flex-row justify-between items-center bg-gray-700 rounded-lg px-4 py-6">
-                <PlayerDisplay isWhite={true} player={whitePlayer} gameResult={gameResult.result} />
+                <PlayerDisplay
+                  isWhite={true}
+                  player={whitePlayer}
+                  gameResult={gameResult.result}
+                />
                 <div className="text-white text-2xl font-bold">vs</div>
-                <PlayerDisplay isWhite={false} player={blackPlayer} gameResult={gameResult.result} />
+                <PlayerDisplay
+                  isWhite={false}
+                  player={blackPlayer}
+                  gameResult={gameResult.result}
+                />
               </div>
             </div>
             <div className="px-6 py-4 bg-gray-900 text-right rounded-b-lg">
