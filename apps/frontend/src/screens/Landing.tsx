@@ -75,7 +75,7 @@ export const Landing = () => {
                       src="https://res.cloudinary.com/dcugqfvvg/image/upload/v1713650980/chess-solid-svgrepo-com_qbosf3.svg"
                       alt="icon"
                     />
-                    <p className="text-4xl">Spectate</p>
+                    <p className="text-4xl text-white">Spectate</p>
                   </Button>
                 </div>
               ))}
