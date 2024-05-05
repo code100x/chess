@@ -9,12 +9,18 @@ interface BotChessBoardProps {
   fen: engine.Fen;
   onMovePiece: (sourceSquare: Square, targetSquare: Square) => boolean;
   Bot:SelectedBot;
+  onSquareClick?: (square: engine.Square) => void;
+  onMouseOutSquare?: (square: engine.Square) => void;
+  customSquareStyles?: {};
 } 
 
 const BotChessBoard2: React.FC<BotChessBoardProps> = ({
   fen,
   onMovePiece,
-  Bot
+  Bot,
+  onSquareClick,
+  onMouseOutSquare,
+  customSquareStyles
 }) => {
   return (
     <Chessboard
@@ -26,6 +32,9 @@ const BotChessBoard2: React.FC<BotChessBoardProps> = ({
       customDarkSquareStyle={{ backgroundColor: Bot?.squareColor.dark || '' }}
       customPieces={BotPieces}
       boardWidth={625}
+      onSquareClick={onSquareClick}
+      onMouseOutSquare={onMouseOutSquare}
+      customSquareStyles={customSquareStyles}
     />
   );
 };

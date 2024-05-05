@@ -15,11 +15,72 @@ const BotGame: React.FC<{
   const [history, setHistory] = useState<Array<engine.Move>>([]);
   const [White] = useState<SelectedBot>(null);
   const [blackBot, setBlackBot] = useState<SelectedBot>(null);
+  const [squareStyles , setSquareStyles] = useState({});
+
 
   const newGame = () => {
     setPlaying(false);
     setFen(engine.newGame);
     setHistory([]);
+  };
+
+  const squareStyling = ( pieceSquare:string, history:Array<engine.Move>) => {
+    const sourceSquare = history.length && history[history.length -1].from;
+    const targetSquare = history.length && history[history.length -1].to;
+  
+    return {
+      [pieceSquare]: { backgroundColor: "rgba(255, 255, 0, 0.4)" },
+      ...(history.length && {
+        [sourceSquare]: {
+          backgroundColor: "rgba(255, 255, 0, 0.4)",
+        },
+      }),
+      ...(history.length && {
+        [targetSquare]: {
+          backgroundColor: "rgba(255, 255, 0, 0.4)",
+        },
+      }),
+    };
+  };
+
+  const highlightSquare = (sourceSquare:engine.Square, squaresToHighlight:string[], history:Array<engine.Move> , pieceSquare :string) => {
+    const highlightStyles: React.CSSProperties = [sourceSquare, ...squaresToHighlight].reduce(
+      (a, c) => {
+        return {
+          ...a,
+          ...{
+            [c]: {
+              background:
+                "radial-gradient(circle, rgb(191, 188, 180) 36%, transparent 40%)",
+              borderRadius: "50%",
+            },
+          },
+          ...squareStyling(pieceSquare, history),
+        };
+      },
+      {} as React.CSSProperties,
+    );
+    setSquareStyles({ ...squareStyles, ...highlightStyles });
+  };
+
+  const  onSquareClick = (square : engine.Square) => {
+    const moves = engine.getPossibleMoves(fen, square);
+    if (moves.length === 0) return;
+
+    const squaresToHighlight = [];
+    for (let i = 0; i < moves.length; i++) {
+      squaresToHighlight.push(moves[i].to);
+    }
+
+    highlightSquare(square, squaresToHighlight , history , engine.getPiece(fen , square));
+  };
+
+  const removeHighlight = ( pieceSquare: engine.Square) => {
+      setSquareStyles(squareStyling(pieceSquare, history));
+  };
+
+  const onMouseOutSquare = (square : engine.Square) => {
+        removeHighlight(square);
   };
 
   const doMove = useCallback(
@@ -40,6 +101,8 @@ const BotGame: React.FC<{
 
       setFen(newFen);
       setHistory((history) => [...history, action]);
+      setSquareStyles(squareStyling(action.from, history)); 
+
     },
     [onGameCompleted],
   );
@@ -101,6 +164,9 @@ const BotGame: React.FC<{
               fen={fen}
               onMovePiece={onMovePiece}
               Bot={blackBot}
+              onSquareClick={onSquareClick}
+              onMouseOutSquare={onMouseOutSquare}
+              customSquareStyles={squareStyles}
             />
           </div>
 
