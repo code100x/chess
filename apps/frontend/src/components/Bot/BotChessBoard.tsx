@@ -1,58 +1,33 @@
-import Chessboard from 'chessboardjsx';
+import { Square } from "chess.js";
 import React from 'react';
+import { Chessboard } from "react-chessboard";
 import * as engine from '../../helper/BotEngine';
 import BotPieces from './BotPieces';
 import { SelectedBot } from './BotSelector';
 
-type BoardMove = {
-  sourceSquare: engine.Square;
-  targetSquare: engine.Square;
-};
-
 interface BotChessBoardProps {
   fen: engine.Fen;
-  onDragStart: (sourceSquare: Pick<BoardMove, 'sourceSquare'>) => boolean;
-  onMovePiece: (move: BoardMove) => void;
+  onMovePiece: (sourceSquare: Square, targetSquare: Square) => boolean;
   Bot:SelectedBot;
-  onSquareClick?: (square: engine.Square) => void;
-  onMouseOutSquare?: (square: engine.Square) => void
-  squareStyles?: {};
-  dropSquareStyle?: {};
-  onDragOverSquare?: (square: engine.Square) => void;
-  isPlaying: boolean;
-
 } 
 
-const BotChessBoard: React.FC<BotChessBoardProps> = ({
+const BotChessBoard2: React.FC<BotChessBoardProps> = ({
   fen,
-  onDragStart,
   onMovePiece,
-  Bot,
-  onSquareClick,
-  onMouseOutSquare,
-  squareStyles,
-  dropSquareStyle,
-  onDragOverSquare,
-  isPlaying
+  Bot
 }) => {
   return (
     <Chessboard
       position={fen}
-      allowDrag={onDragStart}
-      onDrop={onMovePiece}
-      onMouseOutSquare={isPlaying ? onMouseOutSquare : ()=>{}}
-      dropOffBoard="trash"
-      sparePieces={false}
-      width={650}
-      lightSquareStyle={{ backgroundColor: Bot?.squareColor.light}}
-      darkSquareStyle={{ backgroundColor: Bot?.squareColor.dark }}
-      squareStyles={squareStyles}
-      dropSquareStyle={dropSquareStyle}
-      pieces={BotPieces}
-      onDragOverSquare={onDragOverSquare}
-      onSquareClick={isPlaying ? onSquareClick : ()=>{}}  
+      onPieceDrop={(sourceSquare, targetSquare) => onMovePiece(sourceSquare, targetSquare)}
+      id="computer"
+      animationDuration={200}
+      customLightSquareStyle={{ backgroundColor: Bot?.squareColor.light || ''}}
+      customDarkSquareStyle={{ backgroundColor: Bot?.squareColor.dark || '' }}
+      customPieces={BotPieces}
+      boardWidth={625}
     />
   );
 };
 
-export default BotChessBoard;
+export default BotChessBoard2;

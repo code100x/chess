@@ -6,11 +6,6 @@ import type { SelectedBot } from './BotSelector';
 import type { AvailableBots } from '../../helper/Bots';
 import BotSelector from './BotSelector';
 
-type BoardMove = {
-  sourceSquare: engine.Square;
-  targetSquare: engine.Square;
-};
-
 const BotGame: React.FC<{
   bots: AvailableBots;
   onGameCompleted: (winner: engine.GameWinner) => void;
@@ -20,58 +15,12 @@ const BotGame: React.FC<{
   const [history, setHistory] = useState<Array<engine.Move>>([]);
   const [White] = useState<SelectedBot>(null);
   const [blackBot, setBlackBot] = useState<SelectedBot>(null);
-  const [dropSquareStyle , setDropSquareStyle] = useState({});
-  const [squareStyles , setSquareStyles] = useState({});
 
   const newGame = () => {
     setPlaying(false);
     setFen(engine.newGame);
     setHistory([]);
   };
-
-
-
-  const squareStyling = ( pieceSquare:string, history:Array<engine.Move>) => {
-    const sourceSquare = history.length && history[history.length - 1].from;
-    const targetSquare = history.length && history[history.length - 1].to;
-  
-    return {
-      [pieceSquare]: { backgroundColor: "rgba(255, 255, 0, 0.4)" },
-      ...(history.length && {
-        [sourceSquare]: {
-          backgroundColor: "rgba(255, 255, 0, 0.4)",
-        },
-      }),
-      ...(history.length && {
-        [targetSquare]: {
-          backgroundColor: "rgba(255, 255, 0, 0.4)",
-        },
-      }),
-    };
-  };
-
-
-  const highlightSquare = (sourceSquare:engine.Square, squaresToHighlight:string[], history:Array<engine.Move> , pieceSquare :string) => {
-    const highlightStyles: React.CSSProperties = [sourceSquare, ...squaresToHighlight].reduce(
-      (a, c) => {
-        return {
-          ...a,
-          ...{
-            [c]: {
-              background:
-                "radial-gradient(circle, rgb(191, 188, 180) 36%, transparent 40%)",
-              borderRadius: "50%",
-            },
-          },
-          ...squareStyling(pieceSquare, history),
-        };
-      },
-      {} as React.CSSProperties,
-    );
-    setSquareStyles({ ...squareStyles, ...highlightStyles });
-  };
-  
-
 
   const doMove = useCallback(
     (fen: engine.Fen, from: engine.Square, to: engine.Square) => {
@@ -91,56 +40,23 @@ const BotGame: React.FC<{
 
       setFen(newFen);
       setHistory((history) => [...history, action]);
-      setSquareStyles(squareStyling(action.from, history)); 
     },
     [onGameCompleted],
   );
 
-
- const  onSquareClick = (square : engine.Square) => {
-    const moves = engine.getPossibleMoves(fen, square);
-    if (moves.length === 0) return;
-
-    const squaresToHighlight = [];
-    for (let i = 0; i < moves.length; i++) {
-      squaresToHighlight.push(moves[i].to);
+  const onMovePiece = ( sourceSquare: engine.Square, targetSquare: engine.Square  ) => {
+    if (!isPlaying) {
+      return false;
     }
 
-    highlightSquare(square, squaresToHighlight , history , engine.getPiece(fen , square));
-  };
+    const move = engine.move(fen, sourceSquare, targetSquare);
 
+      if (!move) {
+        return false;
+      }
+      doMove(fen, sourceSquare, targetSquare);
 
-  const removeHighlight = ( pieceSquare: engine.Square) => {
-    setSquareStyles(squareStyling(pieceSquare, history));
-  };
-
-
-const onMouseOutSquare = (square : engine.Square) => {
-      removeHighlight(square);
-};
-
-   const onDragOverSquare = (square:engine.Square) => {
-    (square === 'e4' || square === 'd4' || square === 'e5' || square === 'd5') ?
-    setDropSquareStyle({ backgroundColor: '#00000' }) :
-    setDropSquareStyle({ boxShadow: 'inset 0 0 1px 4px rgb(115, 109, 94)' });
-  };
-
-
-  const onDragStart = ({
-    sourceSquare: from,
-  }: Pick<BoardMove, 'sourceSquare'>) => {
-    const isWhiteTurn = White && engine.isWhiteTurn(fen);
-    const isBlackBotTurn = blackBot && engine.isBlackTurn(fen);
-
-    return (
-      isPlaying &&
-      engine.isMoveable(fen, from) &&
-      !(isWhiteTurn || isBlackBotTurn)
-    );
-  };
-
-  const onMovePiece = ({ sourceSquare: from, targetSquare: to }: BoardMove) => {
-    doMove(fen, from, to);
+      return true;
   };
 
   useEffect(() => {
@@ -183,16 +99,8 @@ const onMouseOutSquare = (square : engine.Square) => {
           <div className={'float-left ml-[16vw] mt-[2vh] '}>
             <BotChessBoard
               fen={fen}
-              onDragStart={onDragStart}
               onMovePiece={onMovePiece}
               Bot={blackBot}
-              onSquareClick={onSquareClick}
-              onMouseOutSquare={onMouseOutSquare}
-              onDragOverSquare={onDragOverSquare}
-              dropSquareStyle={dropSquareStyle}
-              squareStyles={squareStyles}
-              isPlaying={isPlaying}
-
             />
           </div>
 
