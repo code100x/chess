@@ -16,3 +16,22 @@ Let's keep it simple
 3. Typescript as the language
 4. Separate Websocket servers for handling real time games
 5. Redis for storing all moves of a game in a queue
+
+## Setting it up locally
+
+ - Clone the repo
+ - Copy over .env.example over to .env everywhere
+ - Update .env
+    - Postgres DB Credentials
+    - Github/Google Auth credentials
+ - npm install
+ - Start ws server
+    - cd apps/ws
+    - npm run dev
+ - Start Backend
+    - cd apps/backend
+    - npm run dev
+ - Start frontend
+    - cd apps/frontend
+    - npm run dev
+
