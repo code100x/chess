@@ -11,6 +11,7 @@ import {
   GAME_ALERT,
   GAME_ADDED,
   GAME_ENDED,
+  RESIGN,
 } from './messages';
 import { Game, isPromoting } from './Game';
 import { db } from './db';
@@ -183,6 +184,17 @@ export class GameManager {
         );
 
         SocketManager.getInstance().addUser(user, gameId);
+      }
+
+      if (message.type === RESIGN) {
+        const gameId = message.payload.gameId;
+        const game = this.games.find((game) => game.gameId === gameId);
+        if (game) {
+          const result =
+            user.userId === game.player1UserId ? 'BLACK_WINS' : 'WHITE_WINS';
+          game.result = result;
+          game.endGame('COMPLETED', result, "RESIGN");
+        }
       }
     });
   }

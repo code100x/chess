@@ -23,6 +23,7 @@ export const GAME_ADDED = 'game_added';
 export const USER_TIMEOUT = 'user_timeout';
 export const GAME_TIME = 'game_time';
 export const GAME_ENDED = 'game_ended';
+export const RESIGN = 'resign';
 export enum Result {
   WHITE_WINS = 'WHITE_WINS',
   BLACK_WINS = 'BLACK_WINS',
@@ -32,7 +33,6 @@ export interface GameResult {
   result: Result;
   by: string;
 }
-
 
 const GAME_TIME_MS = 10 * 60 * 1000;
 
@@ -131,8 +131,14 @@ export const Game = () => {
           break;
 
         case GAME_ENDED:
-          const wonBy = message.payload.status === 'COMPLETED' ? 
-            message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw' : 'Timeout';
+          const wonBy =
+            message.payload.status === 'COMPLETED'
+              ? message.payload.result !== 'DRAW'
+                ? message.payload.outcome === 'CHECKMATE'
+                  ? 'CheckMate'
+                  : 'Resign'
+                : 'Draw'
+              : 'Timeout';
           setResult({
             result: message.payload.result,
             by: wonBy,
@@ -328,7 +334,18 @@ export const Game = () => {
                 </div>
               )}
               <div>
-                <MovesTable />
+                <MovesTable
+                  resign={() => {
+                    socket?.send(
+                      JSON.stringify({
+                        type: RESIGN,
+                        payload: {
+                          gameId,
+                        },
+                      }),
+                    );
+                  }}
+                />
               </div>
             </div>
           </div>

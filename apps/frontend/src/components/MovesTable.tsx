@@ -16,7 +16,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
-const MovesTable = () => {
+const MovesTable = ({ resign }: { resign: () => void }) => {
   const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
     userSelectedMoveIndexAtom,
   );
@@ -87,7 +87,7 @@ const MovesTable = () => {
               {<HandshakeIcon size={16} />}
               Draw
             </button>
-            <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
+            <button onClick={resign} className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
               {<FlagIcon size={16} />}
               Resign
             </button>
