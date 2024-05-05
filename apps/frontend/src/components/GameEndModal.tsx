@@ -2,19 +2,23 @@ import React, { useState } from 'react';
 import WhiteKing from '../../public/wk.png';
 import BlackKing from '../../public/bk.png';
 import { GameResult, Result } from '@/screens/Game';
+import { useNavigate } from 'react-router-dom';
 
 interface ModalProps {
   blackPlayer?: { id: string; name: string };
   whitePlayer?: { id: string; name: string };
   gameResult: GameResult;
+  gameId: string;
 }
 
 const GameEndModal: React.FC<ModalProps> = ({
   blackPlayer,
   whitePlayer,
   gameResult,
+  gameId,
 }) => {
   const [isOpen, setIsOpen] = useState(true);
+  const Navigate = useNavigate();
 
   const closeModal = () => {
     setIsOpen(false);
@@ -51,6 +55,12 @@ const GameEndModal: React.FC<ModalProps> = ({
         </div>
       </div>
     );
+  };
+
+  const reviewRedirect = () => {
+    Navigate(`/review/${gameId}`, {
+      replace: false,
+    });
   };
 
   const getWinnerMessage = (result: Result) => {
@@ -101,7 +111,13 @@ const GameEndModal: React.FC<ModalProps> = ({
                 />
               </div>
             </div>
-            <div className="px-6 py-4 bg-gray-900 text-right rounded-b-lg">
+            <div className="px-6 py-4 bg-gray-900 text-right rounded-b-lg gap-2 flex justify-end">
+              <button
+                className="px-6 py-3 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none"
+                onClick={reviewRedirect}
+              >
+                Review
+              </button>
               <button
                 className="px-6 py-3 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none"
                 onClick={closeModal}

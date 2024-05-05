@@ -290,6 +290,7 @@ export const Game = () => {
           blackPlayer={gameMetadata?.blackPlayer}
           whitePlayer={gameMetadata?.whitePlayer}
           gameResult={result}
+          gameId={gameId!}
         ></GameEndModal>
       )}
       {started && (
