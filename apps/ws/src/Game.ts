@@ -70,11 +70,10 @@ export class Game {
     from: string;
     to: string;
     comments: string | null;
-    startFen: string;
-    endFen: string;
     timeTaken: number | null;
     createdAt: Date;
   }[]) {
+    console.log(moves);
     moves.forEach((move) => {
       if (
         isPromoting(this.board, move.from as Square, move.to as Square)
@@ -92,7 +91,9 @@ export class Game {
       }
     });
     this.moveCount = moves.length;
-    this.lastMoveTime = moves[moves.length - 1].createdAt;
+    if (moves[moves.length - 1]) {
+      this.lastMoveTime = moves[moves.length - 1].createdAt;
+    }
 
     moves.map((move, index) => {
       if (move.timeTaken) {
