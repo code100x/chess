@@ -20,8 +20,11 @@ const GAME_MODES: { [key: string]: GAME_TYPE } = {
 };
 
 
-const GAME_TIME_MS = 10 * 60 * 60 * 1000;
-
+const GAME_TIME_MS: Record<string, number> = {
+  bullet: 1 * 60 * 1000, 
+  blitz: 3 * 60 * 1000, 
+  rapid: 10 * 60 * 1000, 
+};
 export function isPromoting(chess: Chess, from: Square, to: Square) {
   if (!from) {
     return false;
@@ -317,8 +320,7 @@ export class Game {
       clearTimeout(this.moveTimer)
     }
     const turn = this.board.turn();
-    const timeLeft = GAME_TIME_MS - (turn === 'w' ? this.player1TimeConsumed : this.player2TimeConsumed);
-
+    const timeLeft = GAME_TIME_MS[this.gameMode] - (turn === 'w' ? this.player1TimeConsumed : this.player2TimeConsumed);
     this.moveTimer = setTimeout(() => {
       this.endGame("TIME_UP", turn === 'b' ? 'WHITE_WINS' : 'BLACK_WINS');
     }, timeLeft);

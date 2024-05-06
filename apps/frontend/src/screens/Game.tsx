@@ -66,11 +66,11 @@ export const Game = () => {
   const [gameMode, setGameMode] = useState('rapid');
   const [isSelectFocused, setIsSelectFocused] = useState(false);
 
-  const GAME_TIME_MS = {
+  const GAME_TIME_MS: Record<string, number> = {
     bullet: 1 * 60 * 1000, 
     blitz: 3 * 60 * 1000, 
     rapid: 10 * 60 * 1000, 
-  }[gameMode] || 10 * 60 * 1000;
+  };
 
   const setMoves = useSetRecoilState(movesAtom);
   const userSelectedMoveIndex = useRecoilValue(userSelectedMoveIndexAtom);
@@ -217,7 +217,7 @@ export const Game = () => {
   }, [started, gameMetadata, user]);
 
   const getTimer = (timeConsumed: number) => {
-    const timeLeftMs = GAME_TIME_MS - timeConsumed;
+    const timeLeftMs = GAME_TIME_MS[gameMode] - timeConsumed;
     const minutes = Math.floor(timeLeftMs / (1000 * 60));
     const remainingSeconds = Math.floor((timeLeftMs % (1000 * 60)) / 1000);
 
