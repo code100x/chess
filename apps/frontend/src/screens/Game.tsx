@@ -33,11 +33,6 @@ export interface GameResult {
   by: string;
 }
 
-
-export interface IMove {
-    from: Square; to: Square; piece: string
-}
-
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
