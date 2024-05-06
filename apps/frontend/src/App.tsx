@@ -33,7 +33,7 @@ function AuthApp() {
           element={<Login />}
         />
         <Route 
-          path="/bot" 
+          path="/game/computer" 
           element={<Layout children={<Bot />} />}
         />
         <Route

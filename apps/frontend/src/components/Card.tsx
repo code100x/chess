@@ -5,7 +5,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '../components/ui/card';
 import chessIcon from '../../public/chess.png';
 import computerIcon from '../../public/computer.png';
 import lightningIcon from '../../public/lightning-bolt.png';
@@ -42,7 +42,7 @@ export function PlayCard() {
       title: 'Computer',
       description: 'Challenge a bot from easy to master',
       onClick: () => {
-        navigate('/bot');
+        navigate('/game/computer');
       },
       disabled: true,
     },
