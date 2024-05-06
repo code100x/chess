@@ -1,11 +1,12 @@
 import {
-  isBoardFlippedAtom,
-  movesAtom,
-  userSelectedMoveIndexAtom,
+  BoardOrientation,
+  boardOrientationAtom,
+  liveGamePositionAtom,
+  selectedMoveIndexAtom,
 } from '@repo/store/chessBoard';
-import { Move } from 'chess.js';
-import { useEffect, useRef } from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { Chess, Move } from 'chess.js';
+import { useEffect, useRef, useState } from 'react';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 import {
   HandshakeIcon,
   FlagIcon,
@@ -16,13 +17,14 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
-const MovesTable = () => {
-  const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
-    userSelectedMoveIndexAtom,
-  );
-  const setIsFlipped = useSetRecoilState(isBoardFlippedAtom);
-  const moves = useRecoilValue(movesAtom);
+const MovesTable = ({ chess }: { chess: Chess }) => {
+  const setLiveGamePosition = useSetRecoilState(liveGamePositionAtom);
+  const setBoardOrientation = useSetRecoilState(boardOrientationAtom);
   const movesTableRef = useRef<HTMLInputElement>(null);
+  const moves = chess.history({ verbose: true });
+
+  const [selectedMoveIndex, setSelectedMoveIndex] = useRecoilState(selectedMoveIndexAtom)
+
   const movesArray = moves.reduce((result, _, index: number, array: Move[]) => {
     if (index % 2 === 0) {
       result.push(array.slice(index, index + 2));
@@ -31,6 +33,9 @@ const MovesTable = () => {
   }, [] as Move[][]);
 
   useEffect(() => {
+    console.log("rerender");
+    
+    setSelectedMoveIndex(null);
     if (movesTableRef && movesTableRef.current) {
       movesTableRef.current.scrollTo({
         top: movesTableRef.current.scrollHeight,
@@ -38,6 +43,32 @@ const MovesTable = () => {
       });
     }
   }, [moves]);
+
+  const handleMoveSelection = (moveIndex: number | null) => {
+    const move =
+      moveIndex !== null ? moves[moveIndex] : moves[moves.length - 1];
+    setLiveGamePosition(move.after);
+    setSelectedMoveIndex(moveIndex);
+  };
+
+  const handleGoToMove = (moveIndex: number | null) => {
+    if (moveIndex === null) {
+      handleMoveSelection(null);
+    } else {
+      const newIndex = Math.max(0, Math.min(moves.length - 1, moveIndex));
+      handleMoveSelection(newIndex);
+    }
+  };
+
+  const goToFirstMove = () => handleGoToMove(0);
+  const goToPreviousMove = () =>
+    handleGoToMove(
+      selectedMoveIndex === null ? moves.length - 2 : selectedMoveIndex - 1,
+    );
+  const goToNextMove = () =>
+    handleGoToMove(selectedMoveIndex === null ? null : selectedMoveIndex + 1);
+  const goToLastMove = () => handleGoToMove(null);
+
   return (
     <div className="text-[#C3C3C0] relative w-full ">
       <div
@@ -54,12 +85,11 @@ const MovesTable = () => {
                 <span className="text-[#C3C3C0] px-2 py-1.5">{`${index + 1}.`}</span>
 
                 {movePairs.map((move, movePairIndex) => {
-                  const isLastIndex =
-                    movePairIndex === movePairs.length - 1 &&
-                    movesArray.length - 1 === index;
+                  const moveIndex = index * 2 + movePairIndex;
+                  const isLastIndex = moveIndex === moves.length - 1;
                   const isHighlighted =
-                    userSelectedMoveIndex !== null
-                      ? userSelectedMoveIndex === index * 2 + movePairIndex
+                    selectedMoveIndex !== null
+                      ? moveIndex === selectedMoveIndex
                       : isLastIndex;
                   const { san } = move;
 
@@ -68,7 +98,8 @@ const MovesTable = () => {
                       key={movePairIndex}
                       className={`col-span-2 cursor-pointer flex items-center w-full pl-1 ${isHighlighted ? 'bg-[#484644] rounded border-b-[#5A5858] border-b-[3px]' : ''}`}
                       onClick={() => {
-                        setUserSelectedMoveIndex(index * 2 + movePairIndex);
+                        setLiveGamePosition(move.after);
+                        setSelectedMoveIndex(isLastIndex ? null : moveIndex);
                       }}
                     >
                       <span className="text-[#C3C3C0]">{san}</span>
@@ -80,7 +111,7 @@ const MovesTable = () => {
           );
         })}
       </div>
-      {moves.length && (
+      {moves.length > 0 && (
         <div className="w-full p-2 bg-[#20211D] flex items-center justify-between">
           <div className="flex gap-4">
             <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
@@ -94,10 +125,8 @@ const MovesTable = () => {
           </div>
           <div className="flex gap-1">
             <button
-              onClick={() => {
-                setUserSelectedMoveIndex(0);
-              }}
-              disabled={userSelectedMoveIndex === 0}
+              onClick={goToFirstMove}
+              disabled={selectedMoveIndex === 0}
               className="hover:text-white"
               title="Go to first move"
             >
@@ -105,36 +134,25 @@ const MovesTable = () => {
             </button>
 
             <button
-              onClick={() => {
-                setUserSelectedMoveIndex((prev) =>
-                  prev !== null ? prev - 1 : moves.length - 2,
-                );
-              }}
-              disabled={userSelectedMoveIndex === 0}
+              onClick={goToPreviousMove}
+              disabled={selectedMoveIndex === 0}
               className="hover:text-white"
             >
               <ChevronLeft />
             </button>
             <button
-              onClick={() => {
-                setUserSelectedMoveIndex((prev) =>
-                  prev !== null
-                    ? prev + 1 >= moves.length - 1
-                      ? moves.length - 1
-                      : prev + 1
-                    : null,
-                );
-              }}
-              disabled={userSelectedMoveIndex === null}
+              onClick={goToNextMove}
+              disabled={
+                selectedMoveIndex === null ||
+                selectedMoveIndex === moves.length - 1
+              }
               className="hover:text-white"
             >
               <ChevronRight />
             </button>
             <button
-              onClick={() => {
-                setUserSelectedMoveIndex(moves.length - 1);
-              }}
-              disabled={userSelectedMoveIndex === null}
+              onClick={goToLastMove}
+              disabled={selectedMoveIndex === null}
               className="hover:text-white"
               title="Go to last move"
             >
@@ -142,7 +160,7 @@ const MovesTable = () => {
             </button>
             <button
               onClick={() => {
-                setIsFlipped((prev) => !prev);
+                setBoardOrientation(prev=> prev === BoardOrientation.WHITE? BoardOrientation.BLACK: BoardOrientation.WHITE)
               }}
               title="Flip the board"
             >
