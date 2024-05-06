@@ -79,8 +79,14 @@
   background-color: #302e2b;
 }
 
+@layer utilities {
+  /* Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 
-.no-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
 }
