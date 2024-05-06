@@ -41,6 +41,9 @@ export function PlayCard() {
       ),
       title: 'Computer',
       description: 'Challenge a bot from easy to master',
+      onClick: () => {
+        navigate('/bot');
+      },
       disabled: true,
     },
     {
