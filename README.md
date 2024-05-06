@@ -21,7 +21,7 @@ cd chess
 npm install
 ```
 
-These commands install all the necessary dependencies required to run both the frontend and backend of the Chess Platform.
+This command install all the necessary dependencies required to run both the frontend and backend of the Chess Platform.
 
 ## Usage
 
@@ -30,7 +30,7 @@ use the `.env.example`
 
 - We have 3 places where you need to add your credentials
 
-`apps/backend`
+`apps/backend: Github/Google Auth credentials`
 ```bash
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
@@ -42,40 +42,52 @@ ALLOWED_HOSTS="http://localhost:5173,https://example.com"
 AUTH_REDIRECT_URL="http://localhost:5173/game/random"
 ```
 
-`apps/frontend`
+`apps/frontend: localhost Url`
 ```bash
 VITE_APP_WS_URL="ws://localhost:8080"
 VITE_APP_BACKEND_URL="http://localhost:3000"
 ```
 
-`packages/db`
+`packages/db: Postgres DB Credentials`
 ```bash
 DATABASE_URL="postgresql://postgres:mysecretpassword@localhost:5432/postgres"
 ```
 
-For frontend:
+## Running the Project
+
+- Start Ws Server
 ```bash
-cd apps/frontend/
+cd apps/ws
 npm run dev
 ```
 
-For backend:
+- Start backend:
 ```bash
 cd apps/backend/
 npm run dev
 ```
 
+- Start frontend:
+```bash
+cd apps/frontend/
+npm run dev
+```
 
 After starting the servers, open your browser and go to [http://localhost:5173](http://localhost:5173) to access the Chess Platform.
 
 ## Architecture
 
-![image](https://github.com/pantharshit007/chess/assets/97608579/e20f120c-be47-4ed2-9457-fe366174d4a0)
+![image](./apps/frontend/public/Chess-structure.png)
 
 
 Scalable Architecture for the Future:
-where user can be distributed across multiple servers and to broadcast matched we can use PUB-SUB 
-![image](https://github.com/pantharshit007/chess/assets/97608579/f7377474-b32e-48f7-935b-fbb9c7ecc622)
+> where user can be distributed across multiple servers and to broadcast matched we can use PUB-SUB 
+
+![image](./apps/frontend/public/Chess-scalable.png)
+
+## Schema Structure
+
+![image](./apps/frontend/public/Chess-schema.png)
 
 
 
