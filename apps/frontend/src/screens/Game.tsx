@@ -1,7 +1,7 @@
 /* eslint-disable no-case-declarations */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useRef, useState } from 'react';
-import MoveSound from '../../public/move.wav';
+import MoveSound from '/move.wav';
 import { Button } from '../components/Button';
 import { ChessBoard, isPromoting } from '../components/ChessBoard';
 import { useSocket } from '../hooks/useSocket';
@@ -79,8 +79,7 @@ export const Game = () => {
     if (!user) {
       window.location.href = '/login';
     }
-  }, [user])
-
+  }, [user]);
 
   useEffect(() => {
     if (!socket) {
