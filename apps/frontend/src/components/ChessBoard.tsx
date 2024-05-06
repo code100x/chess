@@ -16,7 +16,6 @@ import { useRecoilState } from 'recoil';
 import {
   isBoardFlippedAtom,
   movesAtom,
-  userSelectedMoveIndexAtom,
 } from '@repo/store/chessBoard';
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
@@ -77,9 +76,6 @@ export const ChessBoard = memo(({
   const { height, width } = useWindowSize();
 
   const [isFlipped, setIsFlipped] = useRecoilState(isBoardFlippedAtom);
-  const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
-    userSelectedMoveIndexAtom,
-  );
   const [moves, setMoves] = useRecoilState(movesAtom);
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(
     null,
@@ -182,32 +178,6 @@ export const ChessBoard = memo(({
     }
   }, [moves]);
 
-  useEffect(() => {
-    if (userSelectedMoveIndex !== null) {
-      const move = moves[userSelectedMoveIndex];
-      setLastMove({
-        from: move.from,
-        to: move.to,
-      });
-      chess.load(move.after);
-      setBoard(chess.board());
-      return;
-    }
-  }, [userSelectedMoveIndex]);
-
-  useEffect(() => {
-    if (userSelectedMoveIndex !== null) {
-      chess.reset();
-      moves.forEach((move) => {
-        chess.move({ from: move.from, to: move.to });
-      });
-      setBoard(chess.board());
-      setUserSelectedMoveIndex(null);
-    } else {
-      setBoard(chess.board());
-    }
-  }, [moves]);
-
   return (
     <>
       {gameOver && <Confetti />}
@@ -246,15 +216,6 @@ export const ChessBoard = memo(({
                     <div
                       onClick={() => {
                         if (!started) {
-                          return;
-                        }
-                        if (userSelectedMoveIndex !== null) {
-                          chess.reset();
-                          moves.forEach((move) => {
-                            chess.move({ from: move.from, to: move.to });
-                          });
-                          setBoard(chess.board());
-                          setUserSelectedMoveIndex(null);
                           return;
                         }
                         if (!from && square?.color !== chess.turn()) return;
