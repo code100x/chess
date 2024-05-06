@@ -21,7 +21,7 @@ cd chess
 npm install
 ```
 
-This command install all the necessary dependencies required to run both the frontend and backend of the Chess Platform.
+This command installs all the necessary dependencies required to run both the frontend and backend of the Chess Platform.
 
 ## Usage
 
@@ -87,7 +87,7 @@ Scalable Architecture for the Future:
 
 ## Schema Structure
 
-![image](./apps/frontend/public/Chess-schema.png)
+![image](./apps/frontend/public/Chess-Schema.png)
 
 
 
