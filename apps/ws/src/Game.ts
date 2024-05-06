@@ -1,4 +1,4 @@
-import { Chess, Square } from 'chess.js';
+import { Chess, Move, Square } from 'chess.js';
 import {
   GAME_ENDED,
   INIT_GAME,
@@ -70,11 +70,10 @@ export class Game {
     from: string;
     to: string;
     comments: string | null;
-    startFen: string;
-    endFen: string;
     timeTaken: number | null;
     createdAt: Date;
   }[]) {
+    console.log(moves);
     moves.forEach((move) => {
       if (
         isPromoting(this.board, move.from as Square, move.to as Square)
@@ -92,7 +91,9 @@ export class Game {
       }
     });
     this.moveCount = moves.length;
-    this.lastMoveTime = moves[moves.length - 1].createdAt;
+    if (moves[moves.length - 1]) {
+      this.lastMoveTime = moves[moves.length - 1].createdAt;
+    }
 
     moves.map((move, index) => {
       if (move.timeTaken) {
@@ -175,7 +176,8 @@ export class Game {
     this.gameId = game.id;
   }
 
-  async addMoveToDb(move: { from: string; to: string }, moveTimestamp: Date) {
+  async addMoveToDb(move: Move, moveTimestamp: Date) {
+    
     await db.$transaction([
       db.move.create({
         data: {
@@ -183,16 +185,16 @@ export class Game {
           moveNumber: this.moveCount + 1,
           from: move.from,
           to: move.to,
-          // Todo: Fix start fen
-          startFen: this.board.fen(),
-          endFen: this.board.fen(),
+          before: move.before,
+          after: move.after,
           createdAt: moveTimestamp,
           timeTaken: moveTimestamp.getTime() - this.lastMoveTime.getTime(),
+          san: move.san
         },
       }),
       db.game.update({
         data: {
-          currentFen: this.board.fen(),
+          currentFen: move.after,
         },
         where: {
           id: this.gameId,
@@ -203,11 +205,9 @@ export class Game {
 
   async makeMove(
     user: User,
-    move: {
-      from: Square;
-      to: Square;
-    },
+    move: Move
   ) {
+    
     // validate the type of move using zod
     if (this.board.turn() === 'w' && user.userId !== this.player1UserId) {
       return;
@@ -314,7 +314,7 @@ export class Game {
   }
 
   async endGame(status: GAME_STATUS, result: GAME_RESULT) {
-    await db.game.update({
+    const updatedGame = await db.game.update({
       data: {
         status,
         result: result,
@@ -322,6 +322,15 @@ export class Game {
       where: {
         id: this.gameId,
       },
+      include: {
+        moves: {
+          orderBy: {
+            moveNumber: 'asc',
+          },
+        },
+        blackPlayer: true,
+        whitePlayer: true,
+      }
     });
 
     SocketManager.getInstance().broadcast(
@@ -330,10 +339,26 @@ export class Game {
         type: GAME_ENDED,
         payload: {
           result,
-          status
+          status,
+          moves: updatedGame.moves,
+          blackPlayer: {
+            id: updatedGame.blackPlayer.id,
+            name: updatedGame.blackPlayer.name,
+          },
+          whitePlayer: {
+            id: updatedGame.whitePlayer.id,
+            name: updatedGame.whitePlayer.name,
+          },
         },
       }),
     );
+    // clear timers
+    this.clearTimer();
+    this.clearMoveTimer();
+  }
+
+  clearMoveTimer() {
+    if(this.moveTimer) clearTimeout(this.moveTimer);
   }
 
   setTimer(timer: NodeJS.Timeout) {

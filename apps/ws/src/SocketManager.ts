@@ -37,7 +37,7 @@ export class SocketManager {
       ...(this.interestedSockets.get(roomId) || []),
       user,
     ]);
-    this.userRoomMappping.set(user.id, roomId);
+    this.userRoomMappping.set(user.userId, roomId);
   }
 
   broadcast(roomId: string, message: string) {
@@ -53,19 +53,22 @@ export class SocketManager {
   }
 
   removeUser(user: User) {
-    const roomId = this.userRoomMappping.get(user.id);
+    const roomId = this.userRoomMappping.get(user.userId);
     if (!roomId) {
       console.error('User was not interested in any room?');
       return;
     }
+    const room = this.interestedSockets.get(roomId) || []
+    const remainingUsers = room.filter(u =>
+      u.userId !== user.userId
+    )
     this.interestedSockets.set(
       roomId,
-      (this.interestedSockets.get(roomId) || []).filter((u) => u !== user),
+      remainingUsers
     );
     if (this.interestedSockets.get(roomId)?.length === 0) {
       this.interestedSockets.delete(roomId);
     }
-
-    this.userRoomMappping.delete(user.id);
+    this.userRoomMappping.delete(user.userId);
   }
 }
