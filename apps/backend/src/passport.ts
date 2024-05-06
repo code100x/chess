@@ -5,6 +5,13 @@ import passport from 'passport';
 import dotenv from 'dotenv';
 import { db } from './db';
 
+interface GithubEmailRes {
+  email: string;
+  primary: boolean;
+  verified: boolean;
+  visibility: 'private' | 'public';
+}
+
 dotenv.config();
 const GOOGLE_CLIENT_ID =
   process.env.GOOGLE_CLIENT_ID || 'your_google_client_id';
@@ -77,9 +84,17 @@ export function initPassport() {
         profile: any,
         done: (error: any, user?: any) => void,
       ) {
+        const res = await fetch('https://api.github.com/user/emails', {
+          headers: {
+            Authorization: `token ${accessToken}`,
+          },
+        });
+        const data: GithubEmailRes[] = await res.json();
+        const primaryEmail = data.find((item) => item.primary === true);
+
         const user = await db.user.upsert({
           create: {
-            email: profile.emails[0].value,
+            email: primaryEmail!.email,
             name: profile.displayName,
             provider: 'GITHUB',
           },
@@ -87,7 +102,7 @@ export function initPassport() {
             name: profile.displayName,
           },
           where: {
-            email: profile.emails[0].value,
+            email: primaryEmail?.email,
           },
         });
 
