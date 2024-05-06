@@ -11,7 +11,7 @@ const createPiece = (piece: string) => ({ squareWidth, isDragging }: PieceProps)
       width: isDragging ? squareWidth : squareWidth * 1,
       height: isDragging ? squareWidth : squareWidth
     }}
-    src={`${piece}.png`}
+    src={`/${piece}.png`}
     alt={piece}
   />
 );

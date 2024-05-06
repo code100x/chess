@@ -42,23 +42,23 @@ const uciWorker =
 
 const Bots: AvailableBots = {
   Random: randomMove,
-  'Gukesh': uciWorker('bots/stockfish.js-10.0.2/stockfish.js', [
+  'Gukesh': uciWorker('/bots/stockfish.js-10.0.2/stockfish.js', [
     'setoption name Skill Level value 1',
     'go depth 10',
   ]),
-  'Magnus': uciWorker('bots/lozza-1.18/lozza.js', [
+  'Magnus': uciWorker('/bots/lozza-1.18/lozza.js', [
     'setoption name Skill Level value 20',
     'go movetime 1000',
   ]),
-  'Hikaru': uciWorker('bots/stockfish.js-10.0.2/stockfish.js', [
+  'Hikaru': uciWorker('/bots/stockfish.js-10.0.2/stockfish.js', [
     'setoption name Skill Level value 20',
     'go depth 10',
   ]),
-  'Vishy': uciWorker('bots/stockfish.js-10.0.2/stockfish.js', [
+  'Vishy': uciWorker('/bots/stockfish.js-10.0.2/stockfish.js', [
     'setoption name Skill Level value 20',
     'go movetime 1000',
   ]),
-  'Hou Yifan': uciWorker('bots/lozza-1.18/lozza.js', [
+  'Hou Yifan': uciWorker('/bots/lozza-1.18/lozza.js', [
     'setoption name Skill Level value 20',
     'go depth 10',
   ]),
