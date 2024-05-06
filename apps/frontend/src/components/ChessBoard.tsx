@@ -8,8 +8,8 @@ import NumberNotation from './chess-board/NumberNotation';
 import { drawArrow } from '../utils/canvas';
 import useWindowSize from '../hooks/useWindowSize';
 import Confetti from 'react-confetti';
-import MoveSound from '../../public/move.wav';
-import CaptureSound from '../../public/capture.wav';
+import MoveSound from '/move.wav';
+import CaptureSound from '/capture.wav';
 
 import { useRecoilState } from 'recoil';
 
