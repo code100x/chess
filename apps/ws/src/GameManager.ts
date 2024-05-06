@@ -82,6 +82,7 @@ export class GameManager {
             game.gameId,
             JSON.stringify({
               type: GAME_ADDED,
+              gameId:game.gameId,
             }),
           );
         }
@@ -117,6 +118,14 @@ export class GameManager {
             whitePlayer: true,
           },
         });
+
+        // There is a game created but no second player available
+        
+        if (availableGame && !availableGame.player2UserId) {
+          SocketManager.getInstance().addUser(user, availableGame.gameId);
+          await availableGame.updateSecondPlayer(user.userId);
+          return;
+        }
 
         if (!gameFromDb) {
           user.socket.send(
