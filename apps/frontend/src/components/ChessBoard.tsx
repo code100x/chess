@@ -1,5 +1,5 @@
 import { Chess, Color, Move, PieceSymbol, Square } from 'chess.js';
-import { MouseEvent, useEffect, useState } from 'react';
+import { MouseEvent, memo, useEffect, useState } from 'react';
 import { MOVE } from '../screens/Game';
 import LetterNotation from './chess-board/LetterNotation';
 import LegalMoveIndicator from './chess-board/LegalMoveIndicator';
@@ -44,7 +44,7 @@ export function isPromoting(chess: Chess, from: Square, to: Square) {
     .includes(to);
 }
 
-export const ChessBoard = ({
+export const ChessBoard = memo(({
   gameId,
   started,
   myColor,
@@ -73,6 +73,7 @@ export const ChessBoard = ({
   } | null)[][];
   socket: WebSocket;
 }) => {
+  console.log("chessboard reloaded")
   const { height, width } = useWindowSize();
 
   const [isFlipped, setIsFlipped] = useRecoilState(isBoardFlippedAtom);
@@ -397,4 +398,4 @@ export const ChessBoard = ({
       </div>
     </>
   );
-};
+});
