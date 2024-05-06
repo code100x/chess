@@ -10,8 +10,8 @@ import {
 } from '@/components/subnav-accordian';
 import { useEffect, useState } from 'react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
-
 import { type LucideIcon } from 'lucide-react';
+import { useUser } from '@repo/store/useUser';
 
 export interface NavItem {
   title: string;
@@ -29,6 +29,7 @@ interface SideNavProps {
 }
 
 export function SideNav({ items, setOpen, className }: SideNavProps) {
+  const user = useUser();
   const location = useLocation();
   const { isOpen } = useSidebar();
   const [openItem, setOpenItem] = useState('');
@@ -44,7 +45,7 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
   }, [isOpen]);
 
   return (
-    <nav className="space-y-2 dark">
+    <nav className="dark">
       {items.map((item) =>
         item.isChidren ? (
           <Accordion
@@ -108,29 +109,39 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
             </AccordionItem>
           </Accordion>
         ) : (
-          <a
-            key={item.title}
-            href={item.href}
-            onClick={() => {
-              if (setOpen) setOpen(false);
-            }}
-            className={cn(
-              buttonVariants({ variant: 'ghost' }),
-              'group relative flex h-12 justify-start',
-              location.pathname === item.href &&
-                'bg-muted font-bold hover:bg-muted',
-            )}
+          <div
+            hidden={
+              (user && item.title == 'Login') ||
+              (!user && item.title == 'Logout')
+                ? true
+                : false
+            }
           >
-            <item.icon className={cn('h-5 w-5', item.color)} />
-            <span
+            {' '}
+            <a
+              key={item.title}
+              href={item.href}
+              onClick={() => {
+                if (setOpen) setOpen(false);
+              }}
               className={cn(
-                'absolute left-12 text-base duration-200',
-                !isOpen && className,
+                buttonVariants({ variant: 'ghost' }),
+                'group relative flex h-12 justify-start',
+                location.pathname === item.href &&
+                  'bg-muted font-bold hover:bg-muted',
               )}
             >
-              {item.title}
-            </span>
-          </a>
+              <item.icon className={cn('h-5 w-5', item.color)} />
+              <span
+                className={cn(
+                  'absolute left-12 text-base duration-200',
+                  !isOpen && className,
+                )}
+              >
+                {item.title}
+              </span>
+            </a>
+          </div>
         ),
       )}
     </nav>
