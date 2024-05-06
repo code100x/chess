@@ -33,7 +33,7 @@ export const LowerNavItems = [
   {
     title: 'Logout',
     icon: LogOutIcon,
-    href: `${BACKEND_URL}/logout`,
+    href: `${BACKEND_URL}/auth/logout`,
     color: 'text-green-500',
   },
   {

@@ -5,7 +5,7 @@ import {
   selectedMoveIndexAtom,
 } from '@repo/store/chessBoard';
 import { Chess, Move } from 'chess.js';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import {
   HandshakeIcon,
@@ -111,7 +111,7 @@ const MovesTable = ({ chess }: { chess: Chess }) => {
           );
         })}
       </div>
-      {moves.length > 0 && (
+      {moves.length ? (
         <div className="w-full p-2 bg-[#20211D] flex items-center justify-between">
           <div className="flex gap-4">
             <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
@@ -168,7 +168,7 @@ const MovesTable = ({ chess }: { chess: Chess }) => {
             </button>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

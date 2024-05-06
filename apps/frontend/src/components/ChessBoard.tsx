@@ -1,5 +1,5 @@
 import { Chess, Color, Move, PieceSymbol, Square } from 'chess.js';
-import { MouseEvent, useEffect, useState } from 'react';
+import { MouseEvent, memo, useEffect, useState } from 'react';
 import { MOVE } from '../screens/Game';
 import LetterNotation from './chess-board/LetterNotation';
 import LegalMoveIndicator from './chess-board/LegalMoveIndicator';
@@ -8,8 +8,8 @@ import NumberNotation from './chess-board/NumberNotation';
 import { drawArrow } from '../utils/canvas';
 import useWindowSize from '../hooks/useWindowSize';
 import Confetti from 'react-confetti';
-import MoveSound from '../../public/move.wav';
-import CaptureSound from '../../public/capture.wav';
+import MoveSound from '/move.wav';
+import CaptureSound from '/capture.wav';
 
 import { useRecoilState } from 'recoil';
 
@@ -43,7 +43,7 @@ export function isPromoting(chess: Chess, from: Square, to: Square) {
     .includes(to);
 }
 
-export const ChessBoard = ({
+export const ChessBoard = memo(({
   gameId,
   started,
   myColor,
@@ -72,6 +72,7 @@ export const ChessBoard = ({
   } | null)[][];
   socket: WebSocket;
 }) => {
+  console.log("chessboard reloaded")
   const { height, width } = useWindowSize();
 
   const [isFlipped, setIsFlipped] = useRecoilState(isBoardFlippedAtom);
@@ -358,4 +359,4 @@ export const ChessBoard = ({
       </div>
     </>
   );
-};
+});
