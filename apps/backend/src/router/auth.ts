@@ -87,7 +87,7 @@ router.get("/capture-mode", (req, res) => {
 });
 router.get(
   '/github',
-  passport.authenticate('github', { scope: ['profile', 'email'] }),
+  passport.authenticate('github', { scope: ['read:user', 'user:email'] }),
 );
 
 router.get(
