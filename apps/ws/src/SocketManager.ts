@@ -46,16 +46,9 @@ export class SocketManager {
       console.error('No users in room?');
       return;
     }
-
-    let count = 1;
-
     users.forEach((user) => {
-      console.log(`User ${count}:`, user.userId);
-      count++;
       user.socket.send(message);
     });
-
-    count = 1;
   }
 
   removeUser(user: User) {

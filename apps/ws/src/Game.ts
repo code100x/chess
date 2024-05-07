@@ -65,7 +65,6 @@ export class Game {
     }
   }
 
-<<<<<<< HEAD
   seedMoves(
     moves: {
       id: string;
@@ -74,25 +73,11 @@ export class Game {
       from: string;
       to: string;
       comments: string | null;
-      startFen: string;
-      endFen: string;
       timeTaken: number | null;
       createdAt: Date;
     }[],
   ) {
-=======
-  seedMoves(moves: {
-    id: string;
-    gameId: string;
-    moveNumber: number;
-    from: string;
-    to: string;
-    comments: string | null;
-    timeTaken: number | null;
-    createdAt: Date;
-  }[]) {
     console.log(moves);
->>>>>>> e8dd89936e88277c017f2910d72e814d9a2d11a9
     moves.forEach((move) => {
       if (isPromoting(this.board, move.from as Square, move.to as Square)) {
         this.board.move({
