@@ -2,10 +2,10 @@ import { openAuthSessionAsync } from "expo-web-browser";
 import { ReactNode, createContext, useContext } from "react";
 import { useStorageState } from "~/hooks/useStorageState";
 
-const SERVER= process.env.EXPO_PUBLIC_API_URL;
+const SERVER = process.env.EXPO_PUBLIC_API_URL;
 
 interface IAuthContext {
-  signIn:()=> void;
+  signIn: () => void;
   signOut: () => void;
   setCookie: (value: string) => void;
   session: ApiResponse | null;
@@ -13,14 +13,14 @@ interface IAuthContext {
 }
 
 const AuthContext = createContext<IAuthContext>({
-  isLoading:false,
-  session:null,
-  signIn:() => {},
+  isLoading: false,
+  session: null,
+  signIn: () => { },
   signOut: () => { },
-  setCookie: () => {}
+  setCookie: () => { }
 });
 
-export function useAuth(){
+export function useAuth() {
   const value = useContext(AuthContext);
   if (process.env.NODE_ENV !== 'production') {
     if (!value) {
@@ -30,7 +30,7 @@ export function useAuth(){
   return value;
 }
 
-export function AuthProvider({children}:{children:ReactNode}){
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [[isLoading, session], setSession] = useStorageState('session');
   const signIn = async () => {
     try {
@@ -40,15 +40,31 @@ export function AuthProvider({children}:{children:ReactNode}){
       console.log(error);
     }
   }
-  
+
   const setCookie = (value: string) => {
     setSession(value);
   }
 
-  const signOut = () =>{}
+  const signOut = async () => {
+    try {
+      console.log(session);
+      setSession(null);
+      // const cookie = await SecureStore.getItemAsync(key);
+      // const res = await fetch(`${SERVER}/auth/logout`, {
+      //   credentials: "include",
+      //   headers: {
+      //     Cookie: cookie
+      //   }
+      // });
+
+    } catch (error) {
+      console.log(error);
+
+    }
+  }
 
   return (
-    <AuthContext.Provider value={{session, isLoading, signIn, signOut, setCookie}}>
+    <AuthContext.Provider value={{ session, isLoading, signIn, signOut, setCookie }}>
       {children}
     </AuthContext.Provider>
   )

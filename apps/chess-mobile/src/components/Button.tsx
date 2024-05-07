@@ -1,6 +1,6 @@
 import { VariantProps, cva } from 'class-variance-authority';
 import { forwardRef } from 'react';
-import {  Pressable, PressableProps, View } from 'react-native';
+import { Pressable, PressableProps, View } from 'react-native';
 import { cn } from '~/lib/utils';
 
 const buttonVariants = cva(
@@ -8,14 +8,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default:"bg-[#81B44C]",
-        secondary:"bg-[#1E293B]",
+        default: "bg-[#81B44C]",
+        secondary: "bg-[#1E293B]",
+        link: "bg-transparent translate-y-0 active:translate-y-0"
       },
       size: {
-        default:"min-h-12 py-4 px-6",
-        sm:"min-h-9 py-3 px-4",
-        lg:"min-h-16 py-5 px-8",
-        icon:"aspect-square",
+        default: "min-h-12 py-4 px-6",
+        sm: "min-h-9 py-3 px-4",
+        lg: "min-h-16 py-5 px-8",
+        icon: "aspect-square"
       },
     },
     defaultVariants: {
@@ -30,8 +31,9 @@ const buttonShadowVariants = cva(
   {
     variants: {
       variant: {
-        default:"bg-[#45753C]",
-        secondary:"bg-slate-700",
+        default: "bg-[#45753C]",
+        secondary: "bg-slate-700",
+        link: "bg-transparent"
       }
     },
     defaultVariants: {
@@ -47,10 +49,10 @@ interface ButtonProps extends PressableProps, VariantProps<typeof buttonVariants
 export const Button = forwardRef<View, ButtonProps>(
   ({ className, variant, size, roundClass, ...props }, ref) => {
     return (
-      <View className={cn(buttonShadowVariants({variant}), roundClass)}>
+      <View className={cn(buttonShadowVariants({ variant }), roundClass)}>
         <Pressable
           ref={ref}
-          className={cn(buttonVariants({variant, size, className}))}
+          className={cn(buttonVariants({ variant, size, className }))}
           {...props}
         />
       </View>
