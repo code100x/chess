@@ -1,7 +1,7 @@
 /* eslint-disable no-case-declarations */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useRef, useState } from 'react';
-import MoveSound from '../../public/move.wav';
+import MoveSound from '/move.wav';
 import { Button } from '../components/Button';
 import { ChessBoard, isPromoting } from '../components/ChessBoard';
 import { useSocket } from '../hooks/useSocket';
@@ -39,6 +39,7 @@ const GAME_TIME_MS = 10 * 60 * 1000;
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
+import GameEndModal from '../components/GameEndModal';
 
 export interface IMove {
   from: Square;
@@ -52,7 +53,6 @@ export interface Message {
   value: string;
   userId: string;
 }
-import GameEndModal from '@/components/GameEndModal';
 
 const moveAudio = new Audio(MoveSound);
 
