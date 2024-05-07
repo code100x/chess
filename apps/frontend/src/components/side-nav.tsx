@@ -116,6 +116,7 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
                 ? true
                 : false
             }
+            key={item.title}
           >
             {' '}
             <a

@@ -75,7 +75,25 @@
   }
 }
 
+@layer utilities {
+  .scrollbar::-webkit-scrollbar {
+    width: 15px;
+    height: 10px;
+  }
+
+  .scrollbar::-webkit-scrollbar-track {
+    background: #424242;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb {
+    background: #7b7b7b;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #7b7b7b;
+  }
+}
+
 .chess-board {
   background-color: #302e2b;
 }
-

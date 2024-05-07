@@ -28,11 +28,15 @@ export enum Result {
   BLACK_WINS = 'BLACK_WINS',
   DRAW = 'DRAW',
 }
+export const OFFER = 'offer';
+export const ANSWER = 'answer';
+export const SEND_OFFER = 'send_offer';
+export const SEND_ANSWER = 'send_answer';
+export const ICE_CANDIDATE = 'ice_candidate';
 export interface GameResult {
   result: Result;
   by: string;
 }
-
 
 const GAME_TIME_MS = 10 * 60 * 1000;
 
@@ -60,12 +64,17 @@ export const Game = () => {
   const [added, setAdded] = useState(false);
   const [started, setStarted] = useState(false);
   const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
-  const [result, setResult] = useState<
-    GameResult
-    | null
-  >(null);
+  const [result, setResult] = useState<GameResult | null>(null);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
+  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+  const [_senderPc, setSenderPc] = useState<RTCPeerConnection>();
+  const [_receiverPc, setReceiverPc] = useState<RTCPeerConnection>();
+  const [_localAudioTracks, setLocalAudioTracks] =
+    useState<MediaStreamTrack | null>(null);
+  const [_localVideoTracks, setLocalVideoTracks] =
+    useState<MediaStreamTrack | null>(null);
 
   const setMoves = useSetRecoilState(movesAtom);
   const userSelectedMoveIndex = useRecoilValue(userSelectedMoveIndexAtom);
@@ -79,15 +88,17 @@ export const Game = () => {
     if (!user) {
       window.location.href = '/login';
     }
-  }, [user])
-
+  }, [user]);
 
   useEffect(() => {
     if (!socket) {
       return;
     }
-    socket.onmessage = function (event) {
+
+    socket.onmessage = async function (event) {
       const message = JSON.parse(event.data);
+      const payload = message.payload;
+
       switch (message.type) {
         case GAME_ADDED:
           setAdded(true);
@@ -131,8 +142,12 @@ export const Game = () => {
           break;
 
         case GAME_ENDED:
-          const wonBy = message.payload.status === 'COMPLETED' ? 
-            message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw' : 'Timeout';
+          const wonBy =
+            message.payload.status === 'COMPLETED'
+              ? message.payload.result !== 'DRAW'
+                ? 'CheckMate'
+                : 'Draw'
+              : 'Timeout';
           setResult({
             result: message.payload.result,
             by: wonBy,
@@ -148,8 +163,7 @@ export const Game = () => {
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
           });
-          
-        
+
           break;
 
         case USER_TIMEOUT:
@@ -181,8 +195,139 @@ export const Game = () => {
           setPlayer2TimeConsumed(message.payload.player2Time);
           break;
 
+        case SEND_OFFER:
+          console.log('sending offer');
+          const pc1 = new RTCPeerConnection();
+
+          pc1.onicecandidate = async (event) => {
+            console.log('receiving ice candidate locally');
+            if (event.candidate) {
+              console.log('\nice-candidate sender:', event.candidate);
+              socket.send(
+                JSON.stringify({
+                  type: ICE_CANDIDATE,
+                  payload: {
+                    senderSocketid: user.id,
+                    candidate: event.candidate,
+                    type: 'sender',
+                    gameId: payload.gameId,
+                  },
+                }),
+              );
+            }
+          };
+
+          pc1.onnegotiationneeded = async () => {
+            console.log('on negotiation neeeded, sending offer');
+            const sdp = await pc1.createOffer();
+            await pc1.setLocalDescription(sdp);
+            socket.send(
+              JSON.stringify({
+                type: OFFER,
+                payload: {
+                  sdp,
+                  gameId: payload.gameId,
+                  senderSocketid: user.id,
+                },
+              }),
+            );
+          };
+
+          const stream = await window.navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true,
+          });
+
+          const videoTrack = stream.getVideoTracks()[0];
+          const audioTrack = stream.getAudioTracks()[0];
+
+          if (localVideoRef.current) {
+            localVideoRef.current.srcObject = new MediaStream([
+              videoTrack,
+              audioTrack,
+            ]);
+            localVideoRef.current.play();
+            setLocalVideoTracks(videoTrack);
+            setLocalAudioTracks(audioTrack);
+          }
+
+          pc1.addTrack(videoTrack);
+
+          setSenderPc(pc1);
+          break;
+
+        case OFFER:
+          const pc2 = new RTCPeerConnection();
+
+          pc2.ontrack = (event) => {
+            if (remoteVideoRef.current) {
+              remoteVideoRef.current.srcObject = new MediaStream([event.track]);
+              remoteVideoRef.current.play();
+            }
+          };
+
+          pc2.onicecandidate = async (event) => {
+            if (!event.candidate) {
+              return;
+            }
+
+            console.log('on ice candidate receiving side');
+            if (event.candidate) {
+              socket.send(
+                JSON.stringify({
+                  type: ICE_CANDIDATE,
+                  payload: {
+                    candidate: event.candidate,
+                    type: 'receiver',
+                    gameId: payload.gameId,
+                    senderSocketid: user.id,
+                  },
+                }),
+              );
+            }
+          };
+
+          await pc2.setRemoteDescription(payload.remoteSdp);
+          const sdp = await pc2.createAnswer();
+          await pc2.setLocalDescription(sdp);
+
+          setReceiverPc(pc2);
+
+          socket.send(
+            JSON.stringify({
+              type: ANSWER,
+              payload: {
+                gameId: payload.gameId,
+                sdp,
+                senderSocketid: user.id,
+              },
+            }),
+          );
+          break;
+
+        case ANSWER:
+          setSenderPc((pc) => {
+            pc?.setRemoteDescription(payload.remoteSdp);
+            return pc;
+          });
+          break;
+
+        case ICE_CANDIDATE:
+          if (payload.type === 'sender') {
+            setReceiverPc((pc) => {
+              pc?.addIceCandidate(payload.candidate);
+              return pc;
+            });
+          } else {
+            setSenderPc((pc) => {
+              pc?.addIceCandidate(payload.candidate);
+              return pc;
+            });
+          }
+          break;
+
         default:
-          alert(message.payload.message);
+          console.log(message);
           break;
       }
     };
@@ -197,6 +342,17 @@ export const Game = () => {
         }),
       );
     }
+
+    return () => {
+      if (localVideoRef.current) {
+        localVideoRef.current.remove();
+        localVideoRef.current.srcObject = null;
+      }
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.remove();
+        remoteVideoRef.current.srcObject = null;
+      }
+    };
   }, [chess, socket]);
 
   useEffect(() => {
@@ -229,7 +385,7 @@ export const Game = () => {
   if (!socket) return <div>Connecting...</div>;
 
   return (
-    <div className="">
+    <div>
       {result && (
         <GameEndModal
           blackPlayer={gameMetadata?.blackPlayer}
@@ -247,7 +403,7 @@ export const Game = () => {
       )}
       <div className="justify-center flex">
         <div className="pt-2 w-full">
-          <div className="flex flex-wrap justify-around content-around w-full">
+          <div className="flex justify-around content-around w-full gap-6 max-lg:flex-wrap px-6">
             <div className="text-white">
               <div className="flex justify-center">
                 <div>
@@ -270,9 +426,7 @@ export const Game = () => {
                     )}
                   </div>
                   <div>
-                    <div
-                      className={`w-full flex justify-center text-white`}
-                    >
+                    <div className={`w-full flex justify-center text-white`}>
                       <ChessBoard
                         started={started}
                         gameId={gameId ?? ''}
@@ -305,7 +459,7 @@ export const Game = () => {
                 </div>
               </div>
             </div>
-            <div className="rounded-md bg-brown-500 overflow-auto h-[90vh] mt-10">
+            <div className="rounded-md max-h-[90vh] mt-10">
               {!started && (
                 <div className="pt-8 flex justify-center w-full">
                   {added ? (
@@ -327,9 +481,13 @@ export const Game = () => {
                   )}
                 </div>
               )}
-              <div>
-                <MovesTable />
-              </div>
+              <MovesTable
+                started={started}
+                localVideoRef={localVideoRef}
+                remoteVideoRef={remoteVideoRef}
+                setLocalVideoTracks={setLocalVideoTracks}
+                setLocalAudioTracks={setLocalAudioTracks}
+              />
             </div>
           </div>
         </div>

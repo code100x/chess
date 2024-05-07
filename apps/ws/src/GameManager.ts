@@ -11,12 +11,16 @@ import {
   GAME_ALERT,
   GAME_ADDED,
   GAME_ENDED,
+  OFFER,
+  ANSWER,
+  ICE_CANDIDATE,
 } from './messages';
 import { Game, isPromoting } from './Game';
 import { db } from './db';
 import { SocketManager, User } from './SocketManager';
 import { Square } from 'chess.js';
 import { GameStatus } from '@prisma/client';
+import { RoomManager } from './RoomManager';
 
 export class GameManager {
   private games: Game[];
@@ -49,6 +53,8 @@ export class GameManager {
   }
 
   private addHandler(user: User) {
+    const roomManager = new RoomManager();
+
     user.socket.on('message', async (data) => {
       const message = JSON.parse(data.toString());
       if (message.type === INIT_GAME) {
@@ -58,6 +64,7 @@ export class GameManager {
             console.error('Pending game not found?');
             return;
           }
+          console.log('pending game');
           if (user.userId === game.player1UserId) {
             SocketManager.getInstance().broadcast(
               game.gameId,
@@ -92,7 +99,7 @@ export class GameManager {
         const game = this.games.find((game) => game.gameId === gameId);
         if (game) {
           game.makeMove(user, message.payload.move);
-          if (game.result)  {
+          if (game.result) {
             this.removeGame(game.gameId);
           }
         }
@@ -127,23 +134,25 @@ export class GameManager {
           return;
         }
 
-        if(gameFromDb.status !== GameStatus.IN_PROGRESS) {
-          user.socket.send(JSON.stringify({
-            type: GAME_ENDED,
-            payload: {
-              result: gameFromDb.result,
-              status: gameFromDb.status,
-              moves: gameFromDb.moves,
-              blackPlayer: {
-                id: gameFromDb.blackPlayer.id,
-                name: gameFromDb.blackPlayer.name,
+        if (gameFromDb.status !== GameStatus.IN_PROGRESS) {
+          user.socket.send(
+            JSON.stringify({
+              type: GAME_ENDED,
+              payload: {
+                result: gameFromDb.result,
+                status: gameFromDb.status,
+                moves: gameFromDb.moves,
+                blackPlayer: {
+                  id: gameFromDb.blackPlayer.id,
+                  name: gameFromDb.blackPlayer.name,
+                },
+                whitePlayer: {
+                  id: gameFromDb.whitePlayer.id,
+                  name: gameFromDb.whitePlayer.name,
+                },
               },
-              whitePlayer: {
-                id: gameFromDb.whitePlayer.id,
-                name: gameFromDb.whitePlayer.name,
-              },
-            }
-          }));
+            }),
+          );
           return;
         }
 
@@ -152,9 +161,10 @@ export class GameManager {
             gameFromDb?.whitePlayerId!,
             gameFromDb?.blackPlayerId!,
             gameFromDb.id,
-            gameFromDb.startAt
+            gameFromDb.startAt,
           );
-          game.seedMoves(gameFromDb?.moves || [])
+          //@ts-ignore
+          game.seedMoves(gameFromDb?.moves || []);
           this.games.push(game);
           availableGame = game;
         }
@@ -183,6 +193,62 @@ export class GameManager {
         );
 
         SocketManager.getInstance().addUser(user, gameId);
+
+        SocketManager.getInstance().broadcast(
+          gameId,
+          JSON.stringify({
+            type: 'send_offer',
+            payload: {
+              gameId,
+            },
+          }),
+        );
+      }
+
+      if (message.type === OFFER) {
+        const game = this.games.find(
+          (game) => game.gameId === message.payload.gameId,
+        );
+
+        if (!game) return;
+
+        roomManager.onOffer(
+          game,
+          this.users,
+          message.payload.sdp,
+          message.payload.senderSocketid,
+        );
+      }
+
+      if (message.type === ANSWER) {
+        const game = this.games.find(
+          (game) => game.gameId === message.payload.gameId,
+        );
+
+        if (!game) return;
+
+        roomManager.onAnswer(
+          game,
+          this.users,
+          message.payload.sdp,
+          message.payload.senderSocketid,
+        );
+      }
+
+      if (message.type === ICE_CANDIDATE) {
+        const game = this.games.find(
+          (game) => game.gameId === message.payload.gameId,
+        );
+
+        if (!game) return;
+
+        roomManager.onIceCandidates(
+          game,
+          this.users,
+          message.payload.senderSocketid,
+          message.payload.candidate,
+          message.payload.type,
+        );
       }
     });
   }

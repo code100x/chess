@@ -27,14 +27,8 @@ function AuthApp() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout children={<Landing />} />} />
-        <Route
-          path="/login"
-          element={<Login />}
-        />
-        <Route
-          path="/game/:gameId"
-          element={<Layout children={<Game />} />}
-        />
+        <Route path="/login" element={<Login />} />
+        <Route path="/game/:gameId" element={<Layout children={<Game />} />} />
       </Routes>
     </BrowserRouter>
   );
