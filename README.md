@@ -7,6 +7,7 @@ Building a platform where people can
 3. During the match, let users play moves
 4. Have a rating system that goes up and down similar to standard chess rating
 
+
 ## Tech stack
 
 Let's keep it simple
