@@ -216,6 +216,10 @@ export const Game = () => {
     const minutes = Math.floor(timeLeftMs / (1000 * 60));
     const remainingSeconds = Math.floor((timeLeftMs % (1000 * 60)) / 1000);
 
+    if (result) {
+      return;
+    }
+
     return (
       <div className="text-white">
         Time Left: {minutes < 10 ? '0' : ''}
@@ -236,14 +240,16 @@ export const Game = () => {
           gameResult={result}
         ></GameEndModal>
       )}
-      {started && (
-        <div className="justify-center flex pt-4 text-white">
-          {(user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w') ===
-          chess.turn()
-            ? 'Your turn'
-            : "Opponent's turn"}
-        </div>
-      )}
+      {!result
+        ? started && (
+            <div className="justify-center flex pt-4 text-white">
+              {(user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w') ===
+              chess.turn()
+                ? 'Your turn'
+                : "Opponent's turn"}
+            </div>
+          )
+        : null}
       <div className="justify-center flex">
         <div className="pt-2 w-full">
           <div className="flex flex-wrap justify-around content-around w-full">
@@ -269,9 +275,7 @@ export const Game = () => {
                     )}
                   </div>
                   <div>
-                    <div
-                      className={`w-full flex justify-center text-white`}
-                    >
+                    <div className={`w-full flex justify-center text-white`}>
                       <ChessBoard
                         started={started}
                         gameId={gameId ?? ''}
@@ -326,9 +330,11 @@ export const Game = () => {
                   )}
                 </div>
               )}
-              <div>
-                <MovesTable />
-              </div>
+              {result ? (
+                <div>
+                  <MovesTable />
+                </div>
+              ) : null}
             </div>
           </div>
         </div>

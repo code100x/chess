@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import WhiteKing from '../../public/wk.png';
 import BlackKing from '../../public/bk.png';
 import { GameResult, Result } from '@/screens/Game';
+import { Link } from 'react-router-dom';
 
 interface ModalProps {
   blackPlayer?: { id: string; name: string };
@@ -94,8 +95,16 @@ const GameEndModal: React.FC<ModalProps> = ({
                 className="px-6 py-3 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none"
                 onClick={closeModal}
               >
-                Close
+                View Board
               </button>
+              <Link to={'/'}>
+                <button
+                  className="px-6 ml-2 py-3 text-white bg-green-500 rounded-lg hover:bg-green-700 focus:outline-none"
+                  onClick={closeModal}
+                >
+                  Home
+                </button>
+              </Link>
             </div>
           </div>
         </div>
