@@ -59,7 +59,10 @@ export const Game = () => {
   const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
 
   const [gameTime, setGameTime] = useState(10);
-  const [result, setResult] = useState<GameResult | null>(null);
+  const [result, setResult] = useState<
+    GameResult
+    | null
+  >(null);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
 
@@ -126,12 +129,8 @@ export const Game = () => {
           break;
 
         case GAME_ENDED:
-          const wonBy =
-            message.payload.status === 'COMPLETED'
-              ? message.payload.result !== 'DRAW'
-                ? 'CheckMate'
-                : 'Draw'
-              : 'Timeout';
+          const wonBy = message.payload.status === 'COMPLETED' ? 
+          message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw' : 'Timeout';
           setResult({
             result: message.payload.result,
             by: wonBy,
@@ -147,7 +146,6 @@ export const Game = () => {
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
           });
-
           break;
 
         case USER_TIMEOUT:
