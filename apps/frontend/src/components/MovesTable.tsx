@@ -80,7 +80,7 @@ const MovesTable = () => {
           );
         })}
       </div>
-      {moves.length && (
+      {moves.length ? (
         <div className="w-full p-2 bg-[#20211D] flex items-center justify-between">
           <div className="flex gap-4">
             <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
@@ -150,7 +150,7 @@ const MovesTable = () => {
             </button>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };
