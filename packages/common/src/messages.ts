@@ -13,3 +13,6 @@ export const GAME_TIME = 'game_time';
 export const OFFER = 'offer';
 export const ANSWER = 'answer';
 export const ICE_CANDIDATE = 'ice_candidate';
+export const SEND_OFFER = 'send_offer';
+export const SEND_ANSWER = 'send_answer';
+export const USER_TIMEOUT = 'user_timeout';

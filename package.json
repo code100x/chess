@@ -20,5 +20,9 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "express": "^4.19.2",
+    "react-draggable": "^4.4.6"
+  }
 }

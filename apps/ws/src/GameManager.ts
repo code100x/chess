@@ -1,26 +1,23 @@
 import { WebSocket } from 'ws';
-import {
-  GAME_OVER,
-  INIT_GAME,
-  JOIN_GAME,
-  MOVE,
-  OPPONENT_DISCONNECTED,
-  JOIN_ROOM,
-  GAME_JOINED,
-  GAME_NOT_FOUND,
-  GAME_ALERT,
-  GAME_ADDED,
-  GAME_ENDED,
-  OFFER,
-  ANSWER,
-  ICE_CANDIDATE,
-} from './messages';
 import { Game, isPromoting } from './Game';
 import { db } from './db';
 import { SocketManager, User } from './SocketManager';
 import { Square } from 'chess.js';
 import { GameStatus } from '@prisma/client';
 import { RoomManager } from './RoomManager';
+import {
+  ANSWER,
+  GAME_ADDED,
+  GAME_ALERT,
+  GAME_ENDED,
+  GAME_JOINED,
+  GAME_NOT_FOUND,
+  ICE_CANDIDATE,
+  INIT_GAME,
+  JOIN_ROOM,
+  MOVE,
+  OFFER,
+} from '@repo/common/messages';
 
 export class GameManager {
   private games: Game[];

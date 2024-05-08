@@ -1,6 +1,6 @@
+import { ANSWER, ICE_CANDIDATE, OFFER } from '@repo/common/messages';
 import { Game } from './Game';
 import { User } from './SocketManager';
-import { ANSWER, ICE_CANDIDATE, OFFER } from './messages';
 
 export class RoomManager {
   onOffer(game: Game, users: User[], sdp: string, senderSocketid: string) {

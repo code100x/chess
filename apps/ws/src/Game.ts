@@ -1,9 +1,9 @@
 import { Chess, Move, Square } from 'chess.js';
-import { GAME_ENDED, INIT_GAME, MOVE } from './messages';
 import { db } from './db';
 import { randomUUID } from 'crypto';
 import { SocketManager, User } from './SocketManager';
 import { WebSocket } from 'ws';
+import { GAME_ENDED, INIT_GAME, MOVE } from '@repo/common/messages';
 
 type GAME_STATUS = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'TIME_UP';
 type GAME_RESULT = 'WHITE_WINS' | 'BLACK_WINS' | 'DRAW';

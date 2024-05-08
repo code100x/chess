@@ -10,8 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.12.1",
+    "@repo/common": "*",
     "@repo/db": "*",
+    "@prisma/client": "^5.12.1",
     "@types/ws": "^8.5.10",
     "chess.js": "^1.0.0-beta.8",
     "jsonwebtoken": "^9.0.2",

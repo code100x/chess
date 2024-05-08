@@ -10,29 +10,27 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
 import { UserAvatar } from '../components/UserAvatar';
+import {
+  ANSWER,
+  GAME_ADDED,
+  GAME_ENDED,
+  GAME_JOINED,
+  GAME_OVER,
+  GAME_TIME,
+  ICE_CANDIDATE,
+  INIT_GAME,
+  JOIN_ROOM,
+  MOVE,
+  OFFER,
+  SEND_OFFER,
+  USER_TIMEOUT,
+} from '@repo/common/messages';
 
-// TODO: Move together, there's code repetition here
-export const INIT_GAME = 'init_game';
-export const MOVE = 'move';
-export const OPPONENT_DISCONNECTED = 'opponent_disconnected';
-export const GAME_OVER = 'game_over';
-export const JOIN_ROOM = 'join_room';
-export const GAME_JOINED = 'game_joined';
-export const GAME_ALERT = 'game_alert';
-export const GAME_ADDED = 'game_added';
-export const USER_TIMEOUT = 'user_timeout';
-export const GAME_TIME = 'game_time';
-export const GAME_ENDED = 'game_ended';
 export enum Result {
   WHITE_WINS = 'WHITE_WINS',
   BLACK_WINS = 'BLACK_WINS',
   DRAW = 'DRAW',
 }
-export const OFFER = 'offer';
-export const ANSWER = 'answer';
-export const SEND_OFFER = 'send_offer';
-export const SEND_ANSWER = 'send_answer';
-export const ICE_CANDIDATE = 'ice_candidate';
 export interface GameResult {
   result: Result;
   by: string;
@@ -44,6 +42,8 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
 import GameEndModal from '../components/GameEndModal';
+import Draggable from 'react-draggable';
+import { VideoCall } from '../components/VideoCall';
 
 const moveAudio = new Audio(MoveSound);
 
@@ -246,6 +246,7 @@ export const Game = () => {
               videoTrack,
               audioTrack,
             ]);
+
             localVideoRef.current.play();
             setLocalVideoTracks(videoTrack);
             setLocalAudioTracks(audioTrack);
@@ -385,7 +386,7 @@ export const Game = () => {
   if (!socket) return <div>Connecting...</div>;
 
   return (
-    <div>
+    <div className="relative overflow-x-hidden">
       {result && (
         <GameEndModal
           blackPlayer={gameMetadata?.blackPlayer}
@@ -401,9 +402,9 @@ export const Game = () => {
             : "Opponent's turn"}
         </div>
       )}
-      <div className="justify-center flex">
+      <div className="items-start justify-center flex">
         <div className="pt-2 w-full">
-          <div className="flex justify-around content-around w-full gap-6 max-lg:flex-wrap px-6">
+          <div className="flex justify-around content-around w-full gap-6 max-xl:flex-wrap px-6">
             <div className="text-white">
               <div className="flex justify-center">
                 <div>
@@ -481,17 +482,23 @@ export const Game = () => {
                   )}
                 </div>
               )}
-              <MovesTable
-                started={started}
-                localVideoRef={localVideoRef}
-                remoteVideoRef={remoteVideoRef}
-                setLocalVideoTracks={setLocalVideoTracks}
-                setLocalAudioTracks={setLocalAudioTracks}
-              />
+              <MovesTable started={started} />
             </div>
           </div>
         </div>
       </div>
+      {started && (
+        <Draggable bounds="parent">
+          <div className="absolute top-0 right-10">
+            <VideoCall
+              localVideoRef={localVideoRef}
+              remoteVideoRef={remoteVideoRef}
+              setLocalAudioTracks={setLocalAudioTracks}
+              setLocalVideoTracks={setLocalVideoTracks}
+            />
+          </div>
+        </Draggable>
+      )}
     </div>
   );
 };

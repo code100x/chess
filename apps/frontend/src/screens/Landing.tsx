@@ -1,4 +1,4 @@
-import { PlayCard } from '@/components/Card';
+import { PlayCard } from '../components/Card';
 
 export const Landing = () => {
   return (
