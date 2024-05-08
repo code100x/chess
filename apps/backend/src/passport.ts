@@ -1,6 +1,5 @@
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const GithubStrategy = require('passport-github2').Strategy;
-const FacebookStrategy = require('passport-facebook').Strategy;
 import passport from 'passport';
 import dotenv from 'dotenv';
 import { db } from './db';
@@ -21,18 +20,13 @@ const GITHUB_CLIENT_ID =
   process.env.GITHUB_CLIENT_ID || 'your_github_client_id';
 const GITHUB_CLIENT_SECRET =
   process.env.GITHUB_CLIENT_SECRET || 'your_github_client_secret';
-const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID || 'your_facebook_app_id';
-const FACEBOOK_APP_SECRET =
-  process.env.FACEBOOK_APP_SECRET || 'your_facebook_app_secret';
 
 export function initPassport() {
   if (
     !GOOGLE_CLIENT_ID ||
     !GOOGLE_CLIENT_SECRET ||
     !GITHUB_CLIENT_ID ||
-    !GITHUB_CLIENT_SECRET ||
-    !FACEBOOK_APP_ID ||
-    !FACEBOOK_APP_SECRET
+    !GITHUB_CLIENT_SECRET
   ) {
     throw new Error(
       'Missing environment variables for authentication providers',
@@ -110,38 +104,6 @@ export function initPassport() {
       },
     ),
   );
-
-  passport.use(
-    new FacebookStrategy(
-      {
-        clientID: FACEBOOK_APP_ID,
-        clientSecret: FACEBOOK_APP_SECRET,
-        callbackURL: "/auth/facebook/callback",
-        profileFields: ['displayName', 'email']
-      },
-      async function (
-        accessToken: string,
-        refreshToken: string,
-        profile: any,
-        done: (error: any, user?: any) => void,
-      ) {
-        const user = await db.user.upsert({
-          create: {
-            email: profile.emails[0].value,
-            name: profile.displayName,
-            provider: 'FACEBOOK',
-          },
-          update: {
-            name: profile.displayName,
-          },
-          where: {
-            email: profile.emails[0].value,
-          },
-        });
-
-        done(null, user);
-      },
-    ));
 
   passport.serializeUser(function (user: any, cb) {
     process.nextTick(function () {

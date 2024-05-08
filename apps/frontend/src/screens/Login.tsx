@@ -1,6 +1,5 @@
 import Google from '../assets/google.png';
 import Github from '../assets/github.png';
-import Facebook from '../assets/facebook.png';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -16,10 +15,6 @@ const Login = () => {
 
   const github = () => {
     window.open(`${BACKEND_URL}/auth/github`, '_self');
-  };
-
-  const facebook = () => {
-    window.open(`${BACKEND_URL}/auth/facebook`, '_self');
   };
 
   return (
@@ -42,13 +37,6 @@ const Login = () => {
           >
             <img src={Github} alt="Sign in with Github" className="w-6 h-6 mr-2" />
             Sign in with Github
-          </div>
-          <div
-            className="flex items-center justify-center chess-board text-white px-4 py-2 rounded-md cursor-pointer hover:bg-gray-600 transition-colors duration-300"
-            onClick={facebook}
-          >
-            <img src={Facebook} alt="Sign in with Facebook" className="w-6 h-6 mr-2" />
-            Sign in with Facebook
           </div>
         </div>
         <div className="flex flex-col items-center md:ml-8">
