@@ -9,9 +9,7 @@ import { randomUUID } from 'crypto';
 import { SocketManager, User } from './SocketManager';
 
 type GAME_STATUS = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'TIME_UP';
-type GAME_RESULT = "WHITE_WINS" | "BLACK_WINS" | "DRAW";
-
-const GAME_TIME_MS = 10 * 60 * 60 * 1000;
+type GAME_RESULT = 'WHITE_WINS' | 'BLACK_WINS' | 'DRAW';
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
   if (!from) {
@@ -43,6 +41,7 @@ export class Game {
   public player1UserId: string;
   public player2UserId: string | null;
   public board: Chess;
+  public gameTime = 10;
   private moveCount = 0;
   private timer: NodeJS.Timeout | null = null;
   private moveTimer: NodeJS.Timeout | null = null;
@@ -52,11 +51,18 @@ export class Game {
   private startTime = new Date(Date.now());
   private lastMoveTime = new Date(Date.now());
 
-  constructor(player1UserId: string, player2UserId: string | null, gameId?: string, startTime?: Date) {
+  constructor(
+    player1UserId: string,
+    player2UserId: string | null,
+    gameTime: number,
+    gameId?: string,
+    startTime?: Date,
+  ) {
     this.player1UserId = player1UserId;
     this.player2UserId = player2UserId;
     this.board = new Chess();
     this.gameId = gameId ?? randomUUID();
+    this.gameTime = gameTime;
     if (startTime) {
       this.startTime = startTime;
       this.lastMoveTime = startTime;
@@ -149,11 +155,32 @@ export class Game {
   async createGameInDb() {
     this.startTime = new Date(Date.now());
     this.lastMoveTime = this.startTime;
+    const GameTime: {
+      [key: string]: 'CLASSICAL' | 'RAPID' | 'BLITZ' | 'BULLET';
+    } = {
+      classical: 'CLASSICAL',
+      rapid: 'RAPID',
+      blitz: 'BLITZ',
+      bullet: 'BULLET',
+    };
+
+    let currentGameTime;
+    switch (this.gameTime) {
+      case 10:
+        currentGameTime = 'Classic';
+        break;
+      case 3:
+      case 5:
+        currentGameTime = 'Blitz';
+        break;
+      default:
+        currentGameTime = 'rapid';
+    }
 
     const game = await db.game.create({
       data: {
         id: this.gameId,
-        timeControl: 'CLASSICAL',
+        timeControl: GameTime[currentGameTime],
         status: 'IN_PROGRESS',
         startAt: this.startTime,
         currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
@@ -306,10 +333,12 @@ export class Game {
       clearTimeout(this.moveTimer)
     }
     const turn = this.board.turn();
-    const timeLeft = GAME_TIME_MS - (turn === 'w' ? this.player1TimeConsumed : this.player2TimeConsumed);
+    const timeLeft =
+      this.gameTime * 60 * 1000 -
+      (turn === 'w' ? this.player1TimeConsumed : this.player2TimeConsumed);
 
     this.moveTimer = setTimeout(() => {
-      this.endGame("TIME_UP", turn === 'b' ? 'WHITE_WINS' : 'BLACK_WINS');
+      this.endGame('TIME_UP', turn === 'b' ? 'WHITE_WINS' : 'BLACK_WINS');
     }, timeLeft);
   }
 
