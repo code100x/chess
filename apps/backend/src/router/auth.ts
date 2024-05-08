@@ -80,7 +80,7 @@ router.get(
 
 router.get(
   '/facebook',
-  passport.authenticate('facebook', { scope: ['profile'] }),
+  passport.authenticate('facebook', { scope: ['email'] })
 );
 
 router.get(
@@ -88,7 +88,7 @@ router.get(
   passport.authenticate('facebook', {
     successRedirect: CLIENT_URL,
     failureRedirect: '/login/failed',
-  }),
+  })
 );
 
 export default router;

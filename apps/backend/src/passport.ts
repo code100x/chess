@@ -111,6 +111,38 @@ export function initPassport() {
     ),
   );
 
+  passport.use(
+    new FacebookStrategy(
+      {
+        clientID: FACEBOOK_APP_ID,
+        clientSecret: FACEBOOK_APP_SECRET,
+        callbackURL: "/auth/facebook/callback",
+        profileFields: ['displayName', 'email']
+      },
+      async function (
+        accessToken: string,
+        refreshToken: string,
+        profile: any,
+        done: (error: any, user?: any) => void,
+      ) {
+        const user = await db.user.upsert({
+          create: {
+            email: profile.emails[0].value,
+            name: profile.displayName,
+            provider: 'FACEBOOK',
+          },
+          update: {
+            name: profile.displayName,
+          },
+          where: {
+            email: profile.emails[0].value,
+          },
+        });
+
+        done(null, user);
+      },
+    ));
+
   passport.serializeUser(function (user: any, cb) {
     process.nextTick(function () {
       return cb(null, {

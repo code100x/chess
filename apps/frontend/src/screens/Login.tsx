@@ -1,5 +1,7 @@
 import Google from '../assets/google.png';
 import Github from '../assets/github.png';
+import Facebook from '../assets/facebook.png';
+
 import { useNavigate } from 'react-router-dom';
 
 const BACKEND_URL =
@@ -16,26 +18,37 @@ const Login = () => {
     window.open(`${BACKEND_URL}/auth/github`, '_self');
   };
 
+  const facebook = () => {
+    window.open(`${BACKEND_URL}/auth/facebook`, '_self');
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-screen chess-board text-white">
       <h1 className="text-4xl font-bold mb-8 text-center text-green-500 drop-shadow-lg">
         Enter the Game World
       </h1>
       <div className="bg-stone-800 rounded-lg shadow-lg p-8 flex flex-col md:flex-row">
-        <div className="mb-8 md:mb-0 md:mr-8 justify-center flex flex-col">
+        <div className="mb-8 md:mb-0 md:mr-8 justify-center flex flex-col space-y-4">
           <div
-            className="flex items-center justify-center chess-board text-white px-4 py-2 rounded-md mb-4 cursor-pointer hover:bg-gray-600 transition-colors duration-300"
+            className="flex items-center justify-center chess-board text-white px-4 py-2 rounded-md cursor-pointer hover:bg-gray-600 transition-colors duration-300"
             onClick={google}
           >
-            <img src={Google} alt="" className="w-6 h-6 mr-2" />
+            <img src={Google} alt="Sign in with Google" className="w-6 h-6 mr-2" />
             Sign in with Google
           </div>
           <div
             className="flex items-center justify-center chess-board text-white px-4 py-2 rounded-md cursor-pointer hover:bg-gray-600 transition-colors duration-300"
             onClick={github}
           >
-            <img src={Github} alt="" className="w-6 h-6 mr-2" />
+            <img src={Github} alt="Sign in with Github" className="w-6 h-6 mr-2" />
             Sign in with Github
+          </div>
+          <div
+            className="flex items-center justify-center chess-board text-white px-4 py-2 rounded-md cursor-pointer hover:bg-gray-600 transition-colors duration-300"
+            onClick={facebook}
+          >
+            <img src={Facebook} alt="Sign in with Facebook" className="w-6 h-6 mr-2" />
+            Sign in with Facebook
           </div>
         </div>
         <div className="flex flex-col items-center md:ml-8">
