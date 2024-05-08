@@ -40,6 +40,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
 import GameEndModal from '@/components/GameEndModal';
+import { getResult } from '../utils/game';
 
 const moveAudio = new Audio(MoveSound);
 
@@ -130,14 +131,7 @@ export const Game = () => {
           break;
 
         case GAME_ENDED:
-          const wonBy =
-            message.payload.status === 'COMPLETED'
-              ? message.payload.result !== 'DRAW'
-                ? message.payload.outcome === 'CHECKMATE'
-                  ? 'CheckMate'
-                  : 'Resign'
-                : 'Draw'
-              : 'Timeout';
+          const wonBy =  getResult(message.payload.status, message.payload.result)
           setResult({
             result: message.payload.result,
             by: wonBy,

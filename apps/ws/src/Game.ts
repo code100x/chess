@@ -8,9 +8,8 @@ import { db } from './db';
 import { randomUUID } from 'crypto';
 import { SocketManager, User } from './SocketManager';
 
-type GAME_STATUS = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'TIME_UP';
+type GAME_STATUS = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'TIME_UP' | 'RESIGNED';
 type GAME_RESULT = "WHITE_WINS" | "BLACK_WINS" | "DRAW";
-type GAME_OUTCOME = 'CHECKMATE' | 'RESIGN';
 
 const GAME_TIME_MS = 10 * 60 * 60 * 1000;
 
@@ -273,9 +272,7 @@ export class Game {
           ? 'WHITE_WINS'
           : 'BLACK_WINS';
 
-      result === 'DRAW'
-        ? this.endGame('COMPLETED', result)
-        : this.endGame('COMPLETED', result, 'CHECKMATE');
+      this.endGame('COMPLETED', result);
     }
 
     this.moveCount++;
@@ -316,7 +313,7 @@ export class Game {
     }, timeLeft);
   }
 
-  async endGame(status: GAME_STATUS, result: GAME_RESULT, outcome?: GAME_OUTCOME) {
+  async endGame(status: GAME_STATUS, result: GAME_RESULT) {
     const updatedGame = await db.game.update({
       data: {
         status,
@@ -343,7 +340,6 @@ export class Game {
         payload: {
           result,
           status,
-          outcome,
           moves: updatedGame.moves,
           blackPlayer: {
             id: updatedGame.blackPlayer.id,

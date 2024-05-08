@@ -193,7 +193,7 @@ export class GameManager {
           const result =
             user.userId === game.player1UserId ? 'BLACK_WINS' : 'WHITE_WINS';
           game.result = result;
-          game.endGame('COMPLETED', result, "RESIGN");
+          game.endGame('RESIGNED', result);
         }
       }
     });
