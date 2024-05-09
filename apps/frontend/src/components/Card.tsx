@@ -5,7 +5,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '../components/ui/card';
 import chessIcon from '../../public/chess.png';
 import computerIcon from '../../public/computer.png';
 import lightningIcon from '../../public/lightning-bolt.png';
@@ -84,13 +84,13 @@ export function PlayCard() {
   const navigate = useNavigate();
   return (
     <Card className="bg-transparent border-none">
-      <CardHeader className="pb-3 text-center text-white shadow-md">
+      <CardHeader className="pb-3 text-center text-white">
         <CardTitle className="font-semibold tracking-wide flex flex-col items-center justify-center">
           <p>
             Play
             <span className="text-green-700 font-bold pt-1"> Chess</span>
           </p>
-          <img className="pl-1 w-1/2 mt-4" src={chessIcon} alt="chess" />
+          <img className="pl-1 w-1/4 mt-4" src={chessIcon} alt="chess" />
         </CardTitle>
         <CardDescription></CardDescription>
       </CardHeader>

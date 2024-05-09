@@ -1,13 +1,13 @@
-import { cn } from '@/lib/utils';
-import { useSidebar } from '@/hooks/useSidebar';
-import { buttonVariants } from '@/components/ui/button';
+import { cn } from '../lib/utils';
+import { useSidebar } from '../hooks/useSidebar';
+import { buttonVariants } from '../components/ui/button';
 import { useLocation } from 'react-router-dom';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/subnav-accordian';
+} from '../components/subnav-accordian';
 import { useEffect, useState } from 'react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { type LucideIcon } from 'lucide-react';

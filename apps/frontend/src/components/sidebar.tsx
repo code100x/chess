@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import { SideNav } from '@/components/side-nav';
-import { UpperNavItems, LowerNavItems } from '@/components/constants/side-nav';
+import { SideNav } from '../components/side-nav';
+import { UpperNavItems, LowerNavItems } from '../components/constants/side-nav';
 
-import { cn } from '@/lib/utils';
-import { useSidebar } from '@/hooks/useSidebar';
+import { cn } from '../lib/utils';
+import { useSidebar } from '../hooks/useSidebar';
 interface SidebarProps {
   className?: string;
 }
