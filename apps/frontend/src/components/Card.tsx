@@ -1,8 +1,3 @@
-import {
-  EyeNoneIcon,
-  PersonIcon,
-  LightningBoltIcon,
-} from '@radix-ui/react-icons';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -11,67 +6,98 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import chessIcon from '../../public/chess.png';
+import computerIcon from '../../public/computer.png';
+import lightningIcon from '../../public/lightning-bolt.png';
+import friendIcon from '../../public/friendship.png';
+import tournamentIcon from '../../public/trophy.png';
+import variantsIcon from '../../public/strategy.png';
+import GameModeComponent from './GameModeComponent';
 
 export function PlayCard() {
+  const gameModeData = [
+    {
+      icon: (
+        <img
+          src={lightningIcon}
+          className="inline-block mt-1 h-7 w-7"
+          alt="online"
+        />
+      ),
+      title: 'Play Online',
+      description: 'Play vs a Person of Similar Skill',
+      onClick: () => {
+        navigate('/game/random');
+      },
+      disabled: false,
+    },
+    {
+      icon: (
+        <img
+          src={computerIcon}
+          className="inline-block mt-1 h-7 w-7"
+          alt="computer"
+        />
+      ),
+      title: 'Computer',
+      description: 'Challenge a bot from easy to master',
+      disabled: true,
+    },
+    {
+      icon: (
+        <img
+          src={friendIcon}
+          className="inline-block mt-1 h-7 w-7"
+          alt="friend"
+        />
+      ),
+      title: 'Play a Friend',
+      description: 'Invite a Friend to a game of Chess',
+      disabled: true,
+    },
+    {
+      icon: (
+        <img
+          src={tournamentIcon}
+          className="inline-block mt-1 h-7 w-7"
+          alt="tournament"
+        />
+      ),
+      title: 'Tournaments',
+      description: 'Join an Arena where anyone can Win',
+      disabled: true,
+    },
+    {
+      icon: (
+        <img
+          src={variantsIcon}
+          className="inline-block mt-1 h-7 w-7"
+          alt="variants"
+        />
+      ),
+      title: 'Chess Variants',
+      description: 'Find Fun New ways to play chess',
+      disabled: true,
+    },
+  ];
+
   const navigate = useNavigate();
   return (
-    <Card>
-      <CardHeader className="pb-3 text-center">
-        <CardTitle>Play Chess</CardTitle>
+    <Card className="bg-transparent border-none">
+      <CardHeader className="pb-3 text-center text-white shadow-md">
+        <CardTitle className="font-semibold tracking-wide flex flex-col items-center justify-center">
+          <p>
+            Play
+            <span className="text-green-700 font-bold pt-1"> Chess</span>
+          </p>
+          <img className="pl-1 w-1/2 mt-4" src={chessIcon} alt="chess" />
+        </CardTitle>
         <CardDescription></CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-1">
-        <div
-          onClick={() => {
-            navigate('/game/random');
-          }}
-          className="-mx-2 flex items-start space-x-4 rounded-md p-2 transition-all hover:bg-accent hover:text-accent-foreground"
-        >
-          <LightningBoltIcon className="mt-px h-5 w-5" />
-          <div className="space-y-1">
-            <p className="text-sm font-medium leading-none">Play Online</p>
-            <p className="text-sm text-muted-foreground">
-              Play vs a Person of Simillar Skill
-            </p>
-          </div>
-        </div>
-        <div className="-mx-2 flex items-start space-x-4 rounded-md p-2 transition-all ">
-          <PersonIcon className="mt-px h-5 w-5" />
-          <div className="space-y-1">
-            <p className="text-sm font-medium leading-none">Computer</p>
-            <p className="text-sm text-muted-foreground">
-              Challenge a bot from easy to master (coming soon)
-            </p>
-          </div>
-        </div>
-        <div className="-mx-2 flex items-start space-x-4 rounded-md p-2 transition-all">
-          <PersonIcon className="mt-px h-5 w-5" />
-          <div className="space-y-1">
-            <p className="text-sm font-medium leading-none">Play a Friend</p>
-            <p className="text-sm text-muted-foreground">
-              Invite a Friend to a game of Chess (coming soon)
-            </p>
-          </div>
-        </div>
-        <div className="-mx-2 flex items-start space-x-4 rounded-md p-2 transition-all ">
-          <EyeNoneIcon className="mt-px h-5 w-5" />
-          <div className="space-y-1">
-            <p className="text-sm font-medium leading-none">Tournaments</p>
-            <p className="text-sm text-muted-foreground">
-              Join an Arena where anyone can Win (coming soon)
-            </p>
-          </div>
-        </div>
-
-        <div className="-mx-2 flex items-start space-x-4 rounded-md p-2 transition-all ">
-          <EyeNoneIcon className="mt-px h-5 w-5" />
-          <div className="space-y-1">
-            <p className="text-sm font-medium leading-none">Chess Variants</p>
-            <p className="text-sm text-muted-foreground">
-              Find Fun New ways to play chess (coming soon)
-            </p>
-          </div>
-        </div>
+      <CardContent className="grid gap-2 cursor-pointer shadow-md mt-1">
+        {gameModeData.map((data) => {
+          return <GameModeComponent {...data} />;
+        })}
       </CardContent>
     </Card>
   );
