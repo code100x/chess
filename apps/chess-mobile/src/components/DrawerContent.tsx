@@ -4,7 +4,7 @@ import { CommonActions, DrawerActions } from "@react-navigation/native";
 import { Text, View } from "react-native";
 import { cn } from "~/lib/utils";
 import { Button } from "./Button";
-import { useAuth } from '~/context/authcontext';
+import useAuth from '~/hooks/useAuth';
 
 export const DrawerContent = (props: DrawerContentComponentProps) => {
   const { state, descriptors, navigation } = props;

@@ -1,4 +1,3 @@
-import { AuthProvider } from '~/context/authcontext';
 import '../global.css';
 
 import { setBackgroundColorAsync, setBehaviorAsync, setVisibilityAsync } from 'expo-navigation-bar';
@@ -6,6 +5,7 @@ import { Slot } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
 import { useState } from 'react';
 import { SplashScreen } from '~/components';
+import { RecoilRoot } from 'recoil';
 
 export default function Layout() {
   setStatusBarStyle("light");
@@ -18,7 +18,6 @@ export default function Layout() {
     return (
       <SplashScreen
         onAnimationFinish={(isCancelled) => {
-          console.log("isCancelled", isCancelled);
           if (!isCancelled) {
             setSplashAnimationFinished(true);
           }
@@ -28,8 +27,8 @@ export default function Layout() {
   }
 
   return (
-    <AuthProvider>
+    <RecoilRoot>
       <Slot />
-    </AuthProvider>
+    </RecoilRoot>
   );
 }

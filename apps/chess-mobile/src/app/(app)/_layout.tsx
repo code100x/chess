@@ -1,12 +1,14 @@
-import { useAuth } from '~/context/authcontext';
 import { Redirect } from 'expo-router';
 import { Container, Loading } from '~/components';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Drawer } from 'expo-router/drawer';
 import { DrawerContent } from '~/components/DrawerContent';
 import { AntDesign } from '@expo/vector-icons';
+import useAuth from '~/hooks/useAuth';
+
 export default function Layout() {
-  const { session, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
+  console.log(user, isLoading);
 
   if (isLoading) {
     return (
@@ -15,7 +17,7 @@ export default function Layout() {
       </Container>
     )
   }
-  if (!session) {
+  if (!user) {
     return <Redirect href={"/sign-in"} />
   }
 
