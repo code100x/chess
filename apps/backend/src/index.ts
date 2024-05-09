@@ -20,6 +20,7 @@ app.use(
 );
 
 initPassport();
+app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.authenticate('session'));
 

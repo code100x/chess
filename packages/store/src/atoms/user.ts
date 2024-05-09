@@ -8,6 +8,12 @@ export interface User {
   name: string;
 }
 
+export interface UserInfo {
+  email: string;
+  username: string;
+  rating: number;
+}
+
 export const userAtom = atom<User>({
   key: 'user',
   default: selector({
@@ -15,6 +21,32 @@ export const userAtom = atom<User>({
     get: async () => {
       try {
         const response = await fetch(`${BACKEND_URL}/auth/refresh`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          return data;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      return null;
+    },
+  }),
+});
+
+export const userInfoAtom = atom<UserInfo>({
+  key: 'userInfo',
+  default: selector({
+    key: 'userInfo/default',
+    get: async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/auth/userInfo`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

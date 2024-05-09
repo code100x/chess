@@ -27,8 +27,8 @@ model Game {
   id            String     @id @default(uuid())
   whitePlayerId String
   blackPlayerId String
-  whitePlayer   User       @relation("GamesAsWhite", fields: [whitePlayerId], references: [id])
-  blackPlayer   User       @relation("GamesAsBlack", fields: [blackPlayerId], references: [id])
+  whitePlayer   User       @relation("GamesAsWhite", fields: [whitePlayerId], references: [id], onDelete: Cascade)
+  blackPlayer   User       @relation("GamesAsBlack", fields: [blackPlayerId], references: [id], onDelete: Cascade)
   status        GameStatus
   result        GameResult?
   timeControl   TimeControl
@@ -46,7 +46,7 @@ model Game {
 model Move {
   id          String   @id @default(uuid())
   gameId      String
-  game        Game     @relation(fields: [gameId], references: [id])
+  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
   moveNumber  Int
   from        String
   to          String

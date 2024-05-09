@@ -8,6 +8,7 @@ import { RecoilRoot } from 'recoil';
 import { useUser } from '@repo/store/useUser';
 import { Loader } from './components/Loader';
 import { Layout } from './layout';
+import Settings from './screens/Settings';
 
 function App() {
   return (
@@ -27,14 +28,9 @@ function AuthApp() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout children={<Landing />} />} />
-        <Route
-          path="/login"
-          element={<Login />}
-        />
-        <Route
-          path="/game/:gameId"
-          element={<Layout children={<Game />} />}
-        />
+        <Route path="/login" element={<Login />} />
+        <Route path="/game/:gameId" element={<Layout children={<Game />} />} />
+        <Route path="/settings" element={<Layout children={<Settings />} />} />
       </Routes>
     </BrowserRouter>
   );
