@@ -1,0 +1,25 @@
+{
+  "name": "sfu",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js --sourcemap && MEDIASOUP_WORKER_BIN='/Users/nimit/github/chess/node_modules/mediasoup/worker/out/Release/mediasoup-worker' DEBUG='mediasoup*' nodemon dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@repo/db": "*",
+    "@types/ws": "^8.5.10",
+    "jsonwebtoken": "^9.0.2",
+    "mediasoup": "3",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
