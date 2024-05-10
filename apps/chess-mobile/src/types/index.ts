@@ -1,7 +1,5 @@
-type ApiResponse = {
-  id: string,
-  name: string,
-  token:string,
-}
-
-type AuthState<T> = [boolean, T | null];
+type User = {
+  id: string;
+  name: string;
+  token: string;
+};

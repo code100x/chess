@@ -3,12 +3,10 @@ import { useEffect } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import base64 from 'base-64';
 import { BackgroundSvg, Button, Container, Logo } from '~/components';
-import useAuth from '~/hooks/useAuth';
 
 export default function SignIn() {
   const { cookie } = useLocalSearchParams<{ cookie: string }>();
 
-  const { signIn, setCookie } = useAuth();
   // useEffect(() => {
   //   if (cookie) {
   //     console.log("normal- ",cookie);
@@ -22,7 +20,7 @@ export default function SignIn() {
   // }, [cookie])
 
   const handlePress = () => {
-    signIn();
+    // signIn();
   };
   return (
     <Container className="bg-slate-950 px-10 py-20">

@@ -4,20 +4,19 @@ import { CommonActions, DrawerActions } from "@react-navigation/native";
 import { Text, View } from "react-native";
 import { cn } from "~/lib/utils";
 import { Button } from "./Button";
-import useAuth from '~/hooks/useAuth';
+import { useSetRecoilState } from 'recoil';
+import { storedCookie } from '~/store/atoms/cookie';
+import { ProfileCard } from './ProfileCard';
 
 export const DrawerContent = (props: DrawerContentComponentProps) => {
   const { state, descriptors, navigation } = props;
-  const { signOut } = useAuth();
-
+  const setCookie = useSetRecoilState(storedCookie);
   const handleLogout = () => {
-    signOut();
+    setCookie(null)
   }
   return (
     <View className="flex-1 bg-slate-800">
-      <View>
-        {/* USER DETAILS */}
-      </View>
+      <ProfileCard />
       <DrawerContentScrollView className="p-4">
         {state.routes.map((route, idx) => {
           const focused = idx === state.index;

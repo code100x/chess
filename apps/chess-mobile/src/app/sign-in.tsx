@@ -1,22 +1,32 @@
+import { AntDesign } from '@expo/vector-icons';
+import base64 from 'base-64';
 import { router, useLocalSearchParams } from 'expo-router';
+import { openAuthSessionAsync } from 'expo-web-browser';
 import { useEffect } from 'react';
 import { Image, Text, View } from 'react-native';
-import base64 from 'base-64';
-import { AntDesign } from '@expo/vector-icons';
+import { useSetRecoilState } from 'recoil';
 import { BackgroundSvg, Button, Container, Loading, Logo } from '~/components';
-import useAuth from '~/hooks/useAuth';
-import { useRecoilValue } from 'recoil';
-import { loadingAtom } from '~/store/atoms/loading';
+import { storedCookie } from '~/store/atoms/cookie';
+
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+const signIn = async () => {
+  try {
+    const authUrl = `${apiUrl}/auth/google`;
+    await openAuthSessionAsync(authUrl);
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 export default function SignIn() {
   const { cookie } = useLocalSearchParams<{ cookie: string }>();
-  const isLoading = useRecoilValue(loadingAtom);
-  const { signIn, setCookie } = useAuth();
-
+  const setCookie = useSetRecoilState(storedCookie);
+  const isLoading = false;
   useEffect(() => {
     if (cookie) {
       const token = base64.decode(cookie);
       setCookie(token);
+      router.replace("/")
     }
   }, [cookie]);
 
