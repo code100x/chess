@@ -5,7 +5,7 @@ export const createWebRtcTransport = async (router: Router) => {
     listenIps: [
       {
         ip: '0.0.0.0', // replace with relevant IP address
-        announedIp: '127.0.0.1', // replace by public IP address
+        announcedIp: '127.0.0.1', // replace by public IP address
       },
     ],
     enableUdp: true,
