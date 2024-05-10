@@ -32,7 +32,6 @@ const videoParams = {
 const SFU = () => {
   const { socket, localStream } = useSfuSocket();
   const [device, setDevice] = useState<mediasoupClient.Device | null>(null);
-  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
 
   const [producer, setProducer] = useState<Producer<AppData> | null>(null);
   const [consumingTransports, setConsumingTransports] = useState<string[]>([]);
@@ -49,29 +48,16 @@ const SFU = () => {
     await device.load({
       routerRtpCapabilities,
     });
-    console.log('Device RTP Capabilities', device.rtpCapabilities);
     socket?.send(
       JSON.stringify({
         type: 'createProducerTransport',
       }),
     );
   };
-  useEffect(() => {
-    if (remoteStream && remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStream;
-      console.log('remote', remoteStream);
-      console.log('remote', remoteVideoRef.current);
-
-      remoteVideoRef.current.play();
-    }
-  }, [remoteStream]);
 
   const signalNewConsumerTransport = async (remoteProducerId: string) => {
-    //check if we are already consuming the remoteProducerId
     if (consumingTransports.includes(remoteProducerId)) return;
     setConsumingTransports((prev) => [...prev, remoteProducerId]);
-    console.log("newConsumerTransport");
-    
     socket?.send(
       JSON.stringify({
         type: 'createConsumerTransport',
@@ -81,7 +67,6 @@ const SFU = () => {
 
   const handleCreateProducerTransport = async (payload: any) => {
     const transport = device?.createSendTransport(payload);
-    console.log('transport', transport);
     transport?.on('connect', async ({ dtlsParameters }, callback, errback) => {
       try {
         socket?.send(
@@ -96,8 +81,6 @@ const SFU = () => {
           const message = JSON.parse(event.data);
 
           if (message.type === 'producerConnected') {
-            console.log('connected');
-
             callback();
           }
         });
@@ -109,8 +92,6 @@ const SFU = () => {
     transport?.on(
       'produce',
       async ({ kind, rtpParameters, appData }, callback, errback) => {
-        console.log('producing', kind);
-
         try {
           socket?.send(
             JSON.stringify({
@@ -142,36 +123,8 @@ const SFU = () => {
       },
     );
 
-    transport?.on('connectionstatechange', (state) => {
-      console.log('state', state);
-
-      switch (state) {
-        case 'connecting':
-          console.log('connecting....');
-          break;
-        case 'connected':
-          console.log('connected');
-          console.log('DSvfswefveswfgwes');
-
-          if (localStream && remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = localStream;
-          }
-
-          break;
-
-        case 'failed':
-          transport.close();
-          console.error('Failed COnnecting');
-          break;
-        default:
-          break;
-      }
-    });
-
     try {
       const track = localStream?.getVideoTracks()[0];
-      console.log('track', track);
-
       if (track) {
         const producer = await transport?.produce({ track, ...videoParams });
         if (producer) setProducer(producer);
@@ -186,11 +139,8 @@ const SFU = () => {
 
   const handleCreateConsumerTransport = async (payload: any) => {
     const transport = device?.createRecvTransport(payload);
-    console.log('fdhbrthrthrthrt56transport', transport);
     transport?.on('connect', async ({ dtlsParameters }, callback, errback) => {
       try {
-        console.log('sdavfswef');
-
         socket?.send(
           JSON.stringify({
             type: 'connectConsumerTransport',
@@ -211,32 +161,7 @@ const SFU = () => {
         errback(error as Error);
       }
     });
-
-    transport?.on('connectionstatechange', (state) => {
-      console.log('state', state);
-
-      switch (state) {
-        case 'connecting':
-          console.log('connecting....');
-          break;
-        case 'connected':
-          console.log('connected');
-          console.log('DSvfswefveswfgwes');
-
-          if (remoteStream && remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = remoteStream;
-          }
-          break;
-        case 'failed':
-          transport.close();
-          console.error('Failed COnnecting');
-          break;
-        default:
-          break;
-      }
-    });
     if (transport) {
-      console.log('Sdvfwesdfvserf');
 
       setConsumerTransport(transport);
       if (device && producer) {
@@ -254,13 +179,9 @@ const SFU = () => {
   };
 
   const handleSubscribe = async (data: any) => {
-    console.log('sdvsdvs');
-
     if (consumerTransport) {
-      console.log('22333');
 
       const { producerId, id, rtpParameters, kind } = data;
-      console.log('DSavcsdvsdef', kind);
 
       const consumer = await consumerTransport.consume({
         id,
@@ -269,12 +190,12 @@ const SFU = () => {
         rtpParameters,
       });
 
-      console.log('ADscfsedfsedwfews', consumer.track);
+      const stream = new MediaStream([consumer.track]);
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = stream;
+        remoteVideoRef.current?.play();
+      }
 
-      const stream = new MediaStream();
-      stream.addTrack(consumer.track);
-      setRemoteStream(stream);
-      
       socket?.send(
         JSON.stringify({ type: 'resume', payload: { consumerId: id } }),
       );
@@ -296,9 +217,9 @@ const SFU = () => {
           handleCreateProducerTransport(message.payload);
           break;
         }
-        case 'getProducers':{
-          const {producerList} = message.payload;
-          producerList.filter(signalNewConsumerTransport)
+        case 'getProducers': {
+          const { producerList } = message.payload;
+          producerList.forEach(signalNewConsumerTransport);
           break;
         }
         case 'createConsumerTransport': {
@@ -309,18 +230,17 @@ const SFU = () => {
           signalNewConsumerTransport(message.payload.producerId);
           break;
         }
-
         case 'subscribed': {
           handleSubscribe(message.payload);
           break;
         }
       }
     };
-  }, [socket, device, localStream, producer, consumerTransport, remoteStream]);
+  }, [socket, device, localStream, producer, consumerTransport]);
 
   return (
     <div>
-      {/* <video id="1" ref={localVideoRef} autoPlay playsInline muted /> */}
+      <video id="1" ref={localVideoRef} autoPlay playsInline muted />
       <video id="2" ref={remoteVideoRef} autoPlay playsInline muted />
     </div>
   );

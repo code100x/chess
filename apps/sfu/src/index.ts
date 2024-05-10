@@ -1,5 +1,3 @@
-process.env.DEBUG = "mediasoup*"
-
 import { WebSocketServer, WebSocket } from 'ws';
 import url from 'url';
 import { extractUserId } from './auth';
@@ -42,8 +40,6 @@ const mediaCodecs = [
 ] as RtpCodecCapability[];
 
 const send = (ws: WebSocket, type: string, payload: any) => {
-  console.log('type', type);
-
   ws.send(
     JSON.stringify({
       type,
@@ -135,13 +131,6 @@ wss.on('connection', function connection(ws, req) {
       consumers: [...peers[userId].consumers, consumer.id],
     };
   };
-
-  const getProducer = () => {
-    const [producerTransport] = producers.filter(
-      (producer) => producer.userId === userId,
-    );
-    return producerTransport.producer;
-  };
   const getRemoteProducer = () => {
     const [producerTransport] = producers.filter(
       (producer) => producer.userId !== userId,
@@ -170,13 +159,6 @@ wss.on('connection', function connection(ws, req) {
 
   ws.on('message', async function message(data: any) {
     const message = JSON.parse(data);
-    console.log(message.type, userId);
-
-    console.log("1", producerTransports);
-    console.log("2", producers);
-    console.log("3", consumerTransports);
-    console.log("4", consumers);
-    
     switch (message.type) {
       case 'joinRoom': {
         const { roomName } = message.payload;
@@ -266,8 +248,6 @@ wss.on('connection', function connection(ws, req) {
         break;
       }
       case 'resume': {
-        console.log('');
-
         const { consumerId } = message.payload;
         const { consumer } = consumers.find(
           (consumerData) => consumerData.consumer.id === consumerId,
@@ -293,7 +273,7 @@ wss.on('connection', function connection(ws, req) {
           const consumer: Consumer = await getConsumerTransport().consume({
             producerId: id,
             rtpCapabilities,
-            paused: false,
+            paused: true,
           });
 
           send(ws, 'subscribed', {
@@ -318,8 +298,6 @@ wss.on('connection', function connection(ws, req) {
 });
 
 const createRoom = async (roomName: string, userId: string) => {
-  console.log('roomName', roomName);
-
   let router1: Router;
   let peers = [];
   if (rooms[roomName]) {
@@ -328,8 +306,6 @@ const createRoom = async (roomName: string, userId: string) => {
   } else {
     router1 = await worker.createRouter({ mediaCodecs });
   }
-
-  console.log(`Router ID: ${router1.id}`, peers.length);
 
   rooms[roomName] = {
     router: router1,
