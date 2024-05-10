@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import Spinner from '../../public/chessLoader.gif';
 
 const Loader = () => {
   return (
@@ -6,30 +6,7 @@ const Loader = () => {
       <div className="p-4 rounded-md">
         <div className="flex justify-center">
           <>
-            <motion.span
-              className="w-2 h-2 my-12 mx-1 bg-white rounded-full"
-              animate={{
-                y: [0, -20, 0],
-                opacity: [1, 0],
-                transition: { duration: 1, repeat: Infinity },
-              }}
-            />
-            <motion.span
-              className="w-2 h-2 my-12 mx-1 bg-white rounded-full"
-              animate={{
-                y: [0, -20, 0],
-                opacity: [1, 0],
-                transition: { duration: 1, repeat: Infinity, delay: 0.2 },
-              }}
-            />
-            <motion.span
-              className="w-2 h-2 my-12 mx-1 bg-white rounded-full"
-              animate={{
-                y: [0, -20, 0],
-                opacity: [1, 0],
-                transition: { duration: 1, repeat: Infinity, delay: 0.4 },
-              }}
-            />
+            <img src={Spinner} alt="Loading ..." width={90} height={90} />
           </>
         </div>
       </div>
