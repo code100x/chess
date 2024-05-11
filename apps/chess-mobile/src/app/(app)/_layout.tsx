@@ -1,6 +1,7 @@
 import { AntDesign } from '@expo/vector-icons';
 import { Redirect } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
+import { PixelRatio } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useRecoilValueLoadable } from 'recoil';
 import { Container, DrawerContent, Loading } from '~/components';
@@ -9,7 +10,7 @@ import { userAtom } from '~/store/atoms/user';
 export default function Layout() {
   const { contents: user, state } = useRecoilValueLoadable(userAtom);
 
-  const isLoading = state === "loading";
+  const isLoading = state === 'loading';
 
   if (isLoading) {
     return (

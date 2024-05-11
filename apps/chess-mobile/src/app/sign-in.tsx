@@ -3,9 +3,9 @@ import base64 from 'base-64';
 import { router, useLocalSearchParams } from 'expo-router';
 import { openAuthSessionAsync } from 'expo-web-browser';
 import { useEffect } from 'react';
-import { Image, Text, View } from 'react-native';
+import { Image, View } from 'react-native';
 import { useSetRecoilState } from 'recoil';
-import { BackgroundSvg, Button, Container, Loading, Logo } from '~/components';
+import { BackgroundSvg, Button, Container, Loading, Logo, Text } from '~/components';
 import { storedCookie } from '~/store/atoms/cookie';
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -16,7 +16,7 @@ const signIn = async () => {
   } catch (error) {
     console.log(error);
   }
-}
+};
 
 export default function SignIn() {
   const { cookie } = useLocalSearchParams<{ cookie: string }>();
@@ -26,7 +26,7 @@ export default function SignIn() {
     if (cookie) {
       const token = base64.decode(cookie);
       setCookie(token);
-      router.replace("/")
+      router.replace('/');
     }
   }, [cookie]);
 
@@ -39,7 +39,9 @@ export default function SignIn() {
         <BackgroundSvg />
         <View className="flex-1 justify-end gap-y-8 py-10">
           <View className="items-center justify-center gap-y-3">
-            <Text className="text-4xl font-bold text-slate-300">Conquer the Board with</Text>
+            <Text className="text-center text-3xl font-bold text-slate-300">
+              Conquer the Board with
+            </Text>
             <Logo />
           </View>
           <Image source={require('~assets/chess.png')} className="mx-auto max-h-60 max-w-full" />
@@ -50,7 +52,7 @@ export default function SignIn() {
               size="lg"
               onPress={handlePressGoogle}>
               <AntDesign name="google" size={24} color="white" />
-              <Text className="text-2xl font-bold text-white">Login with Google</Text>
+              <Text className="text-xl font-bold text-white">Login with Google</Text>
             </Button>
             <Button
               className="flex-row gap-x-4 rounded-xl"
@@ -58,11 +60,11 @@ export default function SignIn() {
               size="lg"
               onPress={() => console.log('Button pressed: GITHUB')}>
               <AntDesign name="github" size={24} color="white" />
-              <Text className="text-2xl font-bold text-white">Login with Github</Text>
+              <Text className="text-xl font-bold text-white">Login with Github</Text>
             </Button>
             <View className="relative items-center justify-center">
               <View className="absolute h-[1px] w-full bg-slate-400" />
-              <Text className="bg-slate-950 px-2 text-xl font-bold text-white">OR</Text>
+              <Text className="bg-slate-950 px-2 font-bold text-white">OR</Text>
             </View>
             <Button
               variant="secondary"
@@ -70,7 +72,7 @@ export default function SignIn() {
               roundClass="rounded-xl"
               size="lg"
               onPress={() => router.push('/guest')}>
-              <Text className="text-2xl font-bold text-white">Play as Guest</Text>
+              <Text className="text-xl font-bold text-white">Play as Guest</Text>
             </Button>
           </View>
         </View>

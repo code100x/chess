@@ -1,19 +1,20 @@
 import { Feather } from '@expo/vector-icons';
-import { DrawerContentComponentProps, DrawerContentScrollView } from "@react-navigation/drawer";
-import { CommonActions, DrawerActions } from "@react-navigation/native";
-import { Text, View } from "react-native";
-import { cn } from "~/lib/utils";
-import { Button } from "./Button";
+import { DrawerContentComponentProps, DrawerContentScrollView } from '@react-navigation/drawer';
+import { CommonActions, DrawerActions } from '@react-navigation/native';
+import { View } from 'react-native';
+import { cn } from '~/lib/utils';
+import { Button } from './Button';
 import { useSetRecoilState } from 'recoil';
 import { storedCookie } from '~/store/atoms/cookie';
 import { ProfileCard } from './ProfileCard';
+import { Text } from './Themed';
 
 export const DrawerContent = (props: DrawerContentComponentProps) => {
   const { state, descriptors, navigation } = props;
   const setCookie = useSetRecoilState(storedCookie);
   const handleLogout = () => {
-    setCookie(null)
-  }
+    setCookie(null);
+  };
   return (
     <View className="flex-1 bg-slate-800">
       <ProfileCard />
@@ -38,31 +39,31 @@ export const DrawerContent = (props: DrawerContentComponentProps) => {
             }
           };
 
-          const {
-            title,
-            drawerLabel,
-            drawerIcon,
-          } = descriptors[route.key].options;
+          const { title, drawerLabel, drawerIcon } = descriptors[route.key].options;
           const label =
-            drawerLabel !== undefined
-              ? drawerLabel
-              : title !== undefined
-                ? title
-                : route.name;
+            drawerLabel !== undefined ? drawerLabel : title !== undefined ? title : route.name;
           return (
-            <Button variant={"link"} key={route.key} onPress={onPress} className={cn("flex-row gap-4 justify-start my-1", focused && 'bg-slate-700')}>
-              {drawerIcon ? drawerIcon({ size: 20, focused, color: "white" }) : null}
-              {typeof label === "string" ? <Text className="text-white text-xl capitalize">{label}</Text> : label({ color: "white", focused })}
+            <Button
+              variant={'link'}
+              key={route.key}
+              onPress={onPress}
+              className={cn('my-1 flex-row justify-start gap-4', focused && 'bg-slate-700')}>
+              {drawerIcon ? drawerIcon({ size: 20, focused, color: 'white' }) : null}
+              {typeof label === 'string' ? (
+                <Text className="capitalize text-white">{label}</Text>
+              ) : (
+                label({ color: 'white', focused })
+              )}
             </Button>
-          )
+          );
         })}
       </DrawerContentScrollView>
-      <View className="p-4 border-t-slate-600 border-t gap-y-2">
-        <Button variant={"link"} className="flex-row gap-4 justify-start" onPress={handleLogout}>
+      <View className="gap-y-2 border-t border-t-slate-600 p-4">
+        <Button variant={'link'} className="flex-row justify-start gap-4" onPress={handleLogout}>
           <Feather name="log-out" size={20} color="white" />
-          <Text className="text-white text-xl">Sign Out</Text>
+          <Text className="text-white">Sign Out</Text>
         </Button>
       </View>
     </View>
-  )
-}
+  );
+};

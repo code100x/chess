@@ -8,10 +8,10 @@ import { SplashScreen } from '~/components';
 import { RecoilRoot } from 'recoil';
 
 export default function Layout() {
-  setStatusBarStyle("light");
-  setVisibilityAsync("hidden");
-  setBehaviorAsync("overlay-swipe");
-  setBackgroundColorAsync("rgb(2 6 23)");
+  setStatusBarStyle('light');
+  setVisibilityAsync('hidden');
+  setBehaviorAsync('overlay-swipe');
+  setBackgroundColorAsync('rgb(2 6 23)');
 
   const [splashAnimationFinished, setSplashAnimationFinished] = useState(false);
   if (!splashAnimationFinished) {
@@ -23,7 +23,7 @@ export default function Layout() {
           }
         }}
       />
-    )
+    );
   }
 
   return (

@@ -7,3 +7,4 @@ export * from './Loading';
 export * from './Logo';
 export * from './ProfileCard';
 export * from './SplashScreen';
+export * from './Themed';
