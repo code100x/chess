@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
 export const RECEIVE_MSG = 'receive_msg';
 export const NEW_MSG = 'new_msg';
@@ -7,10 +7,12 @@ export const ChatRoom = ({
   gameId,
   socket,
   myMessage,
+  setNewMessage,
 }: {
   gameId: string;
   socket: WebSocket;
   myMessage: string;
+  setNewMessage: Dispatch<SetStateAction<boolean>>;
 }) => {
   const [send, setSend] = useState<string>('');
   const [displayText, setDisplayText] = useState<
@@ -30,7 +32,8 @@ export const ChatRoom = ({
   }, [displayText]);
 
   useEffect(() => {
-    myMessage &&
+    if (myMessage) {
+      setNewMessage(true);
       setDisplayText((prevMsg) => {
         if (prevMsg === null) {
           return [{ msg: myMessage, type: RECEIVE_MSG }];
@@ -38,6 +41,7 @@ export const ChatRoom = ({
           return [...prevMsg, { msg: myMessage, type: RECEIVE_MSG }];
         }
       });
+    }
   }, [myMessage]);
 
   if (!socket) return <div>Connecting...</div>;

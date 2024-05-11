@@ -35,6 +35,7 @@ const MovesTable = ({
   const setIsFlipped = useSetRecoilState(isBoardFlippedAtom);
   const moves = useRecoilValue(movesAtom);
   const movesTableRef = useRef<HTMLInputElement>(null);
+  const [newMessage, setNewMessage] = useState<boolean>(false);
   const [toggleMove, setToggleMove] = useState<boolean>(true);
   const movesArray = moves.reduce((result, _, index: number, array: Move[]) => {
     if (index % 2 === 0) {
@@ -68,10 +69,16 @@ const MovesTable = ({
               className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1 border relative"
               onClick={() => {
                 setToggleMove((p) => !p);
+                setNewMessage(false);
               }}
             >
               {<ArrowUpDownIcon size={16} />}
               {toggleMove ? 'Moves' : 'Message'}
+              {toggleMove && newMessage && (
+                <span className=" absolute top-1 right-1 bg-red-700 text-white text-xs py-1 px-1 rounded-full leading-3">
+                  {' '}
+                </span>
+              )}
             </button>
           </div>
           <div className="flex gap-1">
@@ -179,6 +186,7 @@ const MovesTable = ({
             gameId={gameId ?? ''}
             socket={socket}
             myMessage={myMessage}
+            setNewMessage={setNewMessage}
           />
         </div>
       </div>
