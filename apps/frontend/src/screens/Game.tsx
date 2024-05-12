@@ -39,7 +39,8 @@ const GAME_TIME_MS = 10 * 60 * 1000;
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
-import GameEndModal from '../components/GameEndModal';
+import GameEndModal from '@/components/GameEndModal';
+import { Waitopponent } from '@/components/ui/waitopponent';
 
 export interface IMove {
   from: Square;
@@ -347,7 +348,7 @@ export const Game = () => {
               {!started && (
                 <div className="pt-8 flex justify-center ">
                   {added ? (
-                    <div className="text-white">Waiting</div>
+                    <div className="text-white"><Waitopponent/></div>
                   ) : (
                     gameId === 'random' && (
                       <Button
