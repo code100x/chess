@@ -16,3 +16,6 @@ export const ICE_CANDIDATE = 'ice_candidate';
 export const SEND_OFFER = 'send_offer';
 export const SEND_ANSWER = 'send_answer';
 export const USER_TIMEOUT = 'user_timeout';
+export const VIDEO_CALL_REQUEST = 'video_call_request';
+export const VIDEO_CALL_ANSWER = 'video_call_answer';
+export const TERMINATE_CALL = 'terminate_call';

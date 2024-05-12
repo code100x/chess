@@ -4,7 +4,7 @@ import {
   userSelectedMoveIndexAtom,
 } from '@repo/store/chessBoard';
 import { Move } from 'chess.js';
-import { SetStateAction, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   HandshakeIcon,
@@ -16,12 +16,18 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { Button } from './ui/button';
+import { videoCallRequestStatusAtom } from '@repo/store/videoCall';
 
 type TMovesTableProps = {
   started: boolean;
+  processVideoCall: () => void;
 };
 
-const MovesTable: React.FC<TMovesTableProps> = ({ started }) => {
+const MovesTable: React.FC<TMovesTableProps> = ({
+  started,
+  processVideoCall,
+}) => {
   const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
     userSelectedMoveIndexAtom,
   );
@@ -34,7 +40,13 @@ const MovesTable: React.FC<TMovesTableProps> = ({ started }) => {
     }
     return result;
   }, [] as Move[][]);
-
+  const [videoCallState, setVideoCallState] = useRecoilState(
+    videoCallRequestStatusAtom,
+  );
+  const REQUEST_TIMEOUT = 10 * 1000;
+  const [timeRemaining, setTimeRemaining] = useState(REQUEST_TIMEOUT);
+  const [intervalTimer, setIntervalTimer] = useState<Timer | undefined>();
+  const [timeoutTimer, setTimeoutTimer] = useState<Timer | undefined>();
   useEffect(() => {
     if (movesTableRef && movesTableRef.current) {
       movesTableRef.current.scrollTo({
@@ -44,6 +56,30 @@ const MovesTable: React.FC<TMovesTableProps> = ({ started }) => {
     }
   }, [moves]);
 
+  useEffect(() => {
+    if (videoCallState === 'Locked') {
+      setTimeRemaining(REQUEST_TIMEOUT);
+      clearTimeout(timeoutTimer);
+      clearInterval(intervalTimer);
+      setIntervalTimer(
+        setInterval(() => {
+          setTimeRemaining((prev) => prev - 1000);
+        }, 1000),
+      );
+      setTimeoutTimer(
+        setTimeout(() => {
+          setVideoCallState('Idle');
+          clearInterval(intervalTimer);
+        }, REQUEST_TIMEOUT),
+      );
+    }
+    if (videoCallState === 'Accepted') {
+      clearTimeout(timeoutTimer);
+      clearInterval(intervalTimer);
+      setTimeRemaining(REQUEST_TIMEOUT);
+    }
+  }, [videoCallState]);
+
   return (
     <div
       className={cn(
@@ -52,13 +88,35 @@ const MovesTable: React.FC<TMovesTableProps> = ({ started }) => {
       )}
       ref={movesTableRef}
     >
+      {started && (
+        <Button
+          className="bg-green-500 hover:bg-green-500"
+          onClick={() => {
+            processVideoCall();
+          }}
+          disabled={videoCallState === 'Locked' || videoCallState === 'Pending'}
+        >
+          {videoCallState === 'Idle'
+            ? 'Request a video call'
+            : videoCallState === 'Pending'
+              ? 'Awaiting response...'
+              : videoCallState === 'Accepted'
+                ? 'Leave video call'
+                : `Retry after ${Math.ceil(timeRemaining / 1000)}`}
+        </Button>
+      )}
       <div className="w-full flex flex-grow flex-col overflow-y-auto scrollbar pt-10">
+        {started && (
+          <p className="border-b border-[#5A5858]  p-2 font-bold">
+            Starting position
+          </p>
+        )}
         {movesArray.map((movePairs, index) => {
           return (
             <div
               key={index}
               className={cn(
-                'w-full font-bold items-stretch border-t border-input py-6',
+                'w-full font-bold items-stretch py-6',
                 index % 2 !== 0 ? 'bg-[#2B2927]' : '',
               )}
             >

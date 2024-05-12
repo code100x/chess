@@ -17,17 +17,23 @@ import {
   JOIN_ROOM,
   MOVE,
   OFFER,
+  VIDEO_CALL_REQUEST,
+  SEND_OFFER,
+  VIDEO_CALL_ANSWER,
+  TERMINATE_CALL,
 } from '@repo/common/messages';
 
 export class GameManager {
   private games: Game[];
   private pendingGameId: string | null;
   private users: User[];
+  private videoCallStatusMapping: Map<string, boolean>;
 
   constructor() {
     this.games = [];
     this.pendingGameId = null;
     this.users = [];
+    this.videoCallStatusMapping = new Map<string, boolean>();
   }
 
   addUser(user: User) {
@@ -191,13 +197,84 @@ export class GameManager {
 
         SocketManager.getInstance().addUser(user, gameId);
 
-        SocketManager.getInstance().broadcast(
-          gameId,
+        const isVideoCallAccepted = this.videoCallStatusMapping.get(gameId);
+
+        if (isVideoCallAccepted) {
+          SocketManager.getInstance().broadcast(
+            gameId,
+            JSON.stringify({
+              type: SEND_OFFER,
+              payload: {
+                gameId,
+              },
+            }),
+          );
+        }
+      }
+
+      if (message.type === VIDEO_CALL_REQUEST) {
+        const game = this.games.find(
+          (game) => game.gameId === message.payload.gameId,
+        );
+
+        if (!game) return;
+
+        roomManager.onRequest(game, this.users, message.payload.senderSocketid);
+      }
+
+      if (message.type === VIDEO_CALL_ANSWER) {
+        console.log('video answer');
+
+        const receivingUser = this.users.find(
+          (user) => user.userId !== message.payload.senderSocketId,
+        );
+
+        const game = this.games.find(
+          (game) => game.gameId === message.payload.gameId,
+        );
+
+        if (!game) return;
+
+        console.log('result', message.payload.result);
+
+        if (message.payload.result) {
+          console.log('result is true');
+          this.videoCallStatusMapping.set(message.payload.gameId, true);
+
+          SocketManager.getInstance().broadcast(
+            message.payload.gameId,
+            JSON.stringify({
+              type: SEND_OFFER,
+              payload: {
+                gameId: message.payload.gameId,
+              },
+            }),
+          );
+        } else {
+          this.videoCallStatusMapping.set(message.payload.gameId, false);
+        }
+
+        receivingUser?.socket.send(
           JSON.stringify({
-            type: 'send_offer',
+            type: VIDEO_CALL_ANSWER,
             payload: {
-              gameId,
+              result: message.payload.result,
             },
+          }),
+        );
+      }
+
+      if (message.type === TERMINATE_CALL) {
+        const game = this.games.find(
+          (game) => game.gameId === message.payload.gameId,
+        );
+
+        if (!game) return;
+
+        SocketManager.getInstance().broadcast(
+          game.gameId,
+          JSON.stringify({
+            type: TERMINATE_CALL,
           }),
         );
       }

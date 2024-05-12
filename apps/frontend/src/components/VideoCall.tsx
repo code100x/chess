@@ -22,7 +22,7 @@ export const VideoCall: React.FC<TVideoCallProps> = ({
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [isVideoOn, setIsVideoOn] = useState<boolean>(true);
 
-  const MicIcon: LucideIcon = isMuted ? MicOff : Mic;
+  let MicIcon: LucideIcon = isMuted ? MicOff : Mic;
   const VideoIcon: LucideIcon = isVideoOn ? Video : VideoOff;
 
   return (

@@ -1,15 +1,38 @@
-import { ANSWER, ICE_CANDIDATE, OFFER } from '@repo/common/messages';
+import {
+  ANSWER,
+  ICE_CANDIDATE,
+  OFFER,
+  VIDEO_CALL_REQUEST,
+} from '@repo/common/messages';
 import { Game } from './Game';
 import { User } from './SocketManager';
 
 export class RoomManager {
-  onOffer(game: Game, users: User[], sdp: string, senderSocketid: string) {
+  private getReceivingUser(game: Game, users: User[], senderSocketid: string) {
     const receivingUserId =
       game.player1UserId === senderSocketid
         ? game.player2UserId
         : game.player1UserId;
 
-    const receivingUser = users.find((user) => user.userId === receivingUserId);
+    return users.find((user) => user.userId === receivingUserId);
+  }
+
+  onRequest(game: Game, users: User[], senderSocketid: string) {
+    const receivingUser = this.getReceivingUser(game, users, senderSocketid);
+
+    receivingUser?.socket.send(
+      JSON.stringify({
+        type: VIDEO_CALL_REQUEST,
+        payload: {
+          gameId: game.gameId,
+          senderSocketid,
+        },
+      }),
+    );
+  }
+
+  onOffer(game: Game, users: User[], sdp: string, senderSocketid: string) {
+    const receivingUser = this.getReceivingUser(game, users, senderSocketid);
 
     receivingUser?.socket.send(
       JSON.stringify({
@@ -23,12 +46,7 @@ export class RoomManager {
   }
 
   onAnswer(game: Game, users: User[], sdp: string, senderSocketid: string) {
-    const receivingUserId =
-      game.player1UserId === senderSocketid
-        ? game.player2UserId
-        : game.player1UserId;
-
-    const receivingUser = users.find((user) => user.userId === receivingUserId);
+    const receivingUser = this.getReceivingUser(game, users, senderSocketid);
 
     receivingUser?.socket.send(
       JSON.stringify({
@@ -48,12 +66,7 @@ export class RoomManager {
     candidate: any,
     type: 'sender' | 'receiver',
   ) {
-    const receivingUserId =
-      game.player1UserId === senderSocketid
-        ? game.player2UserId
-        : game.player1UserId;
-
-    const receivingUser = users.find((user) => user.userId === receivingUserId);
+    const receivingUser = this.getReceivingUser(game, users, senderSocketid);
 
     receivingUser?.socket.send(
       JSON.stringify({
