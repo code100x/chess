@@ -1,11 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import chessIcon from '../../public/chess.png';
 import computerIcon from '../../public/computer.png';
 import lightningIcon from '../../public/lightning-bolt.png';
@@ -88,11 +82,10 @@ export function PlayCard() {
         <CardTitle className="font-semibold tracking-wide flex flex-col items-center justify-center">
           <p>
             Play
-            <span className="text-green-700 font-bold pt-1"> Chess</span>
+            <span className="text-green-700 font-bold "> Chess</span>
           </p>
           <img className="pl-1 w-1/2 mt-4" src={chessIcon} alt="chess" />
         </CardTitle>
-        <CardDescription></CardDescription>
       </CardHeader>
       <CardContent className="grid gap-2 cursor-pointer shadow-md mt-1">
         {gameModeData.map((data) => {
