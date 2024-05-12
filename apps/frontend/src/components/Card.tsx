@@ -1,11 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import chessIcon from '../../public/chess.png';
 import computerIcon from '../../public/computer.png';
 import lightningIcon from '../../public/lightning-bolt.png';
@@ -13,6 +6,13 @@ import friendIcon from '../../public/friendship.png';
 import tournamentIcon from '../../public/trophy.png';
 import variantsIcon from '../../public/strategy.png';
 import GameModeComponent from './GameModeComponent';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from './ui/card';
 
 export function PlayCard() {
   const gameModeData = [
@@ -95,9 +95,9 @@ export function PlayCard() {
         <CardDescription></CardDescription>
       </CardHeader>
       <CardContent className="grid gap-2 cursor-pointer shadow-md mt-1">
-        {gameModeData.map((data) => {
-          return <GameModeComponent {...data} />;
-        })}
+        {gameModeData.map((data, index) => (
+          <GameModeComponent {...data} key={index} />
+        ))}
       </CardContent>
     </Card>
   );

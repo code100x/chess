@@ -8,6 +8,7 @@ import { RecoilRoot } from 'recoil';
 import { useUser } from '@repo/store/useUser';
 import { Loader } from './components/Loader';
 import { Layout } from './layout';
+import { Toaster } from './components/toast/toaster';
 
 function App() {
   return (
@@ -24,19 +25,19 @@ function App() {
 function AuthApp() {
   const user = useUser();
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout children={<Landing />} />} />
-        <Route
-          path="/login"
-          element={<Login />}
-        />
-        <Route
-          path="/game/:gameId"
-          element={<Layout children={<Game />} />}
-        />
-      </Routes>
-    </BrowserRouter>
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout children={<Landing />} />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/game/:gameId"
+            element={<Layout children={<Game />} />}
+          />
+        </Routes>
+      </BrowserRouter>
+      <Toaster />
+    </>
   );
 }
 

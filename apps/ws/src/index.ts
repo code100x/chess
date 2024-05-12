@@ -9,9 +9,9 @@ const wss = new WebSocketServer({ port: 8080 });
 const gameManager = new GameManager();
 
 wss.on('connection', function connection(ws, req) {
-  //@ts-ignore
-  const token: string = url.parse(req.url, true).query.token;
-  const userId = extractUserId(token);
+  if (!req.url) return;
+  const token = url.parse(req.url, true).query.token;
+  const userId = extractUserId(token as string);
   gameManager.addUser(new User(ws, userId));
 
   ws.on('close', () => {

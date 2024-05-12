@@ -10,19 +10,25 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
 import { UserAvatar } from '../components/UserAvatar';
+import {
+  ANSWER,
+  GAME_ADDED,
+  GAME_ENDED,
+  GAME_JOINED,
+  GAME_OVER,
+  GAME_TIME,
+  ICE_CANDIDATE,
+  INIT_GAME,
+  JOIN_ROOM,
+  MOVE,
+  OFFER,
+  VIDEO_CALL_REQUEST,
+  SEND_OFFER,
+  USER_TIMEOUT,
+  VIDEO_CALL_ANSWER,
+  TERMINATE_CALL,
+} from '@repo/common/messages';
 
-// TODO: Move together, there's code repetition here
-export const INIT_GAME = 'init_game';
-export const MOVE = 'move';
-export const OPPONENT_DISCONNECTED = 'opponent_disconnected';
-export const GAME_OVER = 'game_over';
-export const JOIN_ROOM = 'join_room';
-export const GAME_JOINED = 'game_joined';
-export const GAME_ALERT = 'game_alert';
-export const GAME_ADDED = 'game_added';
-export const USER_TIMEOUT = 'user_timeout';
-export const GAME_TIME = 'game_time';
-export const GAME_ENDED = 'game_ended';
 export enum Result {
   WHITE_WINS = 'WHITE_WINS',
   BLACK_WINS = 'BLACK_WINS',
@@ -33,13 +39,17 @@ export interface GameResult {
   by: string;
 }
 
-
 const GAME_TIME_MS = 10 * 60 * 1000;
 
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
-import GameEndModal from '@/components/GameEndModal';
+import GameEndModal from '../components/GameEndModal';
+import Draggable from 'react-draggable';
+import { VideoCall } from '../components/VideoCall';
+import { useToast } from '../components/toast/use-toast';
+import { ToastAction } from '../components/toast/toast';
+import { videoCallRequestStatusAtom } from '@repo/store/videoCall';
 
 const moveAudio = new Audio(MoveSound);
 
@@ -60,16 +70,26 @@ export const Game = () => {
   const [added, setAdded] = useState(false);
   const [started, setStarted] = useState(false);
   const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
-  const [result, setResult] = useState<
-    GameResult
-    | null
-  >(null);
+  const [result, setResult] = useState<GameResult | null>(null);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
+  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+  const [senderPc, setSenderPc] = useState<RTCPeerConnection>();
+  const [receiverPc, setReceiverPc] = useState<RTCPeerConnection>();
+  const [localAudioTracks, setLocalAudioTracks] =
+    useState<MediaStreamTrack | null>(null);
+  const [localVideoTracks, setLocalVideoTracks] =
+    useState<MediaStreamTrack | null>(null);
 
   const setMoves = useSetRecoilState(movesAtom);
   const userSelectedMoveIndex = useRecoilValue(userSelectedMoveIndexAtom);
   const userSelectedMoveIndexRef = useRef(userSelectedMoveIndex);
+  const [videoCallRequestStatus, setVideoCallRequestStatus] = useRecoilState(
+    videoCallRequestStatusAtom,
+  );
+
+  const { toast } = useToast();
 
   useEffect(() => {
     userSelectedMoveIndexRef.current = userSelectedMoveIndex;
@@ -85,8 +105,11 @@ export const Game = () => {
     if (!socket) {
       return;
     }
-    socket.onmessage = function (event) {
+
+    socket.onmessage = async function (event) {
       const message = JSON.parse(event.data);
+      const payload = message.payload;
+
       switch (message.type) {
         case GAME_ADDED:
           setAdded(true);
@@ -94,15 +117,14 @@ export const Game = () => {
         case INIT_GAME:
           setBoard(chess.board());
           setStarted(true);
-          navigate(`/game/${message.payload.gameId}`);
+          navigate(`/game/${payload.gameId}`);
           setGameMetadata({
-            blackPlayer: message.payload.blackPlayer,
-            whitePlayer: message.payload.whitePlayer,
+            blackPlayer: payload.blackPlayer,
+            whitePlayer: payload.whitePlayer,
           });
           break;
         case MOVE:
-          const { move, player1TimeConsumed, player2TimeConsumed } =
-            message.payload;
+          const { move, player1TimeConsumed, player2TimeConsumed } = payload;
           setPlayer1TimeConsumed(player1TimeConsumed);
           setPlayer2TimeConsumed(player2TimeConsumed);
           if (userSelectedMoveIndexRef.current !== null) {
@@ -126,46 +148,49 @@ export const Game = () => {
           }
           break;
         case GAME_OVER:
-          setResult(message.payload.result);
+          setResult(payload.result);
           break;
 
         case GAME_ENDED:
-          const wonBy = message.payload.status === 'COMPLETED' ? 
-            message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw' : 'Timeout';
+          const wonBy =
+            payload.status === 'COMPLETED'
+              ? payload.result !== 'DRAW'
+                ? 'CheckMate'
+                : 'Draw'
+              : 'Timeout';
           setResult({
-            result: message.payload.result,
+            result: payload.result,
             by: wonBy,
           });
           chess.reset();
           setMoves(() => {
-            message.payload.moves.map((curr_move: Move) => {
+            payload.moves.map((curr_move: Move) => {
               chess.move(curr_move as Move);
             });
-            return message.payload.moves;
+            return payload.moves;
           });
           setGameMetadata({
-            blackPlayer: message.payload.blackPlayer,
-            whitePlayer: message.payload.whitePlayer,
+            blackPlayer: payload.blackPlayer,
+            whitePlayer: payload.whitePlayer,
           });
-          
-        
+
           break;
 
         case USER_TIMEOUT:
-          setResult(message.payload.win);
+          setResult(payload.win);
           break;
 
         case GAME_JOINED:
           setGameMetadata({
-            blackPlayer: message.payload.blackPlayer,
-            whitePlayer: message.payload.whitePlayer,
+            blackPlayer: payload.blackPlayer,
+            whitePlayer: payload.whitePlayer,
           });
-          setPlayer1TimeConsumed(message.payload.player1TimeConsumed);
-          setPlayer2TimeConsumed(message.payload.player2TimeConsumed);
-          console.error(message.payload);
+          setPlayer1TimeConsumed(payload.player1TimeConsumed);
+          setPlayer2TimeConsumed(payload.player2TimeConsumed);
+          console.error(payload);
           setStarted(true);
 
-          message.payload.moves.map((x: Move) => {
+          payload.moves.map((x: Move) => {
             if (isPromoting(chess, x.from, x.to)) {
               chess.move({ ...x, promotion: 'q' });
             } else {
@@ -176,12 +201,248 @@ export const Game = () => {
           break;
 
         case GAME_TIME:
-          setPlayer1TimeConsumed(message.payload.player1Time);
-          setPlayer2TimeConsumed(message.payload.player2Time);
+          setPlayer1TimeConsumed(payload.player1Time);
+          setPlayer2TimeConsumed(payload.player2Time);
+          break;
+
+        case VIDEO_CALL_REQUEST:
+          if (!socket) return;
+          let accepted = false;
+          const senderName =
+            gameMetadata?.blackPlayer.id === payload.senderSocketid
+              ? gameMetadata?.blackPlayer.name
+              : gameMetadata?.whitePlayer.name;
+          toast({
+            title: `${senderName} has requested a video call`,
+            duration: 1000 * 60 * 10,
+            onDismiss: () => {
+              if (!accepted) {
+                console.log(
+                  '\nvideoCallRequestStatus inside videoc all request:',
+                  videoCallRequestStatus,
+                );
+                setVideoCallRequestStatus('Locked');
+                socket.send(
+                  JSON.stringify({
+                    type: VIDEO_CALL_ANSWER,
+                    payload: {
+                      result: false,
+                      gameId: payload.gameId,
+                      senderSocketId: user.id,
+                    },
+                  }),
+                );
+              }
+            },
+            action: (
+              <div className="space-y-2">
+                <ToastAction
+                  onClick={() => {
+                    accepted = true;
+                    setVideoCallRequestStatus(() => 'Accepted');
+                    socket.send(
+                      JSON.stringify({
+                        type: VIDEO_CALL_ANSWER,
+                        payload: {
+                          result: true,
+                          gameId: payload.gameId,
+                          senderSocketId: user.id,
+                        },
+                      }),
+                    );
+                  }}
+                  altText="Accept"
+                >
+                  Accept
+                </ToastAction>
+                <ToastAction
+                  onClick={() => {
+                    setVideoCallRequestStatus('Locked');
+                    socket.send(
+                      JSON.stringify({
+                        type: VIDEO_CALL_ANSWER,
+                        payload: {
+                          result: false,
+                          gameId: payload.gameId,
+                          senderSocketId: user.id,
+                        },
+                      }),
+                    );
+                  }}
+                  altText="Decline"
+                >
+                  Decline
+                </ToastAction>
+              </div>
+            ),
+          });
+          break;
+
+        case VIDEO_CALL_ANSWER:
+          if (message.payload.result) {
+            setVideoCallRequestStatus('Accepted');
+          } else {
+            setVideoCallRequestStatus('Locked');
+            toast({
+              title: 'Video call request declined!',
+              variant: 'destructive',
+            });
+          }
+          break;
+
+        case TERMINATE_CALL:
+          closeWebRTCConnection();
+          toast({
+            variant: 'destructive',
+            title: 'Video call terminated',
+          });
+          break;
+
+        case SEND_OFFER:
+          const pc1 = new RTCPeerConnection();
+
+          pc1.onicecandidate = async (event) => {
+            if (event.candidate) {
+              socket.send(
+                JSON.stringify({
+                  type: ICE_CANDIDATE,
+                  payload: {
+                    senderSocketid: user.id,
+                    candidate: event.candidate,
+                    type: 'sender',
+                    gameId: payload.gameId,
+                  },
+                }),
+              );
+            }
+          };
+
+          pc1.onnegotiationneeded = async () => {
+            const sdp = await pc1.createOffer();
+            await pc1.setLocalDescription(sdp);
+            socket.send(
+              JSON.stringify({
+                type: OFFER,
+                payload: {
+                  sdp,
+                  gameId: payload.gameId,
+                  senderSocketid: user.id,
+                },
+              }),
+            );
+          };
+
+          try {
+            const videoStream =
+              await window.navigator.mediaDevices.getUserMedia({
+                video: true,
+              });
+            const videoTrack = videoStream.getVideoTracks()[0];
+
+            if (!localVideoRef.current) {
+              return;
+            }
+
+            localVideoRef.current.srcObject = new MediaStream([videoTrack]);
+            localVideoRef.current.play();
+            setLocalVideoTracks(videoTrack);
+
+            try {
+              const audioStream =
+                await window.navigator.mediaDevices.getUserMedia({
+                  audio: true,
+                });
+              const audioTrack = audioStream.getAudioTracks()[0];
+              setLocalAudioTracks(audioTrack);
+              localVideoRef.current.srcObject.addTrack(audioTrack);
+              pc1.addTrack(audioTrack);
+            } catch (error) {
+              toast({
+                title: 'Mic not found',
+              });
+            }
+            pc1.addTrack(videoTrack);
+          } catch (error) {
+            console.error(error);
+            toast({
+              title: 'Camera not found',
+            });
+          }
+
+          setSenderPc(pc1);
+          break;
+
+        case OFFER:
+          const pc2 = new RTCPeerConnection();
+
+          pc2.ontrack = (event) => {
+            if (remoteVideoRef.current) {
+              remoteVideoRef.current.srcObject = new MediaStream([event.track]);
+              remoteVideoRef.current.play();
+            }
+          };
+
+          pc2.onicecandidate = async (event) => {
+            if (!event.candidate) {
+              return;
+            }
+
+            if (event.candidate) {
+              socket.send(
+                JSON.stringify({
+                  type: ICE_CANDIDATE,
+                  payload: {
+                    candidate: event.candidate,
+                    type: 'receiver',
+                    gameId: payload.gameId,
+                    senderSocketid: user.id,
+                  },
+                }),
+              );
+            }
+          };
+
+          await pc2.setRemoteDescription(payload.remoteSdp);
+          const sdp = await pc2.createAnswer();
+          await pc2.setLocalDescription(sdp);
+
+          setReceiverPc(pc2);
+
+          socket.send(
+            JSON.stringify({
+              type: ANSWER,
+              payload: {
+                gameId: payload.gameId,
+                sdp,
+                senderSocketid: user.id,
+              },
+            }),
+          );
+          break;
+
+        case ANSWER:
+          setSenderPc((pc) => {
+            pc?.setRemoteDescription(payload.remoteSdp);
+            return pc;
+          });
+          break;
+
+        case ICE_CANDIDATE:
+          if (payload.type === 'sender') {
+            setReceiverPc((pc) => {
+              pc?.addIceCandidate(payload.candidate);
+              return pc;
+            });
+          } else {
+            setSenderPc((pc) => {
+              pc?.addIceCandidate(payload.candidate);
+              return pc;
+            });
+          }
           break;
 
         default:
-          alert(message.payload.message);
+          console.log(message);
           break;
       }
     };
@@ -196,6 +457,17 @@ export const Game = () => {
         }),
       );
     }
+
+    return () => {
+      if (localVideoRef.current) {
+        localVideoRef.current.remove();
+        localVideoRef.current.srcObject = null;
+      }
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.remove();
+        remoteVideoRef.current.srcObject = null;
+      }
+    };
   }, [chess, socket]);
 
   useEffect(() => {
@@ -225,10 +497,77 @@ export const Game = () => {
     );
   };
 
+  function closeWebRTCConnection() {
+    if (senderPc) {
+      senderPc.close();
+      setSenderPc(undefined);
+    }
+    if (receiverPc) {
+      receiverPc.close();
+      setReceiverPc(undefined);
+    }
+    if (localAudioTracks) {
+      localAudioTracks.stop();
+      setLocalAudioTracks(null);
+    }
+    if (localVideoTracks) {
+      localVideoTracks.stop();
+      setLocalVideoTracks(null);
+    }
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = null;
+    }
+
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = null;
+    }
+    if (videoCallRequestStatus !== 'Locked') {
+      setVideoCallRequestStatus('Idle');
+    }
+  }
+
+  function initiateCallRequest() {
+    if (!socket) return;
+
+    setVideoCallRequestStatus('Pending');
+
+    socket.send(
+      JSON.stringify({
+        type: VIDEO_CALL_REQUEST,
+        payload: {
+          gameId,
+          senderSocketid: user.id,
+        },
+      }),
+    );
+  }
+
+  function terminateVideoCall() {
+    if (!socket) return;
+
+    socket.send(
+      JSON.stringify({
+        type: TERMINATE_CALL,
+        payload: {
+          gameId,
+          senderSocketid: user.id,
+        },
+      }),
+    );
+  }
+
+  const processVideoCall = () => {
+    if (videoCallRequestStatus === 'Idle') {
+      initiateCallRequest();
+    } else if (videoCallRequestStatus === 'Accepted') {
+      terminateVideoCall();
+    }
+  };
+
   if (!socket) return <div>Connecting...</div>;
 
   return (
-    <div className="">
+    <div className="relative overflow-x-hidden">
       {result && (
         <GameEndModal
           blackPlayer={gameMetadata?.blackPlayer}
@@ -244,9 +583,9 @@ export const Game = () => {
             : "Opponent's turn"}
         </div>
       )}
-      <div className="justify-center flex">
+      <div className="items-start justify-center flex">
         <div className="pt-2 w-full">
-          <div className="flex flex-wrap justify-around content-around w-full">
+          <div className="flex justify-around content-around w-full gap-6 max-xl:flex-wrap px-6">
             <div className="text-white">
               <div className="flex justify-center">
                 <div>
@@ -269,9 +608,7 @@ export const Game = () => {
                     )}
                   </div>
                   <div>
-                    <div
-                      className={`w-full flex justify-center text-white`}
-                    >
+                    <div className={`w-full flex justify-center text-white`}>
                       <ChessBoard
                         started={started}
                         gameId={gameId ?? ''}
@@ -304,7 +641,7 @@ export const Game = () => {
                 </div>
               </div>
             </div>
-            <div className="rounded-md bg-brown-500 overflow-auto h-[90vh] mt-10">
+            <div className="rounded-md max-h-[90vh] mt-10">
               {!started && (
                 <div className="pt-8 flex justify-center w-full">
                   {added ? (
@@ -326,13 +663,26 @@ export const Game = () => {
                   )}
                 </div>
               )}
-              <div>
-                <MovesTable />
-              </div>
+              <MovesTable
+                processVideoCall={processVideoCall}
+                started={started}
+              />
             </div>
           </div>
         </div>
       </div>
+      {videoCallRequestStatus === 'Accepted' && (
+        <Draggable bounds="parent">
+          <div className="absolute top-0 right-10">
+            <VideoCall
+              localVideoRef={localVideoRef}
+              remoteVideoRef={remoteVideoRef}
+              setLocalAudioTracks={setLocalAudioTracks}
+              setLocalVideoTracks={setLocalVideoTracks}
+            />
+          </div>
+        </Draggable>
+      )}
     </div>
   );
 };

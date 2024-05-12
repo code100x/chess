@@ -1,3 +1,5 @@
+import { cn } from '../lib/utils';
+
 export const Button = ({
   onClick,
   children,
@@ -10,7 +12,10 @@ export const Button = ({
   return (
     <button
       onClick={onClick}
-      className={`px-8 py-4 text-2xl bg-green-500 text-white font-bold rounded ${className}`}
+      className={cn(
+        'px-8 py-4 text-2xl bg-green-500 text-white font-bold rounded',
+        className,
+      )}
     >
       {children}
     </button>
