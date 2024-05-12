@@ -336,11 +336,16 @@ export class Game {
         message,
         user: {
           id: userId,
+          name: user?.name,
         },
       },
     });
 
     SocketManager.getInstance().broadcast(this.gameId, messageBroadcast);
+    SocketManager.getInstance().broadcastToSpectators(
+      this.gameId,
+      messageBroadcast,
+    );
   }
 
   getPlayer1TimeConsumed() {

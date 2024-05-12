@@ -78,7 +78,6 @@ export const Game = () => {
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageState, setMessageState] = useState('');
-  const [moveResult, setMoveResult] = useState<Move | null>(null);
 
   const setMoves = useSetRecoilState(movesAtom);
   const userSelectedMoveIndex = useRecoilValue(userSelectedMoveIndexAtom);
@@ -322,7 +321,6 @@ export const Game = () => {
                         setBoard={setBoard}
                         socket={socket}
                         board={board}
-                        setMoveResult={setMoveResult}
                       />
                     </div>
                   </div>

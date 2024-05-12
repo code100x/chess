@@ -21,6 +21,7 @@ export const JOIN_ROOM = 'join_room';
 export const GAME_JOINED = 'game_joined';
 export const GAME_ALERT = 'game_alert';
 export const GAME_ADDED = 'game_added';
+export const GAME_MESSAGE = 'game_message';
 export const USER_TIMEOUT = 'user_timeout';
 
 const GAME_TIME_MS = 10 * 60 * 1000;
@@ -31,6 +32,12 @@ export interface IMove {
   piece: string;
   startTime: number;
   endTime: number;
+}
+
+export interface Message {
+  value: string;
+  userId: string;
+  name: string;
 }
 
 const moveAudio = new Audio(MoveSound);
@@ -48,6 +55,7 @@ export const Spectate = () => {
 
   const navigate = useNavigate();
   // Todo move to store/context
+  const [messages, setMessages] = useState<Message[]>([]);
   const [chess, _setChess] = useState(new Chess());
   const [board, setBoard] = useState(chess.board());
   const [added, setAdded] = useState(false);
@@ -63,9 +71,6 @@ export const Spectate = () => {
   >(null);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
-  const [myMoveStartTime, setMyMoveStartTime] = useState<Date>(
-    new Date(Date.now()),
-  );
 
   useEffect(() => {
     if (!socket) {
@@ -79,7 +84,6 @@ export const Spectate = () => {
           setAdded(true);
           break;
         case INIT_GAME:
-          setMyMoveStartTime(message.payload.startTime);
           setBoard(chess.board());
           setStarted(true);
           navigate(`/game/${message.payload.gameId}`);
@@ -155,6 +159,17 @@ export const Spectate = () => {
             }
           });
           setBoard(chess.board());
+          break;
+
+        case GAME_MESSAGE:
+          setMessages((messages) => [
+            ...messages,
+            {
+              value: message.payload.message,
+              userId: message.payload.user.id,
+              name: message.payload.user.name,
+            },
+          ]);
           break;
 
         default:
@@ -246,8 +261,6 @@ export const Spectate = () => {
                         setBoard={setBoard}
                         socket={socket}
                         board={board}
-                        myMoveStartTime={myMoveStartTime}
-                        setMyMoveStartTime={setMyMoveStartTime}
                       />
                     </div>
                   </div>
@@ -267,6 +280,28 @@ export const Spectate = () => {
                 {moves.length > 0 ? (
                   <div className="mt-4">
                     <MovesTable />
+                    <div className="bg-brown-600 rounded-lg shadow-md p-6 mt-8 md:mt-0 h-[49%] flex flex-col justify-between overflow-hidden">
+                      <div>
+                        <h2 className="text-2xl font-bold mb-4 text-white">
+                          Chat Messages
+                        </h2>
+                        <div className="overflow-y-auto max-h-[17.5rem]">
+                          {messages.map((it, i) => (
+                            <div
+                              key={i}
+                              className={`flex justify-start mb-2 flex-col`}
+                            >
+                              <div className="text-xs">
+                                <UserAvatar name={it.name} />
+                              </div>
+                              <div className="bg-gray-300 p-2 py-1 rounded">
+                                <p>{it.value}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ) : null}
               </div>
