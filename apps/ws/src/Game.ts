@@ -50,6 +50,8 @@ export class Game {
   public result: GAME_RESULT | null = null;
   private player1TimeConsumed = 0;
   private player2TimeConsumed = 0;
+  private player1MoveStartTime = new Date(Date.now());
+  private player2MoveStartTime = new Date(Date.now());
   private startTime = new Date(Date.now());
   private lastMoveTime = new Date(Date.now());
 
@@ -118,6 +120,7 @@ export class Game {
   }
   async updateSecondPlayer(player2UserId: string) {
     this.player2UserId = player2UserId;
+    this.player1MoveStartTime = new Date(Date.now());
 
     const users = await db.user.findMany({
       where: {
@@ -220,7 +223,7 @@ export class Game {
     ]);
   }
 
-  async makeMove(user: User, move: TimingMove) {
+  async makeMove(user: User, move: Move) {
     // validate the type of move using zod
     if (this.board.turn() === 'w' && user.userId !== this.player1UserId) {
       return;
@@ -270,15 +273,34 @@ export class Game {
         (moveTimestamp.getTime() - this.lastMoveTime.getTime());
     }
 
-    await this.addMoveToDb(move);
+    const timeTaken =
+      user.userId === this.player1UserId
+        ? moveTimestamp.getTime() - this.player1MoveStartTime.getTime()
+        : moveTimestamp.getTime() - this.player2MoveStartTime.getTime();
+
+    await this.addMoveToDb({
+      ...move,
+      createdAt: moveTimestamp,
+      timeTaken,
+    });
     this.resetAbandonTimer();
     this.resetMoveTimer();
 
     this.lastMoveTime = moveTimestamp;
+    if (user.userId === this.player1UserId) {
+      this.player2MoveStartTime = moveTimestamp;
+    } else {
+      this.player1MoveStartTime = moveTimestamp;
+    }
     const moveBroadcastMessage = JSON.stringify({
       type: MOVE,
       payload: {
-        move,
+        move: {
+          ...move,
+          createAt: moveTimestamp,
+          timeTaken,
+        },
+        userId: user.userId,
         player1TimeConsumed: this.player1TimeConsumed,
         player2TimeConsumed: this.player2TimeConsumed,
       },

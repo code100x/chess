@@ -76,9 +76,9 @@ export const Game = () => {
   const [result, setResult] = useState<GameResult | null>(null);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
-  const [myMoveStartTime, setMyMoveStartTime] = useState<Date>(new Date());
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageState, setMessageState] = useState('');
+  const [moveResult, setMoveResult] = useState<Move | null>(null);
 
   const setMoves = useSetRecoilState(movesAtom);
   const userSelectedMoveIndex = useRecoilValue(userSelectedMoveIndexAtom);
@@ -105,7 +105,6 @@ export const Game = () => {
           setAdded(true);
           break;
         case INIT_GAME:
-          setMyMoveStartTime(message.payload.startTime);
           setBoard(chess.board());
           setStarted(true);
           navigate(`/game/${message.payload.gameId}`);
@@ -115,12 +114,15 @@ export const Game = () => {
           });
           break;
         case MOVE:
-          const { move, player1TimeConsumed, player2TimeConsumed } =
+          const { move, player1TimeConsumed, player2TimeConsumed, userId } =
             message.payload;
+          if (user.id === userId) {
+            setMoves((moves) => [...moves, move]);
+          }
+          // setMoves((moves) => [...moves, move]);
           setPlayer1TimeConsumed(player1TimeConsumed);
           setPlayer2TimeConsumed(player2TimeConsumed);
           if (userSelectedMoveIndexRef.current !== null) {
-            setMoves((moves) => [...moves, move]);
             return;
           }
           try {
@@ -136,24 +138,7 @@ export const Game = () => {
             moveAudio.play();
             setBoard(chess.board());
             const piece = chess.get(move.to)?.type;
-            setMoves((moves) => [
-              ...moves,
-              {
-                ...move,
-                piece,
-              },
-            ]);
-            // }
-            if (
-              chess.turn() ===
-              (user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w')
-            ) {
-              setMyMoveStartTime(move.createdAt);
-            } else {
-              setMyMoveStartTime(
-                new Date(new Date(move.createdAt).getTime() + move.timeTaken),
-              );
-            }
+            setMoves((moves) => [...moves, move]);
           } catch (error) {
             console.log('Error', error);
           }
@@ -337,8 +322,7 @@ export const Game = () => {
                         setBoard={setBoard}
                         socket={socket}
                         board={board}
-                        myMoveStartTime={myMoveStartTime}
-                        setMyMoveStartTime={setMyMoveStartTime}
+                        setMoveResult={setMoveResult}
                       />
                     </div>
                   </div>

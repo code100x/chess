@@ -53,7 +53,7 @@ export const ChessBoard = memo(({
   board,
   socket,
   setBoard,
-  myMoveStartTime,
+  setMoveResult
 }: {
   myColor: Color;
   gameId: string;
@@ -74,8 +74,7 @@ export const ChessBoard = memo(({
     color: Color;
   } | null)[][];
   socket: WebSocket;
-  myMoveStartTime: Date;
-  setMyMoveStartTime: React.Dispatch<React.SetStateAction<Date>>;
+  setMoveResult: React.Dispatch<React.SetStateAction<Move | null>>;
 }) => {
   console.log("chessboard reloaded")
   const { height, width } = useWindowSize();
@@ -322,8 +321,6 @@ export const ChessBoard = memo(({
                                 to: squareRepresentation,
                               });
                             }
-                            const timeTaken =
-                              time - new Date(myMoveStartTime).getTime();
                             const piece = chess.get(squareRepresentation)?.type;
                             if (moveResult) {
                               moveAudio.play();
@@ -331,15 +328,7 @@ export const ChessBoard = memo(({
                               if (moveResult?.captured) {
                                 captureAudio.play();
                               }
-                              setMoves((prev) => [
-                                ...prev,
-                                {
-                                  ...moveResult,
-                                  piece,
-                                  createdAt: myMoveStartTime,
-                                  timeTaken,
-                                },
-                              ]);
+                              setMoveResult(moveResult);
                               setFrom(null);
                               setLegalMoves([]);
                               if (moveResult.san.includes('#')) {
@@ -358,8 +347,8 @@ export const ChessBoard = memo(({
                                     before: moveResult?.before,
                                     after: moveResult?.after,
                                     piece,
-                                    createdAt: myMoveStartTime,
-                                    timeTaken,
+                                    // createdAt: myMoveStartTime,
+                                    // timeTaken,
                                   },
                                 },
                               }),
