@@ -37,6 +37,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
 import GameEndModal from '@/components/GameEndModal';
+import { Waitopponent } from '@/components/ui/waitopponent';
 
 const moveAudio = new Audio(MoveSound);
 
@@ -308,7 +309,7 @@ export const Game = () => {
               {!started && (
                 <div className="pt-8 flex justify-center ">
                   {added ? (
-                    <div className="text-white">Waiting</div>
+                    <div className="text-white"><Waitopponent/></div>
                   ) : (
                     gameId === 'random' && (
                       <div className="flex flex-col justify-center">
