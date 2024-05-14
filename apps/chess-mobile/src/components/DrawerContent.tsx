@@ -39,7 +39,7 @@ export const DrawerContent = (props: DrawerContentComponentProps) => {
             }
           };
 
-          const { title, drawerLabel, drawerIcon } = descriptors[route.key].options;
+          const { title, drawerLabel, drawerIcon, drawerItemStyle } = descriptors[route.key].options;
           const label =
             drawerLabel !== undefined ? drawerLabel : title !== undefined ? title : route.name;
           return (
@@ -47,6 +47,7 @@ export const DrawerContent = (props: DrawerContentComponentProps) => {
               variant={'link'}
               key={route.key}
               onPress={onPress}
+              style={drawerItemStyle}
               className={cn('my-1 flex-row justify-start gap-4', focused && 'bg-slate-700')}>
               {drawerIcon ? drawerIcon({ size: 20, focused, color: 'white' }) : null}
               {typeof label === 'string' ? (

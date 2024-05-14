@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { View } from 'react-native';
 import { Button, ChessBoardUI, Container, Text } from '~/components';
 
@@ -14,7 +15,7 @@ export default function Home() {
           className="flex-row gap-x-4 rounded-xl"
           roundClass="rounded-xl"
           size="lg"
-          onPress={() => console.log('Button pressed: GOOGLE')}>
+          onPress={() => router.push("/game")}>
           <Text className="text-xl font-bold text-white">Play Online</Text>
         </Button>
       </View>

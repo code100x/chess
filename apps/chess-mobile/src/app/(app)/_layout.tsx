@@ -36,6 +36,7 @@ export default function Layout() {
           }}
         />
         <Drawer.Screen name="details" />
+        <Drawer.Screen name="game" options={{ swipeEnabled: false, drawerItemStyle: { display: "none" } }} />
       </Drawer>
     </GestureHandlerRootView>
   );
