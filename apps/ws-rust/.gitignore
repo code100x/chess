@@ -1,0 +1,24 @@
+# Compiled files
+.target
+
+# Remove Cargo.lock from the library projects, keep it for executable projects
+# Cargo.lock
+
+# Environment configuration files
+.env
+
+# IDE and text editor folders
+/.idea/
+*.swp
+*.swo
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Temp files
+*.tmp
