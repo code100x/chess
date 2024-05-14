@@ -214,6 +214,9 @@ export const Game = () => {
 
   const getTimer = (timeConsumed: number) => {
     const timeLeftMs = GAME_TIME_MS - timeConsumed;
+    if (timeLeftMs <= 0) {
+      return <div className="text-white">Time's up!</div>;
+    }
     const minutes = Math.floor(timeLeftMs / (1000 * 60));
     const remainingSeconds = Math.floor((timeLeftMs % (1000 * 60)) / 1000);
 
@@ -237,23 +240,15 @@ export const Game = () => {
           gameResult={result}
         ></GameEndModal>
       )}
-      {started && (
-        <div className="justify-center flex pt-4 text-white">
-          {(user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w') ===
-          chess.turn()
-            ? 'Your turn'
-            : "Opponent's turn"}
-        </div>
-      )}
       <div className="justify-center flex">
         <div className="pt-2 w-full">
           <div className="flex flex-wrap justify-around content-around w-full">
             <div className="text-white">
               <div className="flex justify-center">
                 <div>
-                  <div className="mb-4">
+                  <div className="mb-2">
                     {started && (
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center  h-10 font-semibold">
                         <UserAvatar
                           name={
                             user.id === gameMetadata?.whitePlayer?.id
@@ -261,6 +256,13 @@ export const Game = () => {
                               : gameMetadata?.whitePlayer?.name ?? ''
                           }
                         />
+                       <div className="justify-center flex  text-white">
+                       {(user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w') ===
+                          chess.turn()
+                        ? 'Your turn'
+                         : "Opponent's turn"}
+                         </div>
+    
                         {getTimer(
                           user.id === gameMetadata?.whitePlayer?.id
                             ? player2TimeConsumed
@@ -287,7 +289,7 @@ export const Game = () => {
                     </div>
                   </div>
                   {started && (
-                    <div className="mt-4 flex justify-between">
+                    <div className="mt- flex justify-between items-center mt-2 h-10 font-semibold">
                       <UserAvatar
                         name={
                           user.id === gameMetadata?.blackPlayer?.id
