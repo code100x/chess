@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '@repo/store/useUser';
+import { SFUMessageType } from '@repo/common/types';
 
 const SFU_URL = import.meta.env.VITE_APP_SFU_URL ?? 'ws://localhost:8081';
 
@@ -11,7 +12,6 @@ export const useSfuSocket = () => {
   useEffect(() => {
     if (!user) return;
     const ws = new WebSocket(`${SFU_URL}?token=${user.token}`);
-
     ws.onopen = async () => {
       try {
         const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -22,15 +22,14 @@ export const useSfuSocket = () => {
       } catch (error) {
         console.error('Error accessing media devices:', error);
       }
-
-      ws.send(
-        JSON.stringify({
-          type: 'joinRoom',
-          payload: {
-            roomName: '1',
-          },
-        }),
-      );
+      setTimeout(()=>{
+        ws.send(
+          JSON.stringify({
+            type: SFUMessageType.JOIN_ROOM,
+            payload: { roomId: '1' },
+          }),
+        );
+      }, 500)
       setSocket(ws);
     };
 
@@ -43,5 +42,5 @@ export const useSfuSocket = () => {
     };
   }, [user]);
 
-  return {socket, localStream};
+  return { socket, localStream };
 };
