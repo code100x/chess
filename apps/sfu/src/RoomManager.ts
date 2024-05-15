@@ -1,189 +1,358 @@
+import {
+  IProducePayload,
+  SFUMessageType,
+  SFUServerMessageReceived,
+} from '@repo/common/types';
+import { Peer } from './Peer';
+import { Room } from './Room';
 import { WebSocket } from 'ws';
 import {
-  GAME_OVER,
-  INIT_GAME,
-  JOIN_GAME,
-  MOVE,
-  OPPONENT_DISCONNECTED,
-  JOIN_ROOM,
-  GAME_JOINED,
-  GAME_NOT_FOUND,
-  GAME_ALERT,
-  GAME_ADDED,
-  GAME_ENDED,
-} from './messages';
-import { Game, isPromoting } from './Game';
-import { db } from './db';
-import { SocketManager, User } from './SocketManager';
-import { Square } from 'chess.js';
-import { GameStatus } from '@prisma/client';
-import { Room } from './Room';
+  AppData,
+  DtlsParameters,
+  Router,
+  Worker,
+} from 'mediasoup/node/lib/types';
+import { mediaCodecs } from './config/mediaCodecs';
+import { sendMessage } from './lib/socket';
+import { createWebRtcTransport } from './lib/createWebRtcTransport';
+import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
 
-export class GameManager {
+export class RoomManager {
   private rooms: Room[];
-  private pendingRoomId: string | null;
-  private users: User[];
+  private peers: Peer[];
+  private peerRoomMapping: Map<string, Room>;
+  private worker: Worker<AppData> | null = null;
 
   constructor() {
     this.rooms = [];
-    this.pendingRoomId = null;
-    this.users = [];
+    this.peers = [];
+    this.peerRoomMapping = new Map<string, Room>();
   }
 
-  addUser(user: User) {
-    this.users.push(user);
-    this.addHandler(user);
+  addPeer(peer: Peer, worker: Worker<AppData>) {
+    
+    this.peers.push(peer);
+    
+    
+    this.worker = worker;
+    this.socketHandler(peer);
   }
 
-  removeUser(socket: WebSocket) {
-    const user = this.users.find((user) => user.socket === socket);
-    if (!user) {
-      console.error('User not found?');
+  removePeer(socket: WebSocket) {
+    const peer = this.peers.find((peer) => peer.socket === socket);
+    if (!peer) {
+      console.error('peer not found?');
       return;
     }
-    this.users = this.users.filter((user) => user.socket !== socket);
-    SocketManager.getInstance().removeUser(user);
+    this.peers = this.peers.filter((peer) => peer.socket !== socket);
+    
+    this.removePeerFromRoom(peer);
+  }
+
+  removePeerFromRoom(peer: Peer) {
+    const room = this.getRoom(peer.peerId);
+    if (!room) {
+      return;
+    }
+    if (room.peer1 && room.peer2) {
+      if (room.peer1.peerId === peer.peerId) {
+        room.peer1 = room.peer2;
+        room.peer2 = null;
+      } else {
+        room.peer2 = null;
+      }
+    } else {
+      this.removeRoom(room.roomId);
+    }
+    room.clear(peer.peerId);
+    this.peerRoomMapping.delete(peer.peerId);
   }
 
   removeRoom(roomId: string) {
     this.rooms = this.rooms.filter((r) => r.roomId !== roomId);
   }
 
-  private addHandler(user: User) {
-    user.socket.on('message', async (data) => {
-      const message = JSON.parse(data.toString());
-      if (message.type === INIT_GAME) {
-        if (this.pendingGameId) {
-          const game = this.games.find((x) => x.roomId === this.pendingGameId);
-          if (!game) {
-            console.error('Pending game not found?');
-            return;
-          }
-          if (user.userId === game.player1UserId) {
-            SocketManager.getInstance().broadcast(
-              game.roomId,
-              JSON.stringify({
-                type: GAME_ALERT,
-                payload: {
-                  message: 'Trying to Connect with yourself?',
-                },
-              }),
-            );
-            return;
-          }
-          SocketManager.getInstance().addUser(user, game.roomId);
-          await game?.updateSecondPlayer(user.userId);
-          this.pendingGameId = null;
-        } else {
-          const game = new Game(user.userId, null);
-          this.games.push(game);
-          this.pendingGameId = game.roomId;
-          SocketManager.getInstance().addUser(user, game.roomId);
-          SocketManager.getInstance().broadcast(
-            game.roomId,
-            JSON.stringify({
-              type: GAME_ADDED,
-            }),
-          );
-        }
-      }
+  getRoom(peerId: string) {
+    const room = this.peerRoomMapping.get(peerId);
+    if (!room) {
+      console.error('Could not find room');
+      return;
+    }
+    return room;
+  }
 
-      if (message.type === MOVE) {
-        const roomId = message.payload.roomId;
-        const game = this.games.find((game) => game.roomId === roomId);
-        if (game) {
-          game.makeMove(user, message.payload.move);
-          if (game.result)  {
-            this.removeGame(game.roomId);
-          }
-        }
-      }
-
-      if (message.type === JOIN_ROOM) {
-        const roomId = message.payload?.roomId;
-        if (!roomId) {
-          return;
-        }
-
-        let availableGame = this.games.find((game) => game.roomId === roomId);
-        const gameFromDb = await db.game.findUnique({
-          where: { id: roomId },
-          include: {
-            moves: {
-              orderBy: {
-                moveNumber: 'asc',
-              },
-            },
-            blackPlayer: true,
-            whitePlayer: true,
-          },
+  private async onJoinRoom(ws: WebSocket, peer: Peer, roomId: string) {
+    
+    if (!this.worker) {
+      console.error('Worker not found');
+      return;
+    }
+    let router: Router<AppData>;
+    let room = this.rooms.find((r) => r.roomId === roomId);
+    if (room) {
+      if (room.peer1 && room.peer2) {
+        sendMessage(ws, {
+          type: SFUMessageType.ROOM_FULL,
+          payload: { message: 'Cannot join room, already full' },
         });
+        return;
+      }
+      router = room.router;
+      room.addSecondPeer(peer);
+    } else {
+      router = await this.worker.createRouter({ mediaCodecs });
+      room = new Room(roomId, peer, router);
+      this.rooms.push(room);
+    }
+    this.peerRoomMapping.set(peer.peerId, room);
+    sendMessage(ws, {
+      type: SFUMessageType.JOIN_ROOM,
+      payload: { rtpCapabilities: router.rtpCapabilities },
+    });
+  }
 
-        if (!gameFromDb) {
-          user.socket.send(
-            JSON.stringify({
-              type: GAME_NOT_FOUND,
-            }),
-          );
-          return;
-        }
+  private async onCreateProducerTransport(ws: WebSocket, peerId: string) {
+    const room = this.getRoom(peerId);
+    if (!room) {
+      return;
+    }
+    try {
+      const { transport, params } = await createWebRtcTransport(room.router);
+      sendMessage(ws, {
+        type: SFUMessageType.CREATE_PRODUCER_TRANSPORT,
+        payload: { params },
+      });
+      room.addProducerTransport(transport, peerId);
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
-        if(gameFromDb.status !== GameStatus.IN_PROGRESS) {
-          user.socket.send(JSON.stringify({
-            type: GAME_ENDED,
+  private async onConnectProducerTransport(
+    ws: WebSocket,
+    peerId: string,
+    dtlsParameters: DtlsParameters,
+  ) {
+
+    
+    const transport = this.getRoom(peerId)?.getProducerTransport(peerId);
+    if (transport) {
+
+      await transport.connect({ dtlsParameters });
+
+      
+      sendMessage(ws, {
+        type: SFUMessageType.PRODUCER_CONNECTED,
+        payload: { message: 'Producer Connected' },
+      });
+    }
+  }
+  private async onConnectConsumerTransport(
+    ws: WebSocket,
+    peerId: string,
+    dtlsParameters: DtlsParameters,
+  ) {
+    const transport = this.getRoom(peerId)?.getConsumerTransport(peerId);
+    if (transport) {
+      await transport.connect({ dtlsParameters });
+      sendMessage(ws, {
+        type: SFUMessageType.CONSUMER_CONNECTED,
+        payload: { message: 'Consumer Connected' },
+      });
+    }
+  }
+
+  private async onCreateConsumerTransport(ws: WebSocket, peerId: string) {
+    const room = this.getRoom(peerId);
+    if (!room) {
+      return;
+    }
+    const { transport, params } = await createWebRtcTransport(room.router);
+    sendMessage(ws, {
+      type: SFUMessageType.CREATE_CONSUMER_TRANSPORT,
+      payload: { params },
+    });
+    room.addConsumerTransport(transport, peerId);
+  }
+
+  private onGetProducers(ws: WebSocket, peerId: string) {
+    const room = this.getRoom(peerId);
+    if (!room) {
+      return;
+    }
+    const producers = room.getProducers();
+    const producersList = producers
+      .filter(({ peerId: id }) => peerId !== id)
+      .map(({ producer }) => producer.id);
+
+    sendMessage(ws, {
+      type: SFUMessageType.GET_PRODUCERS,
+      payload: { producersList },
+    });
+  }
+
+  private async onProduce(
+    ws: WebSocket,
+    peerId: string,
+    payload: IProducePayload,
+  ) {
+    const room = this.getRoom(peerId);
+    if (!room) {
+      return;
+    }
+    const producers = room.getProducers();
+    const transport = room.getProducerTransport(peerId);
+    if (transport) {
+      const producer = await transport.produce(payload);
+      sendMessage(ws, {
+        type: SFUMessageType.PRODUCED,
+        payload: {
+          id: producer.id,
+          producersExist: !!producers && producers.length > 1,
+        },
+      });
+      room.addProducer(producer, peerId);
+      room.informConsumers(peerId);
+
+      producer.on('transportclose', () => {
+        producer.close();
+      });
+    }
+  }
+
+  private async onResume(ws: WebSocket, peerId: string, consumerId: string) {
+    const room = this.getRoom(peerId);
+    if (!room) {
+      return;
+    }
+    const consumers = room.getConsumers();
+    const consumer = consumers.find(
+      (c) => c.consumer.id === consumerId,
+    )?.consumer;
+    if (consumer) {
+      await consumer.resume();
+    }
+  }
+
+  private async onConsume(
+    ws: WebSocket,
+    peerId: string,
+    rtpCapabilities: RtpCapabilities,
+  ) {
+    const room = this.getRoom(peerId);
+    if (!room) {
+      return;
+    }
+    const producers = room.getProducers();
+    const remoteProducerId = producers.filter(
+      ({ peerId: id }) => peerId !== id,
+    )[0]?.producer.id;
+
+    if (!remoteProducerId) {
+      console.log('No Remote Producer Found');
+      return;
+    }
+    const router = room.router;
+    if (
+      router.canConsume({
+        producerId: remoteProducerId,
+        rtpCapabilities,
+      })
+    ) {
+      try {
+        const consumerTransport = room.getConsumerTransport(peerId);
+        if (consumerTransport) {
+          const consumer = await consumerTransport.consume({
+            producerId: remoteProducerId,
+            rtpCapabilities,
+            paused: true,
+          });
+
+          consumer.on('producerclose', () => {
+            sendMessage(ws, {
+              type: SFUMessageType.PRODUCER_CLOSED,
+              payload: { remoteProducerId },
+            });
+            consumerTransport.close();
+            room.removeConsumerTransport(consumerTransport.id);
+            consumer.close();
+            room.removeConsumer(consumer.id);
+          });
+
+          sendMessage(ws, {
+            type: SFUMessageType.SUBSCRIBED,
             payload: {
-              result: gameFromDb.result,
-              status: gameFromDb.status,
-              moves: gameFromDb.moves,
-              blackPlayer: {
-                id: gameFromDb.blackPlayer.id,
-                name: gameFromDb.blackPlayer.name,
-              },
-              whitePlayer: {
-                id: gameFromDb.whitePlayer.id,
-                name: gameFromDb.whitePlayer.name,
-              },
-            }
-          }));
-          return;
-        }
-
-        if (!availableGame) {
-          const game = new Game(
-            gameFromDb?.whitePlayerId!,
-            gameFromDb?.blackPlayerId!,
-            gameFromDb.id,
-            gameFromDb.startAt
-          );
-          game.seedMoves(gameFromDb?.moves || [])
-          this.games.push(game);
-          availableGame = game;
-        }
-
-        console.log(availableGame.getPlayer1TimeConsumed());
-        console.log(availableGame.getPlayer2TimeConsumed());
-
-        user.socket.send(
-          JSON.stringify({
-            type: GAME_JOINED,
-            payload: {
-              roomId,
-              moves: gameFromDb.moves,
-              blackPlayer: {
-                id: gameFromDb.blackPlayer.id,
-                name: gameFromDb.blackPlayer.name,
-              },
-              whitePlayer: {
-                id: gameFromDb.whitePlayer.id,
-                name: gameFromDb.whitePlayer.name,
-              },
-              player1TimeConsumed: availableGame.getPlayer1TimeConsumed(),
-              player2TimeConsumed: availableGame.getPlayer2TimeConsumed(),
+              producerId: remoteProducerId,
+              id: consumer.id,
+              rtpParameters: consumer.rtpParameters,
+              kind: consumer.kind,
+              type: consumer.type,
+              producerPaused: consumer.producerPaused,
             },
-          }),
-        );
+          });
+          room.addConsumer(consumer, peerId);
+        }
+      } catch (error) {
+        console.error('error', error);
+      }
+    }
+  }
 
-        SocketManager.getInstance().addUser(user, roomId);
+  private socketHandler(peer: Peer) {
+    const { socket, peerId } = peer;
+    peer.socket.on('message', async (data) => {
+      
+      const message: SFUServerMessageReceived = JSON.parse(data.toString());
+
+      
+      switch (message.type) {
+        case SFUMessageType.JOIN_ROOM: {
+          this.onJoinRoom(socket, peer, message.payload.roomId);
+          break;
+        }
+        case SFUMessageType.CREATE_PRODUCER_TRANSPORT: {
+          this.onCreateProducerTransport(socket, peerId);
+          break;
+        }
+        case SFUMessageType.CONNECT_PRODUCER_TRANSPORT: {
+          this.onConnectProducerTransport(
+            socket,
+            peerId,
+            message.payload.dtlsParameters,
+          );
+          break;
+        }
+        case SFUMessageType.PRODUCE: {
+          this.onProduce(socket, peerId, message.payload);
+          break;
+        }
+
+        case SFUMessageType.CREATE_CONSUMER_TRANSPORT: {
+          this.onCreateConsumerTransport(socket, peerId);
+          break;
+        }
+        case SFUMessageType.CONNECT_CONSUMER_TRANSPORT: {
+          this.onConnectConsumerTransport(
+            socket,
+            peerId,
+            message.payload.dtlsParameters,
+          );
+          break;
+        }
+        case SFUMessageType.GET_PRODUCERS: {
+          this.onGetProducers(socket, peerId);
+          break;
+        }
+        case SFUMessageType.RESUME: {
+          this.onResume(socket, peerId, message.payload.consumerId);
+          break;
+        }
+        case SFUMessageType.CONSUME: {
+          this.onConsume(socket, peerId, message.payload.rtpCapabilities);
+          break;
+        }
+        default:
+          break;
       }
     });
   }

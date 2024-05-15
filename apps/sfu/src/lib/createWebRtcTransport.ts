@@ -13,6 +13,14 @@ export const createWebRtcTransport = async (router: Router) => {
     preferUdp: true,
   };
   const transport = await router.createWebRtcTransport(webRtcTransport_options);
+
+  transport.on('dtlsstatechange', (dtlsState) => {
+    if (dtlsState === 'closed') {
+      console.log("closed");
+      transport.close();
+    }
+  });
+
   const { id, iceParameters, iceCandidates, dtlsParameters } = transport;
   return {
     transport,

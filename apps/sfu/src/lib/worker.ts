@@ -1,4 +1,4 @@
-process.env.DEBUG = "mediasoup*"
+
 import * as mediasoup from 'mediasoup';
 
 export const createWorker = async () => {
