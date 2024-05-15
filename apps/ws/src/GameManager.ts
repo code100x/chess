@@ -11,7 +11,7 @@ import {
   GAME_ALERT,
   GAME_ADDED,
   GAME_ENDED,
-} from './messages';
+} from '@repo/shared/messages';
 import { Game, isPromoting } from './Game';
 import { db } from './db';
 import { SocketManager, User } from './SocketManager';

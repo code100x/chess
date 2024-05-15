@@ -3,7 +3,8 @@ import {
   GAME_ENDED,
   INIT_GAME,
   MOVE,
-} from './messages';
+} from '@repo/shared/messages';
+import {MoveSchema} from '@repo/shared/zodValidation' ;
 import { db } from './db';
 import { randomUUID } from 'crypto';
 import { SocketManager, User } from './SocketManager';
@@ -209,6 +210,11 @@ export class Game {
   ) {
     
     // validate the type of move using zod
+    if(!MoveSchema.safeParse(move).success)
+      {
+        return;
+      }
+    
     if (this.board.turn() === 'w' && user.userId !== this.player1UserId) {
       return;
     }
