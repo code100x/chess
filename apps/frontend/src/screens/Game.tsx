@@ -6,7 +6,7 @@ import { Button } from '../components/Button';
 import { ChessBoard, isPromoting } from '../components/ChessBoard';
 import { useSocket } from '../hooks/useSocket';
 import { Chess, Move } from 'chess.js';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
 import { UserAvatar } from '../components/UserAvatar';
@@ -311,7 +311,7 @@ export const Game = () => {
                     <div className="text-white">Waiting</div>
                   ) : (
                     gameId === 'random' && (
-                      <>
+                      
                       <Button
                         onClick={() => {
                           socket.send(
@@ -323,12 +323,6 @@ export const Game = () => {
                       >
                         Play
                       </Button>
-                      <Link
-                        to="/sfu"
-                      >
-                        SFU
-                      </Link>
-                      </>
                     )
                   )}
                 </div>
