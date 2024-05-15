@@ -1,0 +1,8 @@
+#!/bin/sh
+. "$(dirname "$0")/husky.sh"
+
+echo 'Performing code styling, testing, and building processes before committing'
+
+yarn run lint && yarn run typecheck
+
+echo 'The code appears to meet the required standards. Proceeding with the build process.'

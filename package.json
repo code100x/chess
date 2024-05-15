@@ -5,17 +5,20 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "typecheck": "tsc --pretty --noEmit",
+    "prepare": "husky"
   },
-  "devDependencies": {
-    "@repo/eslint-config": "*",
-    "@repo/typescript-config": "*",
-    "prettier": "^3.2.5",
-    "turbo": "latest"
-  },
-  "engines": {
-    "node": ">=18"
-  },
+    "devDependencies": {
+      "@repo/eslint-config": "*",
+      "@repo/typescript-config": "*",
+      "husky": "^9.0.11",
+      "prettier": "^3.2.5",
+      "turbo": "latest"
+    },
+    "engines": {
+      "node": ">=18"
+    },
   "packageManager": "yarn@1.22.21",
   "workspaces": [
     "apps/*",
