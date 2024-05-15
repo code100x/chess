@@ -1,6 +1,6 @@
 import { Chess, Color, Move, PieceSymbol, Square } from 'chess.js';
 import { MouseEvent, memo, useEffect, useState } from 'react';
-import { MOVE } from '../screens/Game';
+import { MOVE } from '@repo/shared/messages';
 import LetterNotation from './chess-board/LetterNotation';
 import LegalMoveIndicator from './chess-board/LegalMoveIndicator';
 import ChessSquare from './chess-board/ChessSquare';
