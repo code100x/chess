@@ -311,7 +311,6 @@ export const Game = () => {
                     <div className="text-white">Waiting</div>
                   ) : (
                     gameId === 'random' && (
-                      
                       <Button
                         onClick={() => {
                           socket.send(
