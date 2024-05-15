@@ -1,48 +1,42 @@
-import { TextProps, View } from "react-native";
-import { Text as ThemedText } from './Themed';
-import { Color, PieceSymbol, Square } from "chess.js";
-import { cn } from "~/lib/utils";
-import { BoardNotation } from "./BoardNotation";
-import { FILES } from "~/constants";
-
-const Text = (props: TextProps) => {
-  return <ThemedText maxFontSizeMultiplier={1} {...props} />;
-};
+import { Color, PieceSymbol, Square } from 'chess.js';
+import { useState } from 'react';
+import { LayoutChangeEvent, View } from 'react-native';
+import { ChessBackground } from './ChessBackground';
+import { Piece } from './Piece';
 
 interface ChessBoardProps {
   board: ({
     square: Square;
     type: PieceSymbol;
     color: Color;
-  } | null)[][]
+  } | null)[][];
 }
 export const ChessBoard = ({ board }: ChessBoardProps) => {
+  const [size, setSize] = useState<number>(0);
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const { height } = event.nativeEvent.layout;
+    setSize(height / 8);
+  };
   return (
-    <View className="overflow-hidden rounded">
-      {board.map((row, i) => (
-        <View key={i} className="flex-row">
-          {row.map((square, j) => {
-            const white = (i + j) % 2 === 0;
+    <View className="overflow-hidden rounded" onLayout={handleLayout}>
+      <ChessBackground />
+      {Boolean(size) &&
+        board.map((row) =>
+          row.map((square) => {
+            if (!square) return;
+            const xAxis = square.square.at(0)!.charCodeAt(0) - 97;
+            const yAxis = 8 - parseInt(square.square.at(1)!);
             return (
-              <View
-                key={`${i}${j}`}
-                className={cn(
-                  'relative aspect-square flex-1 p-1',
-                  white ? 'bg-[#EBEDD0]' : 'bg-[#739552]'
-                )}
-              >
-                {square && <Text>{square.color}{square.type}</Text>}
-                {j === 0 && (
-                  <BoardNotation white={white} value={i + 1} />
-                )}
-                {i === board.length - 1 && (
-                  <BoardNotation white={white} value={FILES[j]} position={"bottom-right"} />
-                )}
-              </View>
-            )
-          })}
-        </View>
-      ))}
+              <Piece
+                key={square.square}
+                id={`${square.color}${square.type}`}
+                position={{ x: xAxis, y: yAxis }}
+                size={size}
+              />
+            );
+          })
+        )}
     </View>
   );
 };

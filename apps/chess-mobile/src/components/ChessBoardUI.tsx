@@ -1,63 +1,40 @@
-import { Image, TextProps, View } from 'react-native';
-import { cn } from '~/lib/utils';
-import { Text as ThemedText } from './Themed';
 import { Chess } from 'chess.js';
-import { BoardNotation } from './BoardNotation';
-import { FILES } from '~/constants';
-
-const imageUrl: Record<string, any> = {
-  'wr.png': require('~assets/pieces/wr.png'),
-  'wn.png': require('~assets/pieces/wn.png'),
-  'wb.png': require('~assets/pieces/wb.png'),
-  'wq.png': require('~assets/pieces/wq.png'),
-  'wk.png': require('~assets/pieces/wk.png'),
-  'wp.png': require('~assets/pieces/wp.png'),
-  'br.png': require('~assets/pieces/br.png'),
-  'bn.png': require('~assets/pieces/bn.png'),
-  'bb.png': require('~assets/pieces/bb.png'),
-  'bq.png': require('~assets/pieces/bq.png'),
-  'bp.png': require('~assets/pieces/bp.png'),
-  'bk.png': require('~assets/pieces/bk.png'),
-};
-
-const Text = (props: TextProps) => {
-  return <ThemedText maxFontSizeMultiplier={1} {...props} />;
-};
+import { useState } from 'react';
+import { Image, LayoutChangeEvent, View } from 'react-native';
+import { IMAGE_URL } from '~/constants';
+import { ChessBackground } from './ChessBackground';
 
 const board = new Chess().board();
 
 export const ChessBoardUI = () => {
+  const [size, setSize] = useState<number>(0);
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const { height } = event.nativeEvent.layout;
+    setSize(height / 8);
+  };
+
   return (
-    <View className="overflow-hidden rounded">
-      {board.map((row, i) => (
-        <View key={i} className="flex-row">
-          {row.map((square, j) => {
-            const white = (i + j) % 2 === 0;
-            const pieceImage = square ? `${square.color}${square.type}.png` : null;
-            return (
-              <View
-                key={`${i}${j}`}
-                className={cn(
-                  'relative aspect-square flex-1 p-1',
-                  white ? 'bg-[#EBEDD0]' : 'bg-[#739552]'
-                )}>
-                {pieceImage && (
-                  <Image
-                    source={imageUrl[pieceImage]}
-                    className="aspect-square h-full max-w-full"
-                  />
-                )}
-                {j === 0 && (
-                  <BoardNotation white={white} value={i + 1} />
-                )}
-                {i === board.length - 1 && (
-                  <BoardNotation white={white} value={FILES[j]} position={"bottom-right"} />
-                )}
-              </View>
-            );
-          })}
-        </View>
-      ))}
+    <View className="overflow-hidden rounded" onLayout={handleLayout}>
+      <ChessBackground />
+      {board.map((row, i) =>
+        row.map((square, j) => {
+          const pieceImage = square ? `${square.color}${square.type}` : null;
+          if (!pieceImage) return;
+          return (
+            <Image
+              style={{
+                height: size,
+                width: size,
+                transform: [{ translateX: j * size }, { translateY: i * size }],
+              }}
+              key={square?.square}
+              source={IMAGE_URL[pieceImage]}
+              className="absolute max-w-full "
+            />
+          );
+        })
+      )}
     </View>
   );
 };
