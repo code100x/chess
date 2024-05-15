@@ -1,43 +1,10 @@
 import { Image, TextProps, View } from 'react-native';
 import { cn } from '~/lib/utils';
 import { Text as ThemedText } from './Themed';
+import { Chess } from 'chess.js';
+import { BoardNotation } from './BoardNotation';
+import { FILES } from '~/constants';
 
-const RANKS = [1, 2, 3, 4, 5, 6, 7, 8];
-const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-const PIECE_POSITION: Record<string, string> = {
-  a1: 'wr.png',
-  b1: 'wn.png',
-  c1: 'wb.png',
-  d1: 'wq.png',
-  e1: 'wk.png',
-  f1: 'wb.png',
-  g1: 'wn.png',
-  h1: 'wr.png',
-  a2: 'wp.png',
-  b2: 'wp.png',
-  c2: 'wp.png',
-  d2: 'wp.png',
-  e2: 'wp.png',
-  f2: 'wp.png',
-  g2: 'wp.png',
-  h2: 'wp.png',
-  a8: 'br.png',
-  b8: 'bn.png',
-  c8: 'bb.png',
-  d8: 'bq.png',
-  e8: 'bk.png',
-  f8: 'bb.png',
-  g8: 'bn.png',
-  h8: 'br.png',
-  a7: 'bp.png',
-  b7: 'bp.png',
-  c7: 'bp.png',
-  d7: 'bp.png',
-  e7: 'bp.png',
-  f7: 'bp.png',
-  g7: 'bp.png',
-  h7: 'bp.png',
-};
 const imageUrl: Record<string, any> = {
   'wr.png': require('~assets/pieces/wr.png'),
   'wn.png': require('~assets/pieces/wn.png'),
@@ -57,15 +24,16 @@ const Text = (props: TextProps) => {
   return <ThemedText maxFontSizeMultiplier={1} {...props} />;
 };
 
+const board = new Chess().board();
+
 export const ChessBoardUI = () => {
   return (
     <View className="overflow-hidden rounded">
-      {RANKS.reverse().map((rank, i) => (
+      {board.map((row, i) => (
         <View key={i} className="flex-row">
-          {FILES.map((file, j) => {
-            const white = i % 2 === j % 2;
-            const position = file + rank;
-            const pieceImage = PIECE_POSITION[position];
+          {row.map((square, j) => {
+            const white = (i + j) % 2 === 0;
+            const pieceImage = square ? `${square.color}${square.type}.png` : null;
             return (
               <View
                 key={`${i}${j}`}
@@ -80,22 +48,10 @@ export const ChessBoardUI = () => {
                   />
                 )}
                 {j === 0 && (
-                  <Text
-                    className={cn(
-                      'absolute p-0.5 font-bold',
-                      !white ? 'text-[#EBEDD0]' : 'text-[#739552]'
-                    )}>
-                    {rank}
-                  </Text>
+                  <BoardNotation white={white} value={i + 1} />
                 )}
-                {i === RANKS.length - 1 && (
-                  <Text
-                    className={cn(
-                      'absolute bottom-0 right-0 p-0.5 font-bold',
-                      !white ? 'text-[#EBEDD0]' : 'text-[#739552]'
-                    )}>
-                    {file}
-                  </Text>
+                {i === board.length - 1 && (
+                  <BoardNotation white={white} value={FILES[j]} position={"bottom-right"} />
                 )}
               </View>
             );
