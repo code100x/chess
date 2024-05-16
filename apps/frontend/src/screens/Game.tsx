@@ -78,7 +78,7 @@ export const Game = () => {
 
   useEffect(() => {
     if (!user) {
-      window.location.href = '/login';
+      navigate('/login')
     }
   }, [user]);
 
