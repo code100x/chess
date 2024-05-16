@@ -7,6 +7,8 @@ import {
 import { db } from './db';
 import { randomUUID } from 'crypto';
 import { SocketManager, User } from './SocketManager';
+import { Worker } from './worker/publish';
+import { WORKER_PROCESSES } from './types/enums';
 
 type GAME_STATUS = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'TIME_UP';
 type GAME_RESULT = "WHITE_WINS" | "BLACK_WINS" | "DRAW";
@@ -250,8 +252,21 @@ export class Game {
     if (this.board.turn() === 'w') {
       this.player2TimeConsumed = this.player2TimeConsumed + (moveTimestamp.getTime() - this.lastMoveTime.getTime());
     }
-
-    await this.addMoveToDb(move, moveTimestamp);
+    //publishing the move to the worker
+    await Worker.getInstance().publishOne({
+      type: WORKER_PROCESSES.ADD_MOVE,
+      payload: {
+        from: move.from,
+        to: move.to,
+        moveNumber: this.moveCount + 1,
+        gameId: this.gameId,
+        // Todo: Fix start fen
+        startFen: this.board.fen(),
+        endFen: this.board.fen(),
+        createdAt: moveTimestamp,
+        timeTaken: moveTimestamp.getTime() - this.lastMoveTime.getTime(),
+      },
+    })
     this.resetAbandonTimer()
     this.resetMoveTimer();
 

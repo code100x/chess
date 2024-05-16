@@ -1,25 +1,24 @@
 {
-  "name": "backend1",
+  "name": "worker",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
-    "dev": "esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js --sourcemap && nodemon dist/index.js"
+    "dev": "esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js --sourcemap && node dist/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.12.1",
-    "@repo/db": "*",
-    "@types/ws": "^8.5.10",
-    "chess.js": "^1.0.0-beta.8",
+    "@types/express": "^4.17.21",
     "dotenv": "^16.4.5",
-    "jsonwebtoken": "^9.0.2",
+    "express": "^4.19.2",
     "redis": "^4.6.13",
-    "ws": "^8.16.0"
+    "zod": "^3.23.0"
   },
   "devDependencies": {
+    "@repo/db": "*",
     "@types/node": "^20.12.7",
     "nodemon": "^3.1.0",
     "prisma": "^5.12.1",
