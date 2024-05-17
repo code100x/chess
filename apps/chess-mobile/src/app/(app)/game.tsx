@@ -42,7 +42,7 @@ export default function Game() {
   return (
     <>
       <Container className="bg-slate-950">
-        <ChessBoard board={chess.board()} />
+        <ChessBoard board={chess.board()} chess={chess} />
       </Container>
       {(!isConnected || isWaiting) && <View className="absolute h-full w-full items-center justify-center bg-black/50">
         <Loading className="bg-slate-950" />

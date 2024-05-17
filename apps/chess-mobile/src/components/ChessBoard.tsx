@@ -1,8 +1,9 @@
-import { Color, PieceSymbol, Square } from 'chess.js';
+import { Chess, Color, PieceSymbol, Square } from 'chess.js';
 import { useState } from 'react';
 import { LayoutChangeEvent, View } from 'react-native';
 import { ChessBackground } from './ChessBackground';
 import { Piece } from './Piece';
+import { squareToCoordinate } from '~/lib/squareToCoordinate';
 
 interface ChessBoardProps {
   board: ({
@@ -10,8 +11,9 @@ interface ChessBoardProps {
     type: PieceSymbol;
     color: Color;
   } | null)[][];
+  chess: Chess
 }
-export const ChessBoard = ({ board }: ChessBoardProps) => {
+export const ChessBoard = ({ board, chess }: ChessBoardProps) => {
   const [size, setSize] = useState<number>(0);
 
   const handleLayout = (event: LayoutChangeEvent) => {
@@ -25,14 +27,14 @@ export const ChessBoard = ({ board }: ChessBoardProps) => {
         board.map((row) =>
           row.map((square) => {
             if (!square) return;
-            const xAxis = square.square.at(0)!.charCodeAt(0) - 97;
-            const yAxis = 8 - parseInt(square.square.at(1)!);
+            const { x, y } = squareToCoordinate(square.square);
             return (
               <Piece
                 key={square.square}
                 id={`${square.color}${square.type}`}
-                position={{ x: xAxis, y: yAxis }}
+                position={{ x, y }}
                 size={size}
+                chess={chess}
               />
             );
           })

@@ -1,22 +1,20 @@
-import { Image, TextProps } from 'react-native';
+import { Chess, Square } from 'chess.js';
+import { useCallback } from 'react';
+import { Image } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { Text as ThemedText } from './Themed';
-import { toPosition } from '~/lib/toPosition';
-import { useCallback } from 'react';
-import { Square } from 'chess.js';
 import { IMAGE_URL } from '~/constants';
+import { coordinateToSquare } from '~/lib/coordinateToSquare';
+import { squareToCoordinate } from '~/lib/squareToCoordinate';
 
-const Text = (props: TextProps) => {
-  return <ThemedText maxFontSizeMultiplier={1} {...props} />;
-};
 
 interface PieceProps {
   id: string;
   position: { x: number; y: number };
   size: number;
+  chess: Chess;
 }
-export const Piece = ({ id, position, size }: PieceProps) => {
+export const Piece = ({ id, position, size, chess }: PieceProps) => {
   const pressed = useSharedValue<boolean>(false);
   const offsetX = useSharedValue(0);
   const offsetY = useSharedValue(0);
@@ -24,7 +22,13 @@ export const Piece = ({ id, position, size }: PieceProps) => {
   const translateY = useSharedValue<number>(position.y * size);
 
   const movePiece = useCallback((from: Square, to: Square) => {
-    console.log(from, to);
+    const move = chess.moves({ verbose: true }).find(m => m.from === from && m.to === to);
+    const { x, y } = squareToCoordinate(move ? to : from);
+    translateX.value = x * size;
+    translateY.value = y * size;
+    if (move) {
+      chess.move(move);
+    }
   }, []);
 
   const pan = Gesture.Pan()
@@ -39,8 +43,8 @@ export const Piece = ({ id, position, size }: PieceProps) => {
     })
     .onFinalize(() => {
       pressed.value = false;
-      const from = toPosition({ x: offsetX.value / size, y: offsetY.value / size });
-      const to = toPosition({ x: translateX.value / size, y: translateY.value / size });
+      const from = coordinateToSquare({ x: offsetX.value / size, y: offsetY.value / size });
+      const to = coordinateToSquare({ x: translateX.value / size, y: translateY.value / size });
       runOnJS(movePiece)(from, to);
     });
 
