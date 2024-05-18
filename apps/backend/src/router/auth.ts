@@ -47,7 +47,7 @@ router.get('/logout', (req: Request, res: Response) => {
       res.status(500).json({ error: 'Failed to log out' });
     } else {
       res.clearCookie('jwt');
-      res.redirect('http://localhost:5173/');
+      res.redirect('http://localhost:5173/?status=logout');
     }
   });
 });
@@ -60,8 +60,8 @@ router.get(
 router.get(
   '/google/callback',
   passport.authenticate('google', {
-    successRedirect: CLIENT_URL,
-    failureRedirect: '/login/failed',
+    successRedirect: `${CLIENT_URL}?login=success`,
+    failureRedirect: `${CLIENT_URL}?login=failed`,
   }),
 );
 
@@ -73,8 +73,8 @@ router.get(
 router.get(
   '/github/callback',
   passport.authenticate('github', {
-    successRedirect: CLIENT_URL,
-    failureRedirect: '/login/failed',
+    successRedirect: `${CLIENT_URL}?login=success`,
+    failureRedirect: `${CLIENT_URL}?login=failed`,
   }),
 );
 
@@ -86,8 +86,8 @@ router.get(
 router.get(
   '/facebook/callback',
   passport.authenticate('facebook', {
-    successRedirect: CLIENT_URL,
-    failureRedirect: '/login/failed',
+    successRedirect: `${CLIENT_URL}?login=success`,
+    failureRedirect: `${CLIENT_URL}?login=failed`,
   }),
 );
 
