@@ -4,17 +4,19 @@ import { Image } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { IMAGE_URL } from '~/constants';
+import { useChess } from '~/contexts/chessContext';
+import { useWebSocket } from '~/contexts/wsContext';
 import { coordinateToSquare } from '~/lib/coordinateToSquare';
 import { squareToCoordinate } from '~/lib/squareToCoordinate';
-
 
 interface PieceProps {
   id: string;
   position: { x: number; y: number };
-  size: number;
-  chess: Chess;
 }
-export const Piece = ({ id, position, size, chess }: PieceProps) => {
+export const Piece = ({ id, position }: PieceProps) => {
+  const { socket } = useWebSocket();
+  const { chess, size } = useChess();
+
   const pressed = useSharedValue<boolean>(false);
   const offsetX = useSharedValue(0);
   const offsetY = useSharedValue(0);
@@ -22,12 +24,22 @@ export const Piece = ({ id, position, size, chess }: PieceProps) => {
   const translateY = useSharedValue<number>(position.y * size);
 
   const movePiece = useCallback((from: Square, to: Square) => {
-    const move = chess.moves({ verbose: true }).find(m => m.from === from && m.to === to);
+    const move = chess.moves({ verbose: true }).find((m) => m.from === from && m.to === to);
     const { x, y } = squareToCoordinate(move ? to : from);
     translateX.value = x * size;
     translateY.value = y * size;
     if (move) {
       chess.move(move);
+      if (!socket) {
+        console.log('No SOCKET:', socket);
+        return;
+      }
+      socket.send(
+        JSON.stringify({
+          type: 'move',
+          move: { from: move.from, to: move.to },
+        })
+      );
     }
   }, []);
 

@@ -3,50 +3,64 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Container, Loading, ChessBoard } from '~/components';
 import { GAME_OVER, INIT_GAME, MOVE } from '~/constants';
-import useSocket from '~/hooks/useSocket';
+import { ChessProvider, useChess } from '~/contexts/chessContext';
+import { WebSocketProvider, useWebSocket } from '~/contexts/wsContext';
 
-export default function Game() {
-  const { socket, isConnected } = useSocket();
+export function GameComponent() {
   const [isWaiting, setWaiting] = useState(true);
-  const [chess, setChess] = useState(new Chess());
-
+  const { socket, isConnected } = useWebSocket();
+  const { chess } = useChess();
   useEffect(() => {
     if (!socket) return;
 
-    socket.send(JSON.stringify({
-      type: INIT_GAME,
-    }));
+    socket.send(
+      JSON.stringify({
+        type: INIT_GAME,
+      })
+    );
 
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
       console.log(message);
       switch (message.type) {
         case INIT_GAME:
-          console.log("Game initialized");
+          console.log('Game initialized');
           setWaiting(false);
           break;
         case MOVE:
-          console.log("Move made");
+          console.log('Move made');
           const move = message.payload;
           chess.move(move);
           break;
         case GAME_OVER:
-          console.log("Game finished");
+          console.log('Game finished');
           break;
         default:
           break;
       }
-    }
+    };
   }, [socket]);
 
   return (
     <>
       <Container className="bg-slate-950">
-        <ChessBoard board={chess.board()} chess={chess} />
+        <ChessBoard />
       </Container>
-      {(!isConnected || isWaiting) && <View className="absolute h-full w-full items-center justify-center bg-black/50">
-        <Loading className="bg-slate-950" />
-      </View>}
+      {(!isConnected || isWaiting) && (
+        <View className="absolute h-full w-full items-center justify-center bg-black/50">
+          <Loading className="bg-slate-950" />
+        </View>
+      )}
     </>
+  );
+}
+
+export default function Game() {
+  return (
+    <WebSocketProvider>
+      <ChessProvider>
+        <GameComponent />
+      </ChessProvider>
+    </WebSocketProvider>
   );
 }

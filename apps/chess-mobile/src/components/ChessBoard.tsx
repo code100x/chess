@@ -4,21 +4,18 @@ import { LayoutChangeEvent, View } from 'react-native';
 import { ChessBackground } from './ChessBackground';
 import { Piece } from './Piece';
 import { squareToCoordinate } from '~/lib/squareToCoordinate';
+import { useWebSocket } from '~/contexts/wsContext';
+import { useChess } from '~/contexts/chessContext';
 
-interface ChessBoardProps {
-  board: ({
-    square: Square;
-    type: PieceSymbol;
-    color: Color;
-  } | null)[][];
-  chess: Chess
-}
-export const ChessBoard = ({ board, chess }: ChessBoardProps) => {
-  const [size, setSize] = useState<number>(0);
+interface ChessBoardProps {}
+export const ChessBoard = ({}: ChessBoardProps) => {
+  const { chess, size, changeSize } = useChess();
+
+  const board = chess.board();
 
   const handleLayout = (event: LayoutChangeEvent) => {
     const { height } = event.nativeEvent.layout;
-    setSize(height / 8);
+    changeSize(height / 8);
   };
   return (
     <View className="overflow-hidden rounded" onLayout={handleLayout}>
@@ -29,13 +26,7 @@ export const ChessBoard = ({ board, chess }: ChessBoardProps) => {
             if (!square) return;
             const { x, y } = squareToCoordinate(square.square);
             return (
-              <Piece
-                key={square.square}
-                id={`${square.color}${square.type}`}
-                position={{ x, y }}
-                size={size}
-                chess={chess}
-              />
+              <Piece key={square.square} id={`${square.color}${square.type}`} position={{ x, y }} />
             );
           })
         )}
