@@ -9,10 +9,13 @@ import { WebSocketProvider, useWebSocket } from '~/contexts/wsContext';
 export function GameComponent() {
   const [isWaiting, setWaiting] = useState(true);
   const { socket, isConnected } = useWebSocket();
-  const { chess } = useChess();
+  const { chess, updateBoard } = useChess();
   useEffect(() => {
-    if (!socket) return;
-
+    if (!socket) {
+      console.log('GameComponent: Socket is null in useEffect');
+      return;
+    }
+    console.log('GameComponent: Sending INIT_GAME message');
     socket.send(
       JSON.stringify({
         type: INIT_GAME,
@@ -21,16 +24,22 @@ export function GameComponent() {
 
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      console.log(message);
+      console.log('GameComponent: Received message', message);
       switch (message.type) {
         case INIT_GAME:
           console.log('Game initialized');
           setWaiting(false);
+          console.log(chess.board());
+          console.log(chess.turn());
+
           break;
         case MOVE:
           console.log('Move made');
           const move = message.payload;
           chess.move(move);
+          updateBoard();
+          console.log(chess.turn());
+
           break;
         case GAME_OVER:
           console.log('Game finished');

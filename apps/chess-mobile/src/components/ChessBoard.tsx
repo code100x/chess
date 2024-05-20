@@ -1,17 +1,12 @@
-import { Chess, Color, PieceSymbol, Square } from 'chess.js';
-import { useState } from 'react';
 import { LayoutChangeEvent, View } from 'react-native';
+import { useChess } from '~/contexts/chessContext';
+import { squareToCoordinate } from '~/lib/squareToCoordinate';
 import { ChessBackground } from './ChessBackground';
 import { Piece } from './Piece';
-import { squareToCoordinate } from '~/lib/squareToCoordinate';
-import { useWebSocket } from '~/contexts/wsContext';
-import { useChess } from '~/contexts/chessContext';
 
 interface ChessBoardProps {}
 export const ChessBoard = ({}: ChessBoardProps) => {
-  const { chess, size, changeSize } = useChess();
-
-  const board = chess.board();
+  const { size, changeSize, board } = useChess();
 
   const handleLayout = (event: LayoutChangeEvent) => {
     const { height } = event.nativeEvent.layout;

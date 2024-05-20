@@ -26,6 +26,7 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
   const [isConnected, setConnected] = useState(false);
 
   useEffect(() => {
+    console.log('WebSocketProvider: Initializing WebSocket...');
     const ws = new WebSocket(`${WS_URL}`);
 
     ws.onopen = () => {
@@ -41,6 +42,7 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return () => {
+      console.log('WebSocketProvider: Initializing WebSocket...');
       ws.close();
     };
   }, []);

@@ -1,5 +1,5 @@
 import { Chess, Square } from 'chess.js';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Image } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
@@ -15,7 +15,8 @@ interface PieceProps {
 }
 export const Piece = ({ id, position }: PieceProps) => {
   const { socket } = useWebSocket();
-  const { chess, size } = useChess();
+  const { chess, size, updateBoard } = useChess();
+  const [possibleMoves, setPossibleMoves] = useState<string[]>([]);
 
   const pressed = useSharedValue<boolean>(false);
   const offsetX = useSharedValue(0);
@@ -23,24 +24,38 @@ export const Piece = ({ id, position }: PieceProps) => {
   const translateX = useSharedValue<number>(position.x * size);
   const translateY = useSharedValue<number>(position.y * size);
 
-  const movePiece = useCallback((from: Square, to: Square) => {
-    const move = chess.moves({ verbose: true }).find((m) => m.from === from && m.to === to);
-    const { x, y } = squareToCoordinate(move ? to : from);
-    translateX.value = x * size;
-    translateY.value = y * size;
-    if (move) {
-      chess.move(move);
-      if (!socket) {
-        console.log('No SOCKET:', socket);
-        return;
+  const movePiece = useCallback(
+    (from: Square, to: Square) => {
+      const move = chess.moves({ verbose: true }).find((m) => m.from === from && m.to === to);
+      const { x, y } = squareToCoordinate(move ? to : from);
+      translateX.value = x * size;
+      translateY.value = y * size;
+      if (move) {
+        chess.move(move);
+        // if (!socket) {
+        //   console.log('Piece Component: No SOCKET:', socket);
+        //   return;
+        // }
+        // updateBoard();
+        // console.log(chess.turn());
+
+        // socket.send(
+        //   JSON.stringify({
+        //     type: 'move',
+        //     payload: { from: move.from, to: move.to },
+        //   })
+        // );
       }
-      socket.send(
-        JSON.stringify({
-          type: 'move',
-          move: { from: move.from, to: move.to },
-        })
-      );
-    }
+    },
+    [socket, chess, size]
+  );
+
+  const movesOption = useCallback((from: Square) => {
+    const move = chess
+      .moves({ verbose: true })
+      .filter((m) => m.from === from)
+      .map((m) => m.to);
+    setPossibleMoves(move);
   }, []);
 
   const pan = Gesture.Pan()
@@ -48,6 +63,8 @@ export const Piece = ({ id, position }: PieceProps) => {
       pressed.value = true;
       offsetX.value = translateX.value;
       offsetY.value = translateY.value;
+      const from = coordinateToSquare({ x: offsetX.value / size, y: offsetY.value / size });
+      runOnJS(movesOption)(from);
     })
     .onChange(({ translationX, translationY }) => {
       translateX.value = translationX + offsetX.value;
@@ -55,6 +72,7 @@ export const Piece = ({ id, position }: PieceProps) => {
     })
     .onFinalize(() => {
       pressed.value = false;
+      // possibleMoves.value = [];
       const from = coordinateToSquare({ x: offsetX.value / size, y: offsetY.value / size });
       const to = coordinateToSquare({ x: translateX.value / size, y: translateY.value / size });
       runOnJS(movePiece)(from, to);
@@ -64,19 +82,32 @@ export const Piece = ({ id, position }: PieceProps) => {
     zIndex: pressed.value ? 999999 : 0,
     transform: [{ translateX: translateX.value }, { translateY: translateY.value }],
   }));
+
   return (
-    <GestureDetector gesture={pan}>
-      <Animated.View
-        style={[
-          {
+    <>
+      {possibleMoves.map((m) => (
+        <Animated.View
+          key={m}
+          className="absolute bg-red-400"
+          style={{
             width: size,
             height: size,
-          },
-          animatedStyles,
-        ]}
-        className="absolute">
-        <Image source={IMAGE_URL[id]} className="h-full w-full max-w-full" />
-      </Animated.View>
-    </GestureDetector>
+          }}
+        />
+      ))}
+      <GestureDetector gesture={pan}>
+        <Animated.View
+          style={[
+            {
+              width: size,
+              height: size,
+            },
+            animatedStyles,
+          ]}
+          className="absolute">
+          <Image source={IMAGE_URL[id]} className="h-full w-full max-w-full" />
+        </Animated.View>
+      </GestureDetector>
+    </>
   );
 };
