@@ -1,13 +1,19 @@
-import { Chess, Square } from 'chess.js';
+import { Square } from 'chess.js';
 import { useCallback, useState } from 'react';
 import { Image } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { IMAGE_URL } from '~/constants';
 import { useChess } from '~/contexts/chessContext';
 import { useWebSocket } from '~/contexts/wsContext';
 import { coordinateToSquare } from '~/lib/coordinateToSquare';
 import { squareToCoordinate } from '~/lib/squareToCoordinate';
+import { PossibleMoves } from './PossibleMoves';
 
 interface PieceProps {
   id: string;
@@ -16,7 +22,7 @@ interface PieceProps {
 export const Piece = ({ id, position }: PieceProps) => {
   const { socket } = useWebSocket();
   const { chess, size, updateBoard } = useChess();
-  const [possibleMoves, setPossibleMoves] = useState<string[]>([]);
+  const [possibleMoves, setPossibleMoves] = useState<Square[]>([]);
 
   const pressed = useSharedValue<boolean>(false);
   const offsetX = useSharedValue(0);
@@ -28,8 +34,10 @@ export const Piece = ({ id, position }: PieceProps) => {
     (from: Square, to: Square) => {
       const move = chess.moves({ verbose: true }).find((m) => m.from === from && m.to === to);
       const { x, y } = squareToCoordinate(move ? to : from);
-      translateX.value = x * size;
-      translateY.value = y * size;
+      translateX.value = withTiming(x * size);
+      translateY.value = withTiming(y * size, {}, () => {
+        pressed.value = false;
+      });
       if (move) {
         chess.move(move);
         // if (!socket) {
@@ -50,7 +58,11 @@ export const Piece = ({ id, position }: PieceProps) => {
     [socket, chess, size]
   );
 
-  const movesOption = useCallback((from: Square) => {
+  const movesOption = useCallback((from?: Square) => {
+    if (!from) {
+      setPossibleMoves([]);
+      return;
+    }
     const move = chess
       .moves({ verbose: true })
       .filter((m) => m.from === from)
@@ -71,11 +83,11 @@ export const Piece = ({ id, position }: PieceProps) => {
       translateY.value = translationY + offsetY.value;
     })
     .onFinalize(() => {
-      pressed.value = false;
       // possibleMoves.value = [];
       const from = coordinateToSquare({ x: offsetX.value / size, y: offsetY.value / size });
       const to = coordinateToSquare({ x: translateX.value / size, y: translateY.value / size });
       runOnJS(movePiece)(from, to);
+      runOnJS(movesOption)();
     });
 
   const animatedStyles = useAnimatedStyle(() => ({
@@ -85,16 +97,7 @@ export const Piece = ({ id, position }: PieceProps) => {
 
   return (
     <>
-      {possibleMoves.map((m) => (
-        <Animated.View
-          key={m}
-          className="absolute bg-red-400"
-          style={{
-            width: size,
-            height: size,
-          }}
-        />
-      ))}
+      <PossibleMoves moves={possibleMoves} />
       <GestureDetector gesture={pan}>
         <Animated.View
           style={[
