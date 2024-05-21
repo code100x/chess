@@ -1,26 +1,29 @@
 import { Square } from 'chess.js';
 import { View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { useChess } from '~/contexts/chessContext';
 import { squareToCoordinate } from '~/lib/squareToCoordinate';
+import { lastmove } from '~/store/atoms/lastmove';
 
-export function PossibleMoves({ moves }: { moves: Square[] }) {
+export function RecentMoves() {
   const { size } = useChess();
-  return moves.map((m, id) => {
+  const recent = useRecoilValue(lastmove);
+
+  if (!recent) return null;
+
+  return Object.values(recent).map((m, id) => {
     const { x, y } = squareToCoordinate(m);
     return (
-      <Animated.View
-        entering={FadeIn.delay(id * 10).duration(200)}
-        exiting={FadeOut.duration(200)}
+      <View
         key={m}
         className="absolute items-center justify-center bg-yellow-400/10"
         style={{
           width: size,
           height: size,
           transform: [{ translateX: x * size }, { translateY: y * size }],
-        }}>
-        <View className="aspect-square w-1/2 rounded-full bg-black/30" />
-      </Animated.View>
+        }}
+      />
     );
   });
 }

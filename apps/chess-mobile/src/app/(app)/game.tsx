@@ -1,15 +1,18 @@
 import { Chess } from 'chess.js';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
+import { useSetRecoilState } from 'recoil';
 import { Container, Loading, ChessBoard } from '~/components';
 import { GAME_OVER, INIT_GAME, MOVE } from '~/constants';
 import { ChessProvider, useChess } from '~/contexts/chessContext';
 import { WebSocketProvider, useWebSocket } from '~/contexts/wsContext';
+import { lastmove } from '~/store/atoms/lastmove';
 
 export function GameComponent() {
   const [isWaiting, setWaiting] = useState(true);
   const { socket, isConnected } = useWebSocket();
   const { chess, updateBoard } = useChess();
+  const setRecentMove = useSetRecoilState(lastmove);
   useEffect(() => {
     if (!socket) {
       console.log('GameComponent: Socket is null in useEffect');
@@ -38,6 +41,7 @@ export function GameComponent() {
           const move = message.payload;
           chess.move(move);
           updateBoard();
+          setRecentMove({ from: move.from, to: move.to });
           console.log(chess.turn());
 
           break;
