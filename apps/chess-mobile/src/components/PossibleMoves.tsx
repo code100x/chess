@@ -1,11 +1,13 @@
-import { Square } from 'chess.js';
 import { View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { useChess } from '~/contexts/chessContext';
+import { useRecoilValue } from 'recoil';
 import { squareToCoordinate } from '~/lib/squareToCoordinate';
+import { possibleMoves, squareSize } from '~/store/atoms';
 
-export function PossibleMoves({ moves }: { moves: Square[] }) {
-  const { size } = useChess();
+export function PossibleMoves() {
+  const size = useRecoilValue(squareSize);
+  const moves = useRecoilValue(possibleMoves);
+
   return moves.map((m, id) => {
     const { x, y } = squareToCoordinate(m);
     return (

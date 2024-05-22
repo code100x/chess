@@ -1,22 +1,15 @@
 import { Square } from 'chess.js';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { Image } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { IMAGE_URL } from '~/constants';
-import { useChess } from '~/contexts/chessContext';
 import { useWebSocket } from '~/contexts/wsContext';
+import { useChess } from '~/hooks/useChess';
 import { coordinateToSquare } from '~/lib/coordinateToSquare';
 import { squareToCoordinate } from '~/lib/squareToCoordinate';
-import { PossibleMoves } from './PossibleMoves';
-import { RecentMoves } from './RecentMoves';
-import { useSetRecoilState } from 'recoil';
-import { lastmove } from '~/store/atoms/lastmove';
+import { chessState, lastmove, possibleMoves, squareSize } from '~/store/atoms';
 
 interface PieceProps {
   id: string;
@@ -24,9 +17,11 @@ interface PieceProps {
 }
 export const Piece = ({ id, position }: PieceProps) => {
   const { socket } = useWebSocket();
-  const { chess, size, updateBoard } = useChess();
-  const [possibleMoves, setPossibleMoves] = useState<Square[]>([]);
+  const { getMoves, makeMove } = useChess();
+  const chess = useRecoilValue(chessState);
+  const size = useRecoilValue(squareSize);
   const setRecentMove = useSetRecoilState(lastmove);
+  const setPossibleMoves = useSetRecoilState(possibleMoves);
 
   const pressed = useSharedValue<boolean>(false);
   const offsetX = useSharedValue(0);
@@ -36,19 +31,20 @@ export const Piece = ({ id, position }: PieceProps) => {
 
   const movePiece = useCallback(
     (from: Square, to: Square) => {
-      movesOption();
-      const move = chess.moves({ verbose: true }).find((m) => m.from === from && m.to === to);
+      const move = getMoves().find((m) => m.from === from && m.to === to);
       const { x, y } = squareToCoordinate(move ? to : from);
-      translateX.value = withTiming(x * size, { duration: 200 });
-      translateY.value = withTiming(y * size, { duration: 200 }, () => {});
+      translateX.value = x * size;
+      translateY.value = y * size;
+      movesOption();
       if (move) {
-        chess.move(move);
+        // chess.move(move);
+        makeMove(move);
         setRecentMove({ from: move.from, to: move.to });
         if (!socket) {
           console.log('Piece Component: No SOCKET:', socket);
           return;
         }
-        updateBoard();
+        // updateBoard();
         socket.send(
           JSON.stringify({
             type: 'move',
@@ -66,8 +62,7 @@ export const Piece = ({ id, position }: PieceProps) => {
         setPossibleMoves([]);
         return;
       }
-      const move = chess
-        .moves({ verbose: true })
+      const move = getMoves()
         .filter((m) => m.from === from)
         .map((m) => m.to);
       setPossibleMoves(move);
@@ -111,8 +106,6 @@ export const Piece = ({ id, position }: PieceProps) => {
   return (
     <>
       <Animated.View className="absolute z-0" style={[{ width: size, height: size }, toStyles]} />
-      <RecentMoves />
-      <PossibleMoves moves={possibleMoves} />
       <GestureDetector gesture={pan}>
         <Animated.View
           style={[

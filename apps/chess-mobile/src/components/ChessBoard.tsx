@@ -1,20 +1,26 @@
 import { LayoutChangeEvent, View } from 'react-native';
-import { useChess } from '~/contexts/chessContext';
 import { squareToCoordinate } from '~/lib/squareToCoordinate';
 import { ChessBackground } from './ChessBackground';
 import { Piece } from './Piece';
+import { PossibleMoves } from './PossibleMoves';
+import { RecentMoves } from './RecentMoves';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { boardState, squareSize } from '~/store/atoms';
 
 interface ChessBoardProps {}
 export const ChessBoard = ({}: ChessBoardProps) => {
-  const { size, changeSize, board } = useChess();
+  const board = useRecoilValue(boardState);
+  const [size, setSize] = useRecoilState(squareSize);
 
   const handleLayout = (event: LayoutChangeEvent) => {
     const { height } = event.nativeEvent.layout;
-    changeSize(height / 8);
+    setSize(height / 8);
   };
   return (
     <View className="overflow-hidden rounded" onLayout={handleLayout}>
       <ChessBackground />
+      <PossibleMoves />
+      <RecentMoves />
       {Boolean(size) &&
         board.map((row) =>
           row.map((square) => {

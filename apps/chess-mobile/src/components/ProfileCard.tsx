@@ -1,6 +1,6 @@
 import { ImageBackground, View } from 'react-native';
 import { useRecoilValue } from 'recoil';
-import { userAtom } from '~/store/atoms/user';
+import { userAtom } from '~/store/atoms';
 import { Text } from './Themed';
 
 const image = { uri: 'https://picsum.photos/seed/picsum/300/200?grayscale&blur=2' };

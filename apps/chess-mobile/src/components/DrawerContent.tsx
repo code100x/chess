@@ -5,7 +5,7 @@ import { View } from 'react-native';
 import { cn } from '~/lib/utils';
 import { Button } from './Button';
 import { useSetRecoilState } from 'recoil';
-import { storedCookie } from '~/store/atoms/cookie';
+import { storedCookie } from '~/store/atoms';
 import { ProfileCard } from './ProfileCard';
 import { Text } from './Themed';
 
@@ -39,7 +39,8 @@ export const DrawerContent = (props: DrawerContentComponentProps) => {
             }
           };
 
-          const { title, drawerLabel, drawerIcon, drawerItemStyle } = descriptors[route.key].options;
+          const { title, drawerLabel, drawerIcon, drawerItemStyle } =
+            descriptors[route.key].options;
           const label =
             drawerLabel !== undefined ? drawerLabel : title !== undefined ? title : route.name;
           return (

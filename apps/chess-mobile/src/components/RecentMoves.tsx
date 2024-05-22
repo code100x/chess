@@ -1,13 +1,10 @@
-import { Square } from 'chess.js';
-import { View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { useChess } from '~/contexts/chessContext';
+import { useRecoilValue } from 'recoil';
 import { squareToCoordinate } from '~/lib/squareToCoordinate';
-import { lastmove } from '~/store/atoms/lastmove';
+import { lastmove, squareSize } from '~/store/atoms';
 
 export function RecentMoves() {
-  const { size } = useChess();
+  const size = useRecoilValue(squareSize);
   const recent = useRecoilValue(lastmove);
 
   if (!recent) return null;
@@ -15,9 +12,11 @@ export function RecentMoves() {
   return Object.values(recent).map((m, id) => {
     const { x, y } = squareToCoordinate(m);
     return (
-      <View
+      <Animated.View
+        entering={FadeIn.duration(200)}
+        exiting={FadeOut.duration(200)}
         key={m}
-        className="absolute items-center justify-center bg-yellow-400/10"
+        className="absolute items-center justify-center bg-yellow-400/50"
         style={{
           width: size,
           height: size,

@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { Image, View } from 'react-native';
 import { useSetRecoilState } from 'recoil';
 import { BackgroundSvg, Button, Container, Loading, Logo, Text } from '~/components';
-import { storedCookie } from '~/store/atoms/cookie';
+import { storedCookie } from '~/store/atoms';
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 const signIn = async () => {

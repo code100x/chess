@@ -1,18 +1,19 @@
-import { Chess } from 'chess.js';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { useSetRecoilState } from 'recoil';
-import { Container, Loading, ChessBoard } from '~/components';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { ChessBoard, Container, Loading } from '~/components';
 import { GAME_OVER, INIT_GAME, MOVE } from '~/constants';
-import { ChessProvider, useChess } from '~/contexts/chessContext';
 import { WebSocketProvider, useWebSocket } from '~/contexts/wsContext';
-import { lastmove } from '~/store/atoms/lastmove';
+import { useChess } from '~/hooks/useChess';
+import { chessState, lastmove } from '~/store/atoms';
 
 export function GameComponent() {
   const [isWaiting, setWaiting] = useState(true);
   const { socket, isConnected } = useWebSocket();
-  const { chess, updateBoard } = useChess();
+  const chess = useRecoilValue(chessState);
+  const { makeMove } = useChess();
   const setRecentMove = useSetRecoilState(lastmove);
+
   useEffect(() => {
     if (!socket) {
       console.log('GameComponent: Socket is null in useEffect');
@@ -32,15 +33,12 @@ export function GameComponent() {
         case INIT_GAME:
           console.log('Game initialized');
           setWaiting(false);
-          console.log(chess.board());
-          console.log(chess.turn());
 
           break;
         case MOVE:
           console.log('Move made');
           const move = message.payload;
-          chess.move(move);
-          updateBoard();
+          makeMove(move);
           setRecentMove({ from: move.from, to: move.to });
           console.log(chess.turn());
 
@@ -71,9 +69,7 @@ export function GameComponent() {
 export default function Game() {
   return (
     <WebSocketProvider>
-      <ChessProvider>
-        <GameComponent />
-      </ChessProvider>
+      <GameComponent />
     </WebSocketProvider>
   );
 }
