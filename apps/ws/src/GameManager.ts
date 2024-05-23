@@ -11,6 +11,8 @@ import {
   GAME_ALERT,
   GAME_ADDED,
   GAME_ENDED,
+  TAKEBACK,
+  PROPOSE_A_TAKEBACK
 } from './messages';
 import { Game, isPromoting } from './Game';
 import { db } from './db';
@@ -97,6 +99,32 @@ export class GameManager {
           }
         }
       }
+
+      if(message.type === PROPOSE_A_TAKEBACK) {
+        const gameId = message.payload.gameId;
+        const game = this.games.find((game) => game.gameId === gameId);
+        if (game) {
+          const opponentUserId: string | null = game.player1UserId === user.userId ? game.player2UserId : game.player1UserId;
+          SocketManager.getInstance().makeAPropose(
+            game.gameId,
+            opponentUserId, 
+            JSON.stringify({
+              type: PROPOSE_A_TAKEBACK,
+              payload: {
+                message: `Opponent is proposing a takeback. Do you agree?`,
+              },
+            }),
+          );
+        }
+      }
+
+      if(message.type === TAKEBACK) {
+        const gameId = message.payload.gameId;
+        const game = this.games.find((game) => game.gameId === gameId);
+        if (game) {
+          game.takebackMove(user);
+        }
+      } 
 
       if (message.type === JOIN_ROOM) {
         const gameId = message.payload?.gameId;

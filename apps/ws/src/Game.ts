@@ -3,6 +3,7 @@ import {
   GAME_ENDED,
   INIT_GAME,
   MOVE,
+  TAKEBACK
 } from './messages';
 import { db } from './db';
 import { randomUUID } from 'crypto';
@@ -177,7 +178,7 @@ export class Game {
   }
 
   async addMoveToDb(move: Move, moveTimestamp: Date) {
-    
+
     await db.$transaction([
       db.move.create({
         data: {
@@ -207,7 +208,7 @@ export class Game {
     user: User,
     move: Move
   ) {
-    
+
     // validate the type of move using zod
     if (this.board.turn() === 'w' && user.userId !== this.player1UserId) {
       return;
@@ -267,15 +268,93 @@ export class Game {
 
     if (this.board.isGameOver()) {
       const result = this.board.isDraw()
-      ? 'DRAW'
-      : this.board.turn() === 'b'
-        ? 'WHITE_WINS'
-        : 'BLACK_WINS';
-        
+        ? 'DRAW'
+        : this.board.turn() === 'b'
+          ? 'WHITE_WINS'
+          : 'BLACK_WINS';
+
       this.endGame("COMPLETED", result);
     }
 
     this.moveCount++;
+  }
+
+  async removeMoveFromdb() {
+    let takenbackMove: any = null;
+    await db.$transaction(async (tx) => {
+      takenbackMove = await tx.move.delete({
+        where: {
+          gameId_moveNumber: {
+            gameId: this.gameId,
+            moveNumber: this.moveCount,
+          }
+        },
+      });
+
+      await tx.game.update({
+        data: {
+          currentFen: this.board.fen(),
+        },
+        where: {
+          id: this.gameId,
+        },
+      });
+
+      this.moveCount--;
+    })
+    return takenbackMove
+  }
+
+  async takebackMove(user: User) {
+    if (this.result) {
+      console.error(`User ${user.userId} is making a takeback post game completion`);
+      return;
+    }
+
+    if (this.board.turn() === 'w' && user.userId !== this.player1UserId) {
+      return;
+    }
+
+    if (this.board.turn() === 'b' && user.userId !== this.player2UserId) {
+      return;
+    }
+
+    const move: Move | null = this.board.undo();
+    if (!move) {
+      return;
+    }
+
+    const takenbackMove = await this.removeMoveFromdb();
+    if(!takenbackMove) return
+
+    if (this.board.turn() === 'w') {
+      this.player1TimeConsumed -= takenbackMove.timeTaken;
+    } else {
+      this.player2TimeConsumed -= takenbackMove.timeTaken;
+    }
+
+    const lastMove: any = await db.move.findFirst({
+      where: {
+        gameId: this.gameId,
+        moveNumber: this.moveCount,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    if(!lastMove) this.lastMoveTime = this.startTime;
+    else this.lastMoveTime = lastMove.createdAt;
+
+    this.resetAbandonTimer();
+    this.resetMoveTimer();
+
+    SocketManager.getInstance().broadcast(
+      this.gameId,
+      JSON.stringify({
+        type: TAKEBACK,
+        payload: { lastMove, player1TimeConsumed: this.player1TimeConsumed, player2TimeConsumed: this.player2TimeConsumed },
+      }),
+    );
   }
 
   getPlayer1TimeConsumed() {
@@ -358,7 +437,7 @@ export class Game {
   }
 
   clearMoveTimer() {
-    if(this.moveTimer) clearTimeout(this.moveTimer);
+    if (this.moveTimer) clearTimeout(this.moveTimer);
   }
 
   setTimer(timer: NodeJS.Timeout) {

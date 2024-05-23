@@ -15,3 +15,8 @@ export const userSelectedMoveIndexAtom = atom<number | null>({
     key: 'userSelectedMoveIndex',
     default: null
 });
+
+export const takebackAlertAtom = atom<string | null>({
+    key: 'takebackAlert',
+    default: null
+})

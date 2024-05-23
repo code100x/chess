@@ -52,6 +52,17 @@ export class SocketManager {
     });
   }
 
+  makeAPropose(roomId: string, opponentUserId: string | null, message: string) {
+    const users = this.interestedSockets.get(roomId);
+    if (!users) {
+      console.error('No users in room?');
+      return;
+    }
+
+    const opponentUser = users.find(u => u.userId === opponentUserId);
+    opponentUser?.socket.send(message);
+  }
+
   removeUser(user: User) {
     const roomId = this.userRoomMappping.get(user.userId);
     if (!roomId) {
