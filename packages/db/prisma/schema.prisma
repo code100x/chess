@@ -58,6 +58,7 @@ model Move {
   san         String?   
 
   @@index([gameId])
+  @@unique([gameId, moveNumber])
 }
 
 enum GameStatus {

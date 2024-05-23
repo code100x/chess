@@ -1,6 +1,7 @@
 import {
   isBoardFlippedAtom,
   movesAtom,
+  takebackAlertAtom,
   userSelectedMoveIndexAtom,
 } from '@repo/store/chessBoard';
 import { Move } from 'chess.js';
@@ -14,9 +15,16 @@ import {
   ChevronLeft,
   ChevronRight,
   RefreshCw,
+  Undo,
+  Check,
+  X
 } from 'lucide-react';
+import { useSocket } from '../hooks/useSocket';
+import { PROPOSE_A_TAKEBACK, TAKEBACK } from '../screens/Game';
 
-const MovesTable = () => {
+const MovesTable = ({ gameId, userId }: { gameId: string; userId: string; }) => {
+  const socket = useSocket()
+  const [takebackAlert, settakebackAlert] = useRecoilState(takebackAlertAtom);
   const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
     userSelectedMoveIndexAtom,
   );
@@ -81,75 +89,114 @@ const MovesTable = () => {
         })}
       </div>
       {moves.length ? (
-        <div className="w-full p-2 bg-[#20211D] flex items-center justify-between">
-          <div className="flex gap-4">
-            <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
-              {<HandshakeIcon size={16} />}
-              Draw
-            </button>
-            <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
-              {<FlagIcon size={16} />}
-              Resign
-            </button>
-          </div>
-          <div className="flex gap-1">
-            <button
-              onClick={() => {
-                setUserSelectedMoveIndex(0);
-              }}
-              disabled={userSelectedMoveIndex === 0}
-              className="hover:text-white"
-              title="Go to first move"
-            >
-              <ChevronFirst />
-            </button>
+        <>
+          <div className="w-full p-2 bg-[#20211D] flex items-center justify-between">
+            <div className="flex gap-4">
+              <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1" onClick={() => {
+                socket?.send(
+                  JSON.stringify({
+                    type: PROPOSE_A_TAKEBACK,
+                    payload: {
+                      gameId,
+                      userId
+                    }
+                  }));
+              }}>
+                {<Undo size={16} />}
+                Takeback
+              </button>
+              <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
+                {<HandshakeIcon size={16} />}
+                Draw
+              </button>
+              <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
+                {<FlagIcon size={16} />}
+                Resign
+              </button>
+            </div>
+            <div className="flex gap-1">
+              <button
+                onClick={() => {
+                  setUserSelectedMoveIndex(0);
+                }}
+                disabled={userSelectedMoveIndex === 0}
+                className="hover:text-white"
+                title="Go to first move"
+              >
+                <ChevronFirst />
+              </button>
 
-            <button
-              onClick={() => {
-                setUserSelectedMoveIndex((prev) =>
-                  prev !== null ? prev - 1 : moves.length - 2,
-                );
-              }}
-              disabled={userSelectedMoveIndex === 0}
-              className="hover:text-white"
-            >
-              <ChevronLeft />
-            </button>
-            <button
-              onClick={() => {
-                setUserSelectedMoveIndex((prev) =>
-                  prev !== null
-                    ? prev + 1 >= moves.length - 1
-                      ? moves.length - 1
-                      : prev + 1
-                    : null,
-                );
-              }}
-              disabled={userSelectedMoveIndex === null}
-              className="hover:text-white"
-            >
-              <ChevronRight />
-            </button>
-            <button
-              onClick={() => {
-                setUserSelectedMoveIndex(moves.length - 1);
-              }}
-              disabled={userSelectedMoveIndex === null}
-              className="hover:text-white"
-              title="Go to last move"
-            >
-              <ChevronLast />
-            </button>
-            <button
-              onClick={() => {
-                setIsFlipped((prev) => !prev);
-              }}
-              title="Flip the board"
-            >
-              <RefreshCw className="hover:text-white mx-2" size={18} />
-            </button>
+              <button
+                onClick={() => {
+                  setUserSelectedMoveIndex((prev) =>
+                    prev !== null ? prev - 1 : moves.length - 2,
+                  );
+                }}
+                disabled={userSelectedMoveIndex === 0}
+                className="hover:text-white"
+              >
+                <ChevronLeft />
+              </button>
+              <button
+                onClick={() => {
+                  setUserSelectedMoveIndex((prev) =>
+                    prev !== null
+                      ? prev + 1 >= moves.length - 1
+                        ? moves.length - 1
+                        : prev + 1
+                      : null,
+                  );
+                }}
+                disabled={userSelectedMoveIndex === null}
+                className="hover:text-white"
+              >
+                <ChevronRight />
+              </button>
+              <button
+                onClick={() => {
+                  setUserSelectedMoveIndex(moves.length - 1);
+                }}
+                disabled={userSelectedMoveIndex === null}
+                className="hover:text-white"
+                title="Go to last move"
+              >
+                <ChevronLast />
+              </button>
+              <button
+                onClick={() => {
+                  setIsFlipped((prev) => !prev);
+                }}
+                title="Flip the board"
+              >
+                <RefreshCw className="hover:text-white mx-2" size={18} />
+              </button>
+            </div>
           </div>
-        </div>
+          {takebackAlert &&
+            <div className="flex items-center justify-center mt-4">
+              <div className="flex items-center justify-center bg-green-500 text-white w-8 h-8 rounded-full mr-2 cursor-pointer
+" onClick={() => {
+                  socket?.send(JSON.stringify({
+                    type: TAKEBACK,
+                    payload: {
+                      gameId,
+                      userId
+                    }
+                  }));
+                  settakebackAlert(null)
+                }}>
+                <Check />
+              </div>
+              <div className="text-white mx-2">{takebackAlert}</div>
+              <div className="flex items-center justify-center bg-red-500 text-white w-8 h-8 rounded-full ml-2 cursor-pointer
+" onClick={() => {
+                  settakebackAlert(null)
+                }}>
+                <X />
+              </div>
+            </div>
+          }
+        </>
       ) : null}
     </div>
   );

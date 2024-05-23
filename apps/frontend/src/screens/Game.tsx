@@ -23,6 +23,8 @@ export const GAME_ADDED = 'game_added';
 export const USER_TIMEOUT = 'user_timeout';
 export const GAME_TIME = 'game_time';
 export const GAME_ENDED = 'game_ended';
+export const PROPOSE_A_TAKEBACK = 'propose_a_takeback';
+export const TAKEBACK = 'takeback';
 export enum Result {
   WHITE_WINS = 'WHITE_WINS',
   BLACK_WINS = 'BLACK_WINS',
@@ -38,7 +40,7 @@ const GAME_TIME_MS = 10 * 60 * 1000;
 
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
-import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
+import { movesAtom, takebackAlertAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
 import GameEndModal from '@/components/GameEndModal';
 import { Waitopponent } from '@/components/ui/waitopponent';
 
@@ -67,7 +69,7 @@ export const Game = () => {
   >(null);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
-
+  const settakebackAlert = useSetRecoilState(takebackAlertAtom);
   const setMoves = useSetRecoilState(movesAtom);
   const userSelectedMoveIndex = useRecoilValue(userSelectedMoveIndexAtom);
   const userSelectedMoveIndexRef = useRef(userSelectedMoveIndex);
@@ -125,6 +127,17 @@ export const Game = () => {
           } catch (error) {
             console.log('Error', error);
           }
+          break;
+        case PROPOSE_A_TAKEBACK:
+          settakebackAlert(message.payload.message);
+          break;
+        case TAKEBACK:
+          const { lastMove, player1TimeConsumed: p1, player2TimeConsumed: p2 } = message.payload;
+          setPlayer1TimeConsumed(p1);
+          setPlayer2TimeConsumed(p2);
+          setMoves((moves) => moves.slice(0, moves.length - 1));
+          if(!lastMove) chess.reset()
+          else chess.load(lastMove.after)
           break;
         case GAME_OVER:
           setResult(message.payload.result);
@@ -328,7 +341,7 @@ export const Game = () => {
                 </div>
               )}
               <div>
-                <MovesTable />
+                <MovesTable gameId={gameId ?? ''} userId={user.id}/>
               </div>
             </div>
           </div>
