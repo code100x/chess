@@ -1,83 +1,72 @@
 import { useUser } from '@repo/store/useUser';
 import { useSfu } from '../hooks/useSfu';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const Meet = () => {
-  
   const user = useUser();
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
   // consumers videos ref
 
-  const {roomId} = useParams();
+  const { roomId } = useParams();
 
   useEffect(() => {
-    if(!user) {
+    if (!user) {
       navigate('/login');
     }
-  },[user]);
+  }, [user]);
 
-  const {
-    videoProducer,
-    audioProducer,
-    consumers,
-  } = useSfu(roomId!, user);
-
+  const { videoProducer, audioProducer, consumers } = useSfu(roomId!, user);
 
   useEffect(() => {
     if (!videoRef.current) return;
     const stream = new MediaStream();
-    if(videoProducer && videoProducer.track) {
+    if (videoProducer && videoProducer.track) {
       stream.addTrack(videoProducer.track);
     }
-    if(audioProducer && audioProducer.track) {
+    if (audioProducer && audioProducer.track) {
       stream.addTrack(audioProducer.track);
     }
     videoRef.current.srcObject = stream;
-  }, [videoProducer,audioProducer]);
+  }, [videoProducer, audioProducer]);
 
   if (!user) {
     return <div>Redirecting to Login ... </div>;
   }
 
   return (
-    <div>
-      <h1>Meeting</h1>
-      <div>
-        <h2>Producer</h2>
-          <VideoPlayer
-            videoTrack={videoProducer ? videoProducer.track : null}
-            audioTrack={audioProducer ? audioProducer.track : null}
-            onPause={() => {
-              audioProducer?.pause();
-              videoProducer?.pause();
-            }}
-            onPlay={() => {
-              videoProducer?.resume();
-              audioProducer?.resume();
-            }}
-          />
-      </div>
-      <div>
-        <h2>Consumers</h2>
-        {consumers.map((consumer, index) => (
-          console.log('CONSUMER in here', consumer),
-          <div key={consumer.id}>
-            <p>Consumer {index + 1} is active</p>
+    <div className="flex flex-col h-screen p-4">
+      <header className="p-4 mb-4 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Meeting</h1>
+      </header>
+      <div className="flex-1 flex-row">
+        {[
+          { type: 'Producer', track: videoProducer, audio: audioProducer },
+          ...consumers.map((consumer, index) => ({
+            type: `Consumer ${index + 1}`,
+            track: consumer.videoConsumer,
+            audio: consumer.audioConsumer,
+          })),
+        ].map((user, index) => (
+          <div
+            key={index}
+            className="p-2 rounded-md shadow-md flex flex-col items-center w-80"
+          >
             <VideoPlayer
-              videoTrack={consumer.videoConsumer ? consumer.videoConsumer.track : null}
-              audioTrack={consumer.audioConsumer ? consumer.audioConsumer.track : null}
+              videoTrack={user.track ? user.track.track : null}
+              audioTrack={user.audio ? user.audio.track : null}
               onPause={() => {
-                consumer.audioConsumer?.pause();
-                consumer.videoConsumer?.pause();
+                user.audio?.pause();
+                user.track?.pause();
               }}
               onPlay={() => {
-                consumer.audioConsumer?.resume();
-                consumer.videoConsumer?.resume();
+                user.track?.resume();
+                user.audio?.resume();
               }}
             />
+            <p className="text-white mt-2">{user.type}</p>
           </div>
         ))}
       </div>
@@ -106,14 +95,14 @@ const VideoPlayer: React.FC<{
       videoRef.current.onplay = props.onPlay;
       videoRef.current.onpause = props.onPause;
     }
-  });
+  }, [props.audioTrack, props.videoTrack, props.onPlay, props.onPause]);
 
   return (
-    <div className="flex flex-col items-center justify-center mt-10">
+    <div className="flex flex-col items-center justify-center">
       <video
         ref={videoRef}
-        className="w-full max-w-2xl"
-        autoPlay={true}
+        className="w-50 rounded-md shadow-md"
+        autoPlay
         controls
       >
         Your browser does not support the video tag.
@@ -121,5 +110,6 @@ const VideoPlayer: React.FC<{
     </div>
   );
 };
+
 
 export default Meet;

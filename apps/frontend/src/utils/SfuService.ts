@@ -4,28 +4,32 @@ import {
   Producer,
   Transport,
 } from 'mediasoup-client/lib/types';
-import MessageDispatcher from './MessageDispatcher';
+import SfuMessageDispatcher from './SfuMessageDispatcher';
 import { EventEmitter } from 'events';
-import { User } from '../../../../packages/store/src/atoms/user';
+import { User } from "@repo/store/user";
+import { ClientMessageType, CustomAppData, RoomErrorPayload, ServerMessage, ServerMessageType, WebRtcConnectResponsePayload, WebRtcConsumerResponsePayload, WebRtcNewProducerPayload, WebRtcProducerResponsePayload, WebRtcTransportPayload, WebRtcUserDisconnectedPayload } from '@repo/common/sfu';
+
+const SFU_URL = import.meta.env.VITE_APP_SFU_URL ?? 'ws://localhost:8081';
+
 
 export interface UserConsumer {
   id: string;
-  videoConsumer: Consumer<{userId: string}> | null;
-  audioConsumer: Consumer<{userId: string}> | null;
+  videoConsumer: Consumer<CustomAppData> | null;
+  audioConsumer: Consumer<CustomAppData> | null;
 }
 
 export class SfuService extends EventEmitter {
   roomId: string;
   webSocket: WebSocket;
   device: Device;
-  senderTransport: Transport<{userId: string}> | null;
-  receiverTransport: Transport<{userId: string}> | null;
-  videoProducer: Producer<{userId: string}> | null;
-  audioProducer: Producer<{userId: string}> | null;
+  senderTransport: Transport<CustomAppData> | null;
+  receiverTransport: Transport<CustomAppData> | null;
+  videoProducer: Producer<CustomAppData> | null;
+  audioProducer: Producer<CustomAppData> | null;
   producersToConsume: {id: string, userId: string}[];
   consumers: Map<string, UserConsumer>;
   user: { id: string; token: string; name: string };
-  messageDispatcher: MessageDispatcher;
+  sfuMessageDispatcher: SfuMessageDispatcher;
 
 
   constructor(
@@ -34,7 +38,7 @@ export class SfuService extends EventEmitter {
   ) {
     super();
     this.roomId = roomId;
-    this.webSocket = new WebSocket(`ws://localhost:8081?token=${user.token}`);
+    this.webSocket = new WebSocket(`${SFU_URL}?token=${user.token}`);
     this.device = new Device();
     this.senderTransport = null;
     this.receiverTransport = null;
@@ -42,7 +46,7 @@ export class SfuService extends EventEmitter {
     this.audioProducer = null;
     this.consumers = new Map();
     this.user = user;
-    this.messageDispatcher = new MessageDispatcher();
+    this.sfuMessageDispatcher = new SfuMessageDispatcher();
     this.producersToConsume = [];
     this.addHandlers();
   }
@@ -54,23 +58,21 @@ export class SfuService extends EventEmitter {
 
   addHandlers() {
     this.webSocket.onmessage = (event) => {
-      this.messageDispatcher.dispatch(event);
+      this.sfuMessageDispatcher.dispatch(event);
     };
     this.webSocket.onopen = () => {
       console.log('Connected to the server');
-      this.webSocket.send(
-        JSON.stringify({
-          type: 'JOIN_ROOM',
-          payload: {
-            roomId: this.roomId,
-          },
-        }),
-      );
+      sendMessage(this.webSocket, {
+        type: ServerMessageType.JOIN_ROOM,
+        payload: {
+          roomId: this.roomId,
+        },
+      });
     };
 
-    this.messageDispatcher.registerHandler(
-      'WEBRTC_TRANSPORT',
-      async (payload) => {
+    this.sfuMessageDispatcher.registerHandler(
+      ClientMessageType.WEBRTC_TRANSPORT_INITIALIZE, 
+      async (payload: WebRtcTransportPayload) => {
         const { id, iceParameters, iceCandidates, dtlsParameters } =
           payload.sender;
 
@@ -107,23 +109,22 @@ export class SfuService extends EventEmitter {
       },
     );
 
-    this.messageDispatcher.registerHandler("ROOM_ERROR", (payload) => {
+    this.sfuMessageDispatcher.registerHandler(ClientMessageType.ROOM_ERROR, async (payload: RoomErrorPayload) => {
       console.error("Room error", payload.message);
     });
 
 
 
-    this.messageDispatcher.registerHandler(
-      'WEBRTC_NEW_PRODUCER',
-      async (payload) => {
+    this.sfuMessageDispatcher.registerHandler(
+      ClientMessageType.WEBRTC_NEW_PRODUCER,
+      async (payload: WebRtcNewProducerPayload) => {
         try {
-          console.log('New producer to consume', payload.producerId);
           this.producersToConsume.push({
             id: payload.producerId,
             userId: payload.userId,
           });
           const consumer = await this.createSingleConsumer({
-            id: payload.producerId,
+            producerId: payload.producerId,
             userId: payload.userId,
           });
           const consumerUserId = consumer.appData.userId as string;
@@ -147,9 +148,9 @@ export class SfuService extends EventEmitter {
       },
     );
 
-    this.messageDispatcher.registerHandler(
-      'WEBRTC_USER_DISCONNECTED',
-      (payload) => {
+    this.sfuMessageDispatcher.registerHandler(
+      ClientMessageType.WEBRTC_USER_DISCONNECTED,
+      async (payload: WebRtcUserDisconnectedPayload) => {
         const userId = payload.userId as string;
         const userConsumer = this.consumers.get(userId);
 
@@ -223,20 +224,17 @@ export class SfuService extends EventEmitter {
       async ({ dtlsParameters }, callback, errback) => {
         // Here we must communicate our local parameters to our remote transport.
         try {
-          this.webSocket.send(
-            JSON.stringify({
-              type: 'WEBRTC_CONNECT',
-              payload: {
-                transportId: this.senderTransport!.id,
-                dtlsParameters,
-              },
-            }),
-          );
-
+          sendMessage(this.webSocket, {
+            type: ServerMessageType.WEBRTC_CONNECT,
+            payload: {
+              transportId: this.senderTransport!.id,
+              dtlsParameters,
+            },
+          });
           // Done in the server, tell our transport.
-          const deregisterHandler = this.messageDispatcher.registerHandler(
-            'WEBRTC_CONNECT_RESPONSE',
-            (payload: Record<string, any>) => {
+          const deregisterHandler = this.sfuMessageDispatcher.registerHandler(
+            ClientMessageType.WEBRTC_TRANSPORT_CONNECT_RESPONSE,
+            async (payload: WebRtcConnectResponsePayload) => {
               if (payload.transportId === this.senderTransport!.id) {
                 if(payload.success === true) {
                   callback();
@@ -258,26 +256,24 @@ export class SfuService extends EventEmitter {
       'produce',
       async ({ kind, rtpParameters, appData }, callback, errback) => {  
         try {
-          this.webSocket.send(
-            JSON.stringify({
-              type: 'WEBRTC_PRODUCER',
-              payload: {
-                transportId: this.senderTransport!.id,
-                kind,
-                rtpParameters,
-                appData: {
-                  ...appData,
-                  userId: this.user.id,
-                },
+          sendMessage(this.webSocket, {
+            type: ServerMessageType.WEBRTC_PRODUCER,
+            payload: {
+              transportId: this.senderTransport!.id,
+              kind,
+              rtpParameters,
+              appData: {
+                ...appData,
+                userId: this.user.id,
               },
-            }),
-          );
-          const deregisterHandler = this.messageDispatcher.registerHandler(
-            'WEBRTC_PRODUCER_RESPONSE',
-            (payload: Record<string, any>) => {
+            },
+          });
+          const deregisterHandler = this.sfuMessageDispatcher.registerHandler(
+            ClientMessageType.WEBRTC_PRODUCER_RESPONSE,
+            async (payload: WebRtcProducerResponsePayload) => {
               if (payload.transportId === this.senderTransport!.id) {
                 if(payload.success) {
-                  callback({ id: payload.producerId });
+                  callback({ id: payload.producerId! });
                 } else {
                   errback(new Error('Failed to create producer'));
                 }
@@ -300,21 +296,19 @@ export class SfuService extends EventEmitter {
     this.receiverTransport!.on(
       'connect',
       async ({ dtlsParameters }, callback, errback) => {
-        // Here we must communicate our local parameters to our remote transport.
+        // Here we must communicate our local parameters to our remote transport
         try {
-          this.webSocket.send(
-            JSON.stringify({
-              type: 'WEBRTC_CONNECT',
-              payload: {
-                transportId: this.receiverTransport!.id,
-                dtlsParameters,
-              },
-            }),
-          );
+          sendMessage(this.webSocket, {
+            type: ServerMessageType.WEBRTC_CONNECT,
+            payload: {
+              transportId: this.receiverTransport!.id,
+              dtlsParameters,
+            },
+          });
           // Done in the server, tell our transport.
-          const deregisterHandler = this.messageDispatcher.registerHandler(
-            'WEBRTC_CONNECT_RESPONSE',
-            (payload: Record<string, any>) => {
+          const deregisterHandler = this.sfuMessageDispatcher.registerHandler(
+            ClientMessageType.WEBRTC_TRANSPORT_CONNECT_RESPONSE,
+            async (payload: WebRtcConnectResponsePayload) => {
               if (payload.transportId === this.receiverTransport!.id) {
                 if(payload.success === true) {
                   callback();
@@ -324,7 +318,7 @@ export class SfuService extends EventEmitter {
                 deregisterHandler();
               }
             },
-          );
+          );      
         } catch (error) {
           // Something was wrong in server side.
           errback(error as Error);
@@ -357,15 +351,18 @@ export class SfuService extends EventEmitter {
           videoGoogleStartBitrate: 1000,
         },
       };
-      const videoProducer = await this.senderTransport.produce({
-        ...params,
-        track: videoTrack,
-        appData: {
-          userId: this.user.id,
-        },
-      });
-
-      this.videoProducer = videoProducer;
+      try {
+        const videoProducer = await this.senderTransport.produce({
+          ...params,
+          track: videoTrack,
+          appData: {
+            userId: this.user.id,
+          },
+        });
+        this.videoProducer = videoProducer;
+      } catch(err) {
+        console.error('Error creating video producer', err);
+      }
       
       try {
         const audioProducer = await this.senderTransport.produce({
@@ -377,7 +374,7 @@ export class SfuService extends EventEmitter {
         });
         this.audioProducer = audioProducer;
       } catch (error) {
-        console.log('Error creating audio producer', error);
+        console.error('Error creating audio producer', error);
       }
 
       return {
@@ -385,7 +382,7 @@ export class SfuService extends EventEmitter {
         audioProducer: this.audioProducer,
       };
     } catch (error) {
-      console.log('Error creating producer', error);
+      console.error('Error creating producer', error);
       return {
         videoProducer: this.videoProducer,
         audioProducer: this.audioProducer,
@@ -397,29 +394,38 @@ export class SfuService extends EventEmitter {
     if (!this.receiverTransport) {
       throw new Error('Receiver transport is not created');
     }
-    console.log("PRODUCERS TO CONSUME", this.producersToConsume);
     const consumersPromises = this.producersToConsume.map(
       async (producerInfo) => {
         try {
-          const consumer = await this.createSingleConsumer(producerInfo);
-          return consumer;
+          const consumer = await this.createSingleConsumer({
+            producerId: producerInfo.id,
+            userId: producerInfo.userId,
+          });
+          return {
+            userId: producerInfo.userId,
+            consumer,
+          };
         } catch(error) {
           console.error(`Error creating consumer for ${producerInfo.userId}`, error);
-          return null;
+          return {
+            userId: producerInfo.userId,
+            consumer: null,
+          };
         }
       },
     );
 
     const allConsumers = await Promise.all(consumersPromises);
 
-    allConsumers.forEach((consumer) => {
+    allConsumers.forEach((consumerInfo) => {
+
+      const {userId, consumer} = consumerInfo;
 
       if(!consumer) {
-        console.log('Consumer is null');
-        return;
+        console.error(`Consumer for ${userId} is Not created`);
       }
 
-      const consumerUserId = consumer.appData.userId as string;
+      const consumerUserId = userId;
 
       const userConsumer = this.consumers.get(consumerUserId) ?? {
         id: consumerUserId,
@@ -427,10 +433,12 @@ export class SfuService extends EventEmitter {
         audioConsumer: null,
       };
 
-      if (consumer.kind == 'audio') {
-        userConsumer.audioConsumer = consumer;
-      } else {
-        userConsumer.videoConsumer = consumer;
+      if(consumer) {
+        if (consumer.kind == 'audio') {
+          userConsumer.audioConsumer = consumer;
+        } else {
+          userConsumer.videoConsumer = consumer;
+        }
       }
 
       this.consumers.set(consumerUserId, userConsumer);
@@ -439,27 +447,24 @@ export class SfuService extends EventEmitter {
     return this.consumers.values();
   };
 
-  createSingleConsumer = async ({id, userId} : {id: string,userId:string}) : Promise<Consumer<{userId: string}>> => {
-    console.log("Creating consumer for producer", id, userId);
-    const consumer = new Promise<Consumer<{userId: string}>>((resolve, reject) => {
-      this.webSocket.send(
-        JSON.stringify({
-          type: 'WEBRTC_CONSUMER',
-          payload: {
-            transportId: this.receiverTransport!.id,
-            producerId: id,
-            rtpCapabilities: this.device.rtpCapabilities,
-          },
-        }),
-      );
+  createSingleConsumer = async ({producerId, userId} : {producerId: string,userId:string}) : Promise<Consumer<CustomAppData>> => {
+    const consumer = new Promise<Consumer<CustomAppData>>((resolve, reject) => {
+      sendMessage(this.webSocket, {
+        type: ServerMessageType.WEBRTC_CONSUMER,
+        payload: {
+          transportId: this.receiverTransport!.id,
+          producerId: producerId,
+          rtpCapabilities: this.device.rtpCapabilities,
+        },
+      });
 
-      const deregisterHandler = this.messageDispatcher.registerHandler(
-        'WEBRTC_CONSUMER_RESPONSE',
-        async (payload: Record<string, any>) => {
+      const deregisterHandler = this.sfuMessageDispatcher.registerHandler(
+        ClientMessageType.WEBRTC_CONSUMER_RESPONSE,
+        async (payload: WebRtcConsumerResponsePayload) => {
           try {
-            if (payload.transportId === this.receiverTransport!.id && payload.producerId === id) {
-              if(!payload.success) {
-                reject(new Error('Failed to create consumer'));
+            if (payload.transportId === this.receiverTransport!.id && payload.producerId === producerId) {
+              if(!payload.success || !payload.consumerId || !payload.rtpParameters || !payload.kind) {
+                throw new Error('Failed to create consumer');
               }
               const consumer = await this.receiverTransport!.consume({
                 id: payload.consumerId,
@@ -471,14 +476,12 @@ export class SfuService extends EventEmitter {
                 },
               });
               // send ack to sever for resuming consumer on server side 
-              this.webSocket.send(
-                JSON.stringify({
-                  type: 'WEBRTC_RESUME_CONSUMER',
-                  payload: {
-                    consumerId: consumer.id,
-                  },
-                }),
-              );
+              sendMessage(this.webSocket, {
+                type: ServerMessageType.WEBRTC_RESUME_CONSUMER,
+                payload: {
+                  consumerId: consumer.id,
+                },
+              });
               deregisterHandler();
               resolve(consumer);
             }
@@ -490,10 +493,14 @@ export class SfuService extends EventEmitter {
       );
 
       setTimeout(() => {
-        reject(new Error('Consumer creation timeout for ' + id));
+        reject(new Error('Consumer creation timeout for ' + producerId + 'for ' + userId));
         deregisterHandler();
       },10000);
     });
     return consumer;
   };
+}
+
+function sendMessage(ws: WebSocket, message: ServerMessage) {
+  ws.send(JSON.stringify(message));
 }

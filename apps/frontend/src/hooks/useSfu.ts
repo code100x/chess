@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { SfuService, UserConsumer } from '../utils/SfuService';
 import { Producer } from 'mediasoup-client/lib/types';
-import { User } from '../../../../packages/store/src/atoms/user';
+import { User } from '@repo/store/user';
+import { CustomAppData } from '@repo/common/sfu';
 
 export const useSfu = (
   roomId: string,
@@ -9,8 +10,8 @@ export const useSfu = (
 ) => {
 
   const sfuService = useRef<SfuService | null>(null);
-  const [videoProducer, setVideoProducer] = useState<Producer>();
-  const [audioProducer, setAudioProducer] = useState<Producer>();
+  const [videoProducer, setVideoProducer] = useState<Producer<CustomAppData>>();
+  const [audioProducer, setAudioProducer] = useState<Producer<CustomAppData>>();
   const [consumers, setConsumers] = useState<UserConsumer[]>([]);
 
   const handleNewConsumer = (consumer: UserConsumer) => {
@@ -49,7 +50,6 @@ export const useSfu = (
 
     return () => {
       if (sfuService.current) {
-        console.log('CALLED CLOSE');
         sfuService.current.cleanUp();
         sfuService.current.off(SfuService.NEW_CONSUMER_EVENT, handleNewConsumer);
         sfuService.current.off(SfuService.CONSUMER_CLOSED_EVENT, handleConsumerClosed);

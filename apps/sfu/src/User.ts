@@ -3,6 +3,7 @@ import Room from "./Room";
 import { WebSocket } from "ws";
 import { randomUUID } from 'crypto';
 import RoomManager from "./RoomManager";
+import { ServerMessageType } from "@repo/common/sfu";
 
 
 class User {
@@ -22,12 +23,11 @@ class User {
       this.ws.on('message', async (data) => {
         const message = JSON.parse(data.toString());
         switch (message.type) {
-          case 'JOIN_ROOM':
+          case ServerMessageType.JOIN_ROOM:
             const roomId = message.payload.roomId;
             const roomManager = RoomManager.getInstance();
             const room = await roomManager.getOrCreateRoom(roomId);
             room.addPeer(this);
-            console.log(`User ${this.id} joined room ${roomId}`);
             break;
         }
       });
