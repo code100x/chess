@@ -5,9 +5,7 @@ import {createWorker} from 'mediasoup';
 import { MediaKind } from 'mediasoup/node/lib/RtpParameters';
 import User from './User';
 import { cpus } from 'os';
-import { Router } from 'mediasoup/node/lib/Router';
 import { Worker } from 'mediasoup/node/lib/Worker';
-import { AppData } from 'mediasoup/node/lib/types';
 
 
 const wss = new WebSocketServer({ port: 8081 });

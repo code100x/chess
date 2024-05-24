@@ -1,4 +1,4 @@
-import {DtlsParameters,RtpParameters,AppData,RtpCapabilities} from "mediasoup-client/lib/types";
+import {DtlsParameters,RtpParameters,AppData,RtpCapabilities} from "mediasoup/node/lib/types";
 
 export interface CustomAppData extends AppData {
     userId: string;
