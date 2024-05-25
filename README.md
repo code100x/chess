@@ -25,6 +25,11 @@ Let's keep it simple
     - Postgres DB Credentials
     - Github/Google Auth credentials
  - npm install
+ - Initialize prisma
+    - cd packages/db
+    - npm install
+    - npx prisma generate
+    - npx prisma migrate dev
  - Start ws server
     - cd apps/ws
     - npm run dev
