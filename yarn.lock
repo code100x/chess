@@ -2701,32 +2701,32 @@
   dependencies:
     web-streams-polyfill "^3.1.1"
 
-"@repo/db@*", "@repo/db@file:C:\\Users\\tanmay kule\\Desktop\\harkiratChess\\packages\\db":
+"@repo/db@*", "@repo/db@file:C:\\Users\\tanmay kule\\Downloads\\chess\\packages\\db":
   version "1.0.0"
   resolved "file:packages/db"
   dependencies:
     "@prisma/client" "5.12.1"
     prisma "^5.12.0"
 
-"@repo/eslint-config@*", "@repo/eslint-config@file:C:\\Users\\tanmay kule\\Desktop\\harkiratChess\\packages\\eslint-config":
+"@repo/eslint-config@*", "@repo/eslint-config@file:C:\\Users\\tanmay kule\\Downloads\\chess\\packages\\eslint-config":
   version "0.0.0"
   resolved "file:packages/eslint-config"
 
-"@repo/store@*", "@repo/store@file:C:\\Users\\tanmay kule\\Desktop\\harkiratChess\\packages\\store":
+"@repo/store@*", "@repo/store@file:C:\\Users\\tanmay kule\\Downloads\\chess\\packages\\store":
   version "1.0.0"
   resolved "file:packages/store"
   dependencies:
     recoil "^0.7.7"
 
-"@repo/tailwind-config@file:C:\\Users\\tanmay kule\\Desktop\\harkiratChess\\packages\\tailwind-Config":
+"@repo/tailwind-config@file:C:\\Users\\tanmay kule\\Downloads\\chess\\packages\\tailwind-Config":
   version "0.0.0"
   resolved "file:packages/tailwind-Config"
 
-"@repo/typescript-config@*", "@repo/typescript-config@file:C:\\Users\\tanmay kule\\Desktop\\harkiratChess\\packages\\typescript-config":
+"@repo/typescript-config@*", "@repo/typescript-config@file:C:\\Users\\tanmay kule\\Downloads\\chess\\packages\\typescript-config":
   version "0.0.0"
   resolved "file:packages/typescript-config"
 
-"@repo/ui@*", "@repo/ui@file:C:\\Users\\tanmay kule\\Desktop\\harkiratChess\\packages\\ui":
+"@repo/ui@*", "@repo/ui@file:C:\\Users\\tanmay kule\\Downloads\\chess\\packages\\ui":
   version "0.0.0"
   resolved "file:packages/ui"
   dependencies:
@@ -3963,7 +3963,7 @@ babel-preset-fbjs@^3.4.0:
     "@babel/plugin-transform-template-literals" "^7.0.0"
     babel-plugin-syntax-trailing-function-commas "^7.0.0-beta.0"
 
-"backend@file:C:\\Users\\tanmay kule\\Desktop\\harkiratChess\\apps\\backend":
+"backend@file:C:\\Users\\tanmay kule\\Downloads\\chess\\apps\\backend":
   version "1.0.0"
   resolved "file:apps/backend"
   dependencies:
@@ -3979,7 +3979,7 @@ babel-preset-fbjs@^3.4.0:
     passport-github2 "^0.1.12"
     passport-google-oauth20 "^2.0.0"
 
-"backend1@file:C:\\Users\\tanmay kule\\Desktop\\harkiratChess\\apps\\ws":
+"backend1@file:C:\\Users\\tanmay kule\\Downloads\\chess\\apps\\ws":
   version "1.0.0"
   resolved "file:apps/ws"
   dependencies:
@@ -4355,7 +4355,7 @@ chess.js@^1.0.0-beta.8:
   resolved "https://registry.npmjs.org/chess.js/-/chess.js-1.0.0-beta.8.tgz"
   integrity sha512-UngzUMXmexcQaQA/UEJuJj5vatEy34awYMD5YMOp/FW3HM7lqspp7ymYs5JAmquDq0WROtURRfSffoa/vrCCyw==
 
-"chessnative@file:C:\\Users\\tanmay kule\\Desktop\\harkiratChess\\apps\\native":
+"chessnative@file:C:\\Users\\tanmay kule\\Downloads\\chess\\apps\\native":
   version "1.0.0"
   resolved "file:apps/native"
   dependencies:
@@ -6163,7 +6163,7 @@ fresh@0.5.2:
   resolved "https://registry.npmjs.org/fresh/-/fresh-0.5.2.tgz"
   integrity sha512-zJ2mQYM18rEFOudeV4GShTGIQ7RbzA7ozbU9I/XBpm7kqgMywgmylMwXHxZJmkVoYkna9d2pVXVXPdYTP9ej8Q==
 
-"frontend@file:C:\\Users\\tanmay kule\\Desktop\\harkiratChess\\apps\\frontend":
+"frontend@file:C:\\Users\\tanmay kule\\Downloads\\chess\\apps\\frontend":
   version "0.0.0"
   resolved "file:apps/frontend"
   dependencies:
