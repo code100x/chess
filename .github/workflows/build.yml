@@ -1,0 +1,23 @@
+name: Build Pipeline
+
+on: 
+    pull_request: 
+        branches: 
+            - main
+
+jobs:
+    Build:
+        name: Build the project
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js 
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+
+            - name: Install Dependecies
+              run: npm install
+            
+            - name: Run Build
+              run: npm run build
