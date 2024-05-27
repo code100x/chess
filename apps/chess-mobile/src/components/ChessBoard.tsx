@@ -5,11 +5,12 @@ import { Piece } from './Piece';
 import { PossibleMoves } from './PossibleMoves';
 import { RecentMoves } from './RecentMoves';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { boardState, squareSize } from '~/store/atoms';
+import { boardState, isFlipped, squareSize } from '~/store/atoms';
 
 interface ChessBoardProps {}
 export const ChessBoard = ({}: ChessBoardProps) => {
   const board = useRecoilValue(boardState);
+  const flipped = useRecoilValue(isFlipped);
   const [size, setSize] = useRecoilState(squareSize);
 
   const handleLayout = (event: LayoutChangeEvent) => {
@@ -22,12 +23,18 @@ export const ChessBoard = ({}: ChessBoardProps) => {
       <PossibleMoves />
       <RecentMoves />
       {Boolean(size) &&
-        board.map((row) =>
-          row.map((square) => {
+        (flipped ? board.slice().reverse() : board).map((row) =>
+          (flipped ? row.slice().reverse() : row).map((square) => {
             if (!square) return;
             const { x, y } = squareToCoordinate(square.square);
+            const xAxis = flipped ? 7 - x : x;
+            const yAxis = flipped ? 7 - y : y;
             return (
-              <Piece key={square.square} id={`${square.color}${square.type}`} position={{ x, y }} />
+              <Piece
+                key={square.square}
+                id={`${square.color}${square.type}`}
+                position={{ x: xAxis, y: yAxis }}
+              />
             );
           })
         )}

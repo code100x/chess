@@ -1,4 +1,6 @@
 import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
+import { useRecoilValue } from 'recoil';
+import { userAtom } from '~/store/atoms';
 
 const WS_URL = process.env.EXPO_PUBLIC_WS_URL;
 
@@ -24,10 +26,11 @@ export function useWebSocket() {
 export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [isConnected, setConnected] = useState(false);
+  const user = useRecoilValue(userAtom);
 
   useEffect(() => {
     console.log('WebSocketProvider: Initializing WebSocket...');
-    const ws = new WebSocket(`${WS_URL}`);
+    const ws = new WebSocket(`${WS_URL}?token=${user?.token}`);
 
     ws.onopen = () => {
       console.log('CONNECTED');

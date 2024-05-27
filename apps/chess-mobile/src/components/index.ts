@@ -9,6 +9,7 @@ export * from './DrawerContent';
 export * from './Loading';
 export * from './Logo';
 export * from './Piece';
+export * from './PlayerDetail';
 export * from './ProfileCard';
 export * from './SplashScreen';
 export * from './Themed';

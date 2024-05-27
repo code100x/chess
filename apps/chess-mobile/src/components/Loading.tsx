@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import { StyleSheet, Text, View, ViewProps } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -8,7 +8,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import { cn } from '~/lib/utils';
 
-export const Loading = ({ className, ...props }: ViewProps) => {
+interface LoadingProps extends ViewProps {
+  message?: string;
+}
+export const Loading = memo(({ className, message, ...props }: LoadingProps) => {
   const deg = useSharedValue(0);
   const animatedStyles = useAnimatedStyle(() => ({
     transform: [{ rotate: `${deg.value * 360}deg` }],
@@ -29,7 +32,7 @@ export const Loading = ({ className, ...props }: ViewProps) => {
         style={[animatedStyles]}
         className="relative aspect-square w-6 rounded-full border border-b-0 border-r-0 border-slate-300"
       />
-      <Text className="text-slate-300">Loading...</Text>
+      <Text className="text-slate-300">{message ?? 'Loading...'}</Text>
     </View>
   );
-};
+});
