@@ -17,6 +17,10 @@ Let's keep it simple
 4. Separate Websocket servers for handling real time games
 5. Redis for storing all moves of a game in a queue
 
+## Using Docker
+
+   - docker compose up 
+
 ## Setting it up locally
 
  - Clone the repo

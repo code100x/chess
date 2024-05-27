@@ -1,0 +1,73 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres
+    container_name: postgres_container
+    networks:
+      - my_network
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+  frontend:
+    image: chess:frontend_img
+    volumes:
+      - ./apps/frontend:/root/apps/frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend_img
+    container_name: frontend_container
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5173:5173"
+    networks:
+      - my_network
+
+  backend:
+    image: chess:backend_img
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend_img
+    container_name: backend_container
+    volumes:
+      - ./apps/backend:/root/apps/backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    networks:
+      - my_network
+
+  websocket:
+    image: ws_img:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ws_img
+    container_name: ws_container
+    volumes:
+      - ./apps/ws:/root/apps/ws
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - my_network
+
+networks:
+  my_network:

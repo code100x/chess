@@ -5,7 +5,13 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "db:migrate": "cd ./packages/db && npm run db:dev",
+    "backend:dev": "cd ./apps/backend && npm run dev",
+    "start:backend": "npm run db:migrate && npm run backend:dev",
+    "ws:dev":"cd ./apps/ws && npm run dev",
+    "start:ws":"npm run db:migrate && npm run ws:dev",
+    "start:frontend":"cd ./apps/frontend && npm run dev"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",

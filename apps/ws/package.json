@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js --sourcemap && nodemon dist/index.js"
+    "dev": "nodemon",
+    "build": "npx esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js --sourcemap",
+    "start": "node dist/index.js",
+    "build-and-start": "npm run build && npm run start"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +25,7 @@
     "nodemon": "^3.1.0",
     "prisma": "^5.12.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "esbuild": "0.21.3"
   }
 }
