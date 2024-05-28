@@ -1,11 +1,12 @@
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useRecoilValue } from 'recoil';
-import { squareToCoordinate } from '~/lib/squareToCoordinate';
-import { lastmove, squareSize } from '~/store/atoms';
+import { useCoordinates } from '~/hooks/useCoordinates';
+import { isFlipped, lastmove, squareSize } from '~/store/atoms';
 
 export function RecentMoves() {
   const size = useRecoilValue(squareSize);
   const recent = useRecoilValue(lastmove);
+  const { squareToCoordinate } = useCoordinates();
 
   if (!recent) return null;
 
@@ -20,7 +21,7 @@ export function RecentMoves() {
         style={{
           width: size,
           height: size,
-          transform: [{ translateX: x * size }, { translateY: y * size }],
+          transform: [{ translateX: x }, { translateY: y }],
         }}
       />
     );

@@ -1,12 +1,13 @@
 import { View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useRecoilValue } from 'recoil';
-import { squareToCoordinate } from '~/lib/squareToCoordinate';
-import { possibleMoves, squareSize } from '~/store/atoms';
+import { useCoordinates } from '~/hooks/useCoordinates';
+import { isFlipped, possibleMoves, squareSize } from '~/store/atoms';
 
 export function PossibleMoves() {
   const size = useRecoilValue(squareSize);
   const moves = useRecoilValue(possibleMoves);
+  const { squareToCoordinate } = useCoordinates();
 
   return moves.map((m, id) => {
     const { x, y } = squareToCoordinate(m);
@@ -19,7 +20,7 @@ export function PossibleMoves() {
         style={{
           width: size,
           height: size,
-          transform: [{ translateX: x * size }, { translateY: y * size }],
+          transform: [{ translateX: x }, { translateY: y }],
         }}>
         <View className="aspect-square w-1/2 rounded-full bg-black/30" />
       </Animated.View>

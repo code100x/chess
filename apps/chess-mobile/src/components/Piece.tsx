@@ -7,9 +7,8 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { IMAGE_URL } from '~/constants';
 import { useWebSocket } from '~/contexts/wsContext';
 import { useChess } from '~/hooks/useChess';
-import { coordinateToSquare } from '~/lib/coordinateToSquare';
-import { squareToCoordinate } from '~/lib/squareToCoordinate';
-import { chessState, lastmove, possibleMoves, squareSize } from '~/store/atoms';
+import { useCoordinates } from '~/hooks/useCoordinates';
+import { chessState, isFlipped, lastmove, possibleMoves, squareSize } from '~/store/atoms';
 
 interface PieceProps {
   id: string;
@@ -22,19 +21,20 @@ export const Piece = ({ id, position }: PieceProps) => {
   const size = useRecoilValue(squareSize);
   const setRecentMove = useSetRecoilState(lastmove);
   const setPossibleMoves = useSetRecoilState(possibleMoves);
+  const { coordinateToSquare, squareToCoordinate } = useCoordinates();
 
   const pressed = useSharedValue<boolean>(false);
   const offsetX = useSharedValue(0);
   const offsetY = useSharedValue(0);
-  const translateX = useSharedValue<number>(position.x * size);
-  const translateY = useSharedValue<number>(position.y * size);
+  const translateX = useSharedValue<number>(position.x);
+  const translateY = useSharedValue<number>(position.y);
 
   const movePiece = useCallback(
     (from: Square, to: Square) => {
       const move = getMoves().find((m) => m.from === from && m.to === to);
       const { x, y } = squareToCoordinate(move ? to : from);
-      translateX.value = x * size;
-      translateY.value = y * size;
+      translateX.value = x;
+      translateY.value = y;
       movesOption();
       if (move) {
         // chess.move(move);
@@ -75,7 +75,7 @@ export const Piece = ({ id, position }: PieceProps) => {
       pressed.value = true;
       offsetX.value = translateX.value;
       offsetY.value = translateY.value;
-      const from = coordinateToSquare({ x: offsetX.value / size, y: offsetY.value / size });
+      const from = coordinateToSquare({ x: offsetX.value, y: offsetY.value });
       runOnJS(movesOption)(from);
     })
     .onChange(({ translationX, translationY }) => {
@@ -84,8 +84,8 @@ export const Piece = ({ id, position }: PieceProps) => {
     })
     .onFinalize(() => {
       pressed.value = false;
-      const from = coordinateToSquare({ x: offsetX.value / size, y: offsetY.value / size });
-      const to = coordinateToSquare({ x: translateX.value / size, y: translateY.value / size });
+      const from = coordinateToSquare({ x: offsetX.value, y: offsetY.value });
+      const to = coordinateToSquare({ x: translateX.value, y: translateY.value });
       runOnJS(movePiece)(from, to);
     });
 
@@ -95,11 +95,11 @@ export const Piece = ({ id, position }: PieceProps) => {
   }));
 
   const toStyles = useAnimatedStyle(() => {
-    const coord = coordinateToSquare({ x: translateX.value / size, y: translateY.value / size });
+    const coord = coordinateToSquare({ x: translateX.value, y: translateY.value });
     const { x, y } = squareToCoordinate(coord);
     return {
       backgroundColor: pressed.value ? '#rgba(40, 40, 40, .25)' : 'transparent',
-      transform: [{ translateX: x * size }, { translateY: y * size }],
+      transform: [{ translateX: x }, { translateY: y }],
     };
   });
 

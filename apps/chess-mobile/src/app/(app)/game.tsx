@@ -16,7 +16,7 @@ export function GameComponent() {
   const setGameId = useSetRecoilState(gameId);
   const setBlackPlayer = useSetRecoilState(blackPlayer);
   const setWhitePlayer = useSetRecoilState(whitePlayer);
-
+  const flipped = useRecoilValue(isFlipped);
   useEffect(() => {
     if (!socket) {
       console.log('GameComponent: Socket is null in useEffect');
@@ -43,7 +43,7 @@ export function GameComponent() {
           break;
         case MOVE:
           console.log('Move made');
-          const move = message.payload;
+          const { move } = message.payload;
           makeMove(move);
           setRecentMove({ from: move.from, to: move.to });
           console.log(chess.turn());
@@ -64,9 +64,9 @@ export function GameComponent() {
   return (
     <>
       <Container className="bg-slate-950">
-        {/* <PlayerDetail isBlack={flipped} /> */}
+        <PlayerDetail isBlack={!flipped} />
         <ChessBoard />
-        {/* <PlayerDetail isBlack={!flipped} /> */}
+        <PlayerDetail isBlack={flipped} />
       </Container>
       {(!isConnected || isWaiting !== 'idle') && (
         <View className="absolute h-full w-full items-center justify-center bg-black/50">
