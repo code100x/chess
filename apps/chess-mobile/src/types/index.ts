@@ -4,4 +4,4 @@ type User = {
   token: string;
 };
 
-type GameStatus = 'connecting' | 'waiting' | 'idle';
+type GameStatus = 'connecting' | 'waiting' | 'idle' | 'started';

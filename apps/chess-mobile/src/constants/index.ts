@@ -2,6 +2,7 @@ export const INIT_GAME = 'init_game';
 export const MOVE = 'move';
 export const GAME_OVER = 'game_over';
 export const GAME_ADDED = 'game_added';
+export const GAME_TIME = 10 * 60 * 1000;
 export const IMAGE_URL: Record<string, any> = {
   wr: require('~assets/pieces/wr.png'),
   wn: require('~assets/pieces/wn.png'),

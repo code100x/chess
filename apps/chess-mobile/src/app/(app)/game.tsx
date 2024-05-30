@@ -1,14 +1,24 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { ChessBoard, Container, Loading, PlayerDetail } from '~/components';
 import { GAME_OVER, INIT_GAME, MOVE, GAME_ADDED } from '~/constants';
 import { WebSocketProvider, useWebSocket } from '~/contexts/wsContext';
 import { useChess } from '~/hooks/useChess';
-import { blackPlayer, chessState, gameId, isFlipped, lastmove, whitePlayer } from '~/store/atoms';
+import {
+  blackPlayer,
+  blackTimeConsumed,
+  chessState,
+  gameId,
+  gameStatus,
+  isFlipped,
+  lastmove,
+  whitePlayer,
+  whiteTimeConsumed,
+} from '~/store/atoms';
 
 export function GameComponent() {
-  const [isWaiting, setWaiting] = useState<GameStatus>('idle');
+  const [status, setGameStatus] = useRecoilState(gameStatus);
   const { socket, isConnected } = useWebSocket();
   const chess = useRecoilValue(chessState);
   const { makeMove } = useChess();
@@ -16,6 +26,8 @@ export function GameComponent() {
   const setGameId = useSetRecoilState(gameId);
   const setBlackPlayer = useSetRecoilState(blackPlayer);
   const setWhitePlayer = useSetRecoilState(whitePlayer);
+  const setBlackTimeConsumed = useSetRecoilState(blackTimeConsumed);
+  const setWhiteTimeConsumed = useSetRecoilState(whiteTimeConsumed);
   const flipped = useRecoilValue(isFlipped);
   useEffect(() => {
     if (!socket) {
@@ -23,7 +35,7 @@ export function GameComponent() {
       return;
     }
     console.log('GameComponent: Sending INIT_GAME message');
-    setWaiting('connecting');
+    setGameStatus('connecting');
     socket.send(
       JSON.stringify({
         type: INIT_GAME,
@@ -36,7 +48,7 @@ export function GameComponent() {
       switch (message.type) {
         case INIT_GAME:
           console.log('Game initialized');
-          setWaiting('idle');
+          setGameStatus('started');
           setGameId(message.payload.gameId);
           setBlackPlayer(message.payload.blackPlayer);
           setWhitePlayer(message.payload.whitePlayer);
@@ -53,13 +65,27 @@ export function GameComponent() {
           break;
         case GAME_ADDED:
           console.log('Game added');
-          setWaiting('waiting');
+          setGameStatus('waiting');
           break;
         default:
           break;
       }
     };
   }, [socket]);
+
+  useEffect(() => {
+    if (status !== 'started') return;
+    const turn = chess.turn() === 'b';
+
+    const timeInterval = setInterval(() => {
+      if (turn) {
+        setBlackTimeConsumed((curr) => curr + 100);
+      } else {
+        setWhiteTimeConsumed((curr) => curr + 100);
+      }
+    }, 100);
+    return () => clearInterval(timeInterval);
+  }, [status, chess]);
 
   return (
     <>
@@ -68,11 +94,11 @@ export function GameComponent() {
         <ChessBoard />
         <PlayerDetail isBlack={flipped} />
       </Container>
-      {(!isConnected || isWaiting !== 'idle') && (
+      {(!isConnected || status !== 'started') && (
         <View className="absolute h-full w-full items-center justify-center bg-black/50">
           <Loading
             className="bg-slate-950"
-            message={isWaiting === 'waiting' ? 'Waiting for opponent' : undefined}
+            message={status === 'waiting' ? 'Waiting for opponent' : undefined}
           />
         </View>
       )}
