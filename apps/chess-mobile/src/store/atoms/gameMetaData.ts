@@ -31,3 +31,12 @@ export const isFlipped = selector({
     }
   },
 });
+
+export const myColor = selector({
+  key: 'myColor',
+  get: ({ get }) => {
+    const user = get(userAtom);
+    const black = get(blackPlayer);
+    return user?.id === black?.id ? 'b' : 'w';
+  },
+});

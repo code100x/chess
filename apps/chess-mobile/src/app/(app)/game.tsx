@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { ChessBoard, Container, Loading, PlayerDetail } from '~/components';
+import { ChessBoard, ChessBoardUI, Container, Loading, PlayerDetail } from '~/components';
 import { GAME_OVER, INIT_GAME, MOVE, GAME_ADDED } from '~/constants';
 import { WebSocketProvider, useWebSocket } from '~/contexts/wsContext';
 import { useChess } from '~/hooks/useChess';
@@ -55,8 +55,10 @@ export function GameComponent() {
           break;
         case MOVE:
           console.log('Move made');
-          const { move } = message.payload;
+          const { move, player1TimeConsumed, player2TimeConsumed } = message.payload;
           makeMove(move);
+          setWhiteTimeConsumed(player1TimeConsumed);
+          setBlackTimeConsumed(player2TimeConsumed);
           setRecentMove({ from: move.from, to: move.to });
           console.log(chess.turn());
           break;
@@ -90,9 +92,14 @@ export function GameComponent() {
   return (
     <>
       <Container className="bg-slate-950">
-        <PlayerDetail isBlack={!flipped} />
-        <ChessBoard />
-        <PlayerDetail isBlack={flipped} />
+        {status === 'started' && (
+          <>
+            <PlayerDetail isBlack={!flipped} />
+            <ChessBoard />
+            <PlayerDetail isBlack={flipped} />
+          </>
+        )}
+        {(!isConnected || status !== 'started') && <ChessBoardUI />}
       </Container>
       {(!isConnected || status !== 'started') && (
         <View className="absolute h-full w-full items-center justify-center bg-black/50">

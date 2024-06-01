@@ -3,12 +3,20 @@ import { useCallback } from 'react';
 import { Image } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilCallback, useRecoilValue, useSetRecoilState } from 'recoil';
 import { IMAGE_URL } from '~/constants';
 import { useWebSocket } from '~/contexts/wsContext';
 import { useChess } from '~/hooks/useChess';
 import { useCoordinates } from '~/hooks/useCoordinates';
-import { chessState, isFlipped, lastmove, possibleMoves, squareSize } from '~/store/atoms';
+import {
+  chessState,
+  gameId,
+  isFlipped,
+  lastmove,
+  myColor,
+  possibleMoves,
+  squareSize,
+} from '~/store/atoms';
 
 interface PieceProps {
   id: string;
@@ -16,12 +24,18 @@ interface PieceProps {
 }
 export const Piece = ({ id, position }: PieceProps) => {
   const { socket } = useWebSocket();
-  const { getMoves, makeMove } = useChess();
+  const { getMoves } = useChess();
   const chess = useRecoilValue(chessState);
   const size = useRecoilValue(squareSize);
-  const setRecentMove = useSetRecoilState(lastmove);
   const setPossibleMoves = useSetRecoilState(possibleMoves);
   const { coordinateToSquare, squareToCoordinate } = useCoordinates();
+  const color = useRecoilValue(myColor);
+  const getGameId = useRecoilCallback(
+    ({ snapshot }) =>
+      () =>
+        snapshot.getLoadable(gameId).getValue(),
+    []
+  );
 
   const pressed = useSharedValue<boolean>(false);
   const offsetX = useSharedValue(0);
@@ -32,14 +46,7 @@ export const Piece = ({ id, position }: PieceProps) => {
   const movePiece = useCallback(
     (from: Square, to: Square) => {
       const move = getMoves().find((m) => m.from === from && m.to === to);
-      const { x, y } = squareToCoordinate(move ? to : from);
-      translateX.value = x;
-      translateY.value = y;
-      movesOption();
       if (move) {
-        // chess.move(move);
-        makeMove(move);
-        setRecentMove({ from: move.from, to: move.to });
         if (!socket) {
           console.log('Piece Component: No SOCKET:', socket);
           return;
@@ -48,10 +55,14 @@ export const Piece = ({ id, position }: PieceProps) => {
         socket.send(
           JSON.stringify({
             type: 'move',
-            payload: { from: move.from, to: move.to },
+            payload: { gameId: getGameId(), move },
           })
         );
       }
+      const { x, y } = squareToCoordinate(move ? to : from);
+      translateX.value = x;
+      translateY.value = y;
+      movesOption();
     },
     [socket, chess, size]
   );
@@ -71,6 +82,7 @@ export const Piece = ({ id, position }: PieceProps) => {
   );
 
   const pan = Gesture.Pan()
+    .enabled(color === id.at(0))
     .onStart(() => {
       pressed.value = true;
       offsetX.value = translateX.value;

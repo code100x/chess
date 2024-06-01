@@ -3,7 +3,6 @@ import { cn } from '~/lib/utils';
 import { BoardNotation } from './BoardNotation';
 import { useRecoilValue } from 'recoil';
 import { isFlipped } from '~/store/atoms';
-import { memo } from 'react';
 
 const board = Array(8).fill('_');
 
@@ -12,7 +11,7 @@ export const ChessBackground = () => {
   return board.map((_, i) => (
     <View key={i} className="flex-row">
       {board.map((_, j) => {
-        const white = flipped ? !((i + j) % 2 === 0) : (i + j) % 2 === 0;
+        const white = (i + j) % 2 === 0;
         return (
           <View
             key={`${i}${j}`}
