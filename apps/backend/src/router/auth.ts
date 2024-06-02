@@ -3,7 +3,7 @@ import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import useragent from 'express-useragent';
 import { db } from '../db';
-import base64 from "base-64";
+import base64 from 'base-64';
 const router = Router();
 router.use(useragent.express());
 const CLIENT_URL =
@@ -67,22 +67,23 @@ router.get(
     failureRedirect: '/login/failed',
   }),
   (req, res) => {
-    res.redirect("/auth/capture-mode")
-  }
+    res.redirect('/auth/capture-mode');
+  },
 );
 
-router.get("/capture-mode", (req, res) => {
-  const cookies = req.headers.cookie?.split(";").map(cookie => cookie.trim());
-  const authCookie = cookies?.find(cookie => cookie.startsWith("connect.sid"));
+router.get('/capture-mode', (req, res) => {
+  const cookies = req.headers.cookie?.split(';').map((cookie) => cookie.trim());
+  const authCookie = cookies?.find((cookie) =>
+    cookie.startsWith('connect.sid'),
+  );
   const token = base64.encode(authCookie!);
-  console.log("authCookie", token);
+  console.log('authCookie', token);
 
-  const ua =req.useragent;
-  if(ua?.isMobile){
+  const ua = req.useragent;
+  if (ua?.isMobile) {
     res.redirect(`chess-mobile://sign-in?cookie=${token}`);
-  }else{
-    res.redirect(`/auth/refresh`);
-    // res.redirect(CLIENT_URL);
+  } else {
+    res.redirect(CLIENT_URL);
   }
 });
 router.get(

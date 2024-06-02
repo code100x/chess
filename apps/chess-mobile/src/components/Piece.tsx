@@ -8,13 +8,14 @@ import { IMAGE_URL } from '~/constants';
 import { useWebSocket } from '~/contexts/wsContext';
 import { useChess } from '~/hooks/useChess';
 import { useCoordinates } from '~/hooks/useCoordinates';
+import { cn } from '~/lib/utils';
 import {
   chessState,
   gameId,
-  isFlipped,
-  lastmove,
+  moveStore,
   myColor,
   possibleMoves,
+  selectedMoveIndex,
   squareSize,
 } from '~/store/atoms';
 
@@ -24,16 +25,28 @@ interface PieceProps {
 }
 export const Piece = ({ id, position }: PieceProps) => {
   const { socket } = useWebSocket();
-  const { getMoves } = useChess();
+  const { getMoves, makeMove } = useChess();
   const chess = useRecoilValue(chessState);
   const size = useRecoilValue(squareSize);
   const setPossibleMoves = useSetRecoilState(possibleMoves);
+  const setSelectedMove = useSetRecoilState(selectedMoveIndex);
   const { coordinateToSquare, squareToCoordinate } = useCoordinates();
   const color = useRecoilValue(myColor);
+  const allMoves = useRecoilCallback(
+    ({ snapshot }) =>
+      () =>
+        snapshot.getLoadable(moveStore).getValue()
+  );
   const getGameId = useRecoilCallback(
     ({ snapshot }) =>
       () =>
         snapshot.getLoadable(gameId).getValue(),
+    []
+  );
+  const selectedMove = useRecoilCallback(
+    ({ snapshot }) =>
+      () =>
+        snapshot.getLoadable(selectedMoveIndex).getValue(),
     []
   );
 
@@ -69,6 +82,15 @@ export const Piece = ({ id, position }: PieceProps) => {
 
   const movesOption = useCallback(
     (from?: Square) => {
+      if (selectedMove() !== null) {
+        const { x, y } = squareToCoordinate(from!);
+        translateX.value = x;
+        translateY.value = y;
+        const moves = allMoves();
+        makeMove(moves[moves.length - 1]);
+        setSelectedMove(null);
+        return false;
+      }
       if (!from) {
         setPossibleMoves([]);
         return;
@@ -83,7 +105,7 @@ export const Piece = ({ id, position }: PieceProps) => {
 
   const pan = Gesture.Pan()
     .enabled(color === id.at(0))
-    .onStart(() => {
+    .onBegin(() => {
       pressed.value = true;
       offsetX.value = translateX.value;
       offsetY.value = translateY.value;
@@ -115,6 +137,7 @@ export const Piece = ({ id, position }: PieceProps) => {
     };
   });
 
+  const isKingInCheckSquare = chess.inCheck() && id.at(1) === 'k' && id.at(0) === chess.turn();
   return (
     <>
       <Animated.View className="absolute z-0" style={[{ width: size, height: size }, toStyles]} />
@@ -127,7 +150,7 @@ export const Piece = ({ id, position }: PieceProps) => {
             },
             animatedStyles,
           ]}
-          className="absolute">
+          className={cn('absolute', isKingInCheckSquare && 'bg-red-500')}>
           <Image source={IMAGE_URL[id]} className="h-full w-full max-w-full" />
         </Animated.View>
       </GestureDetector>

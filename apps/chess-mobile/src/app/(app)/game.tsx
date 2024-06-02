@@ -1,8 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { ChessBoard, ChessBoardUI, Container, Loading, PlayerDetail } from '~/components';
-import { GAME_OVER, INIT_GAME, MOVE, GAME_ADDED } from '~/constants';
+import {
+  ChessBoard,
+  ChessBoardUI,
+  Container,
+  GameEnd,
+  Loading,
+  MovesTable,
+  PlayerDetail,
+  Turn,
+} from '~/components';
+import { INIT_GAME, MOVE, GAME_ADDED, GAME_ENDED } from '~/constants';
 import { WebSocketProvider, useWebSocket } from '~/contexts/wsContext';
 import { useChess } from '~/hooks/useChess';
 import {
@@ -10,9 +19,12 @@ import {
   blackTimeConsumed,
   chessState,
   gameId,
+  gameResult,
   gameStatus,
   isFlipped,
   lastmove,
+  moveStore,
+  selectedMoveIndex,
   whitePlayer,
   whiteTimeConsumed,
 } from '~/store/atoms';
@@ -28,6 +40,9 @@ export function GameComponent() {
   const setWhitePlayer = useSetRecoilState(whitePlayer);
   const setBlackTimeConsumed = useSetRecoilState(blackTimeConsumed);
   const setWhiteTimeConsumed = useSetRecoilState(whiteTimeConsumed);
+  const storeMoves = useSetRecoilState(moveStore);
+  const setSelectedMove = useSetRecoilState(selectedMoveIndex);
+  const setResult = useSetRecoilState(gameResult);
   const flipped = useRecoilValue(isFlipped);
   useEffect(() => {
     if (!socket) {
@@ -56,14 +71,24 @@ export function GameComponent() {
         case MOVE:
           console.log('Move made');
           const { move, player1TimeConsumed, player2TimeConsumed } = message.payload;
+          setSelectedMove(null);
           makeMove(move);
           setWhiteTimeConsumed(player1TimeConsumed);
           setBlackTimeConsumed(player2TimeConsumed);
           setRecentMove({ from: move.from, to: move.to });
+          storeMoves((moves) => [...moves, move]);
           console.log(chess.turn());
           break;
-        case GAME_OVER:
+        case GAME_ENDED:
           console.log('Game finished');
+          setGameStatus('completed');
+          const wonBy =
+            message.payload.status === 'COMPLETED'
+              ? message.payload.result !== 'DRAW'
+                ? 'CheckMate'
+                : 'Draw'
+              : ('Timeout' as GameWonBy);
+          setResult({ result: message.payload.result as Result, by: wonBy });
           break;
         case GAME_ADDED:
           console.log('Game added');
@@ -88,20 +113,17 @@ export function GameComponent() {
     }, 100);
     return () => clearInterval(timeInterval);
   }, [status, chess]);
-
   return (
     <>
       <Container className="bg-slate-950">
-        {status === 'started' && (
-          <>
-            <PlayerDetail isBlack={!flipped} />
-            <ChessBoard />
-            <PlayerDetail isBlack={flipped} />
-          </>
-        )}
-        {(!isConnected || status !== 'started') && <ChessBoardUI />}
+        <Turn />
+        <PlayerDetail isBlack={!flipped} />
+        {(status === 'started' || status === 'completed') && <ChessBoard />}
+        {(!isConnected || (status !== 'started' && status !== 'completed')) && <ChessBoardUI />}
+        <PlayerDetail isBlack={flipped} />
+        <MovesTable />
       </Container>
-      {(!isConnected || status !== 'started') && (
+      {(!isConnected || (status !== 'started' && status !== 'completed')) && (
         <View className="absolute h-full w-full items-center justify-center bg-black/50">
           <Loading
             className="bg-slate-950"
@@ -109,6 +131,7 @@ export function GameComponent() {
           />
         </View>
       )}
+      {status === 'completed' && <GameEnd />}
     </>
   );
 }

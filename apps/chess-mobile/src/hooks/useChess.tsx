@@ -5,14 +5,6 @@ import { chessState } from '~/store/atoms';
 export const useChess = () => {
   const [chess, setChess] = useRecoilState(chessState);
 
-  const updateBoard = () => {
-    setChess((prev) => {
-      const newChess = new Chess();
-      newChess.loadPgn(prev.pgn());
-      return newChess;
-    });
-  };
-
   const getMoves = () => {
     const newChess = new Chess(chess.fen());
     return newChess.moves({ verbose: true });
@@ -20,10 +12,11 @@ export const useChess = () => {
 
   const makeMove = (move: Move) => {
     setChess((prev) => {
-      const newChess = new Chess(prev.fen());
-      newChess.move(move);
+      const newChess = new Chess();
+      newChess.load(move.after);
       return newChess;
     });
   };
-  return { updateBoard, getMoves, makeMove };
+
+  return { getMoves, makeMove };
 };
