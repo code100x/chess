@@ -33,9 +33,6 @@ export interface GameResult {
   by: string;
 }
 
-
-const GAME_TIME_MS = 10 * 60 * 1000;
-
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
@@ -61,6 +58,8 @@ export const Game = () => {
   const [added, setAdded] = useState(false);
   const [started, setStarted] = useState(false);
   const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
+
+  const [gameTime, setGameTime] = useState(10);
   const [result, setResult] = useState<
     GameResult
     | null
@@ -132,7 +131,7 @@ export const Game = () => {
 
         case GAME_ENDED:
           const wonBy = message.payload.status === 'COMPLETED' ? 
-            message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw' : 'Timeout';
+          message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw' : 'Timeout';
           setResult({
             result: message.payload.result,
             by: wonBy,
@@ -148,8 +147,6 @@ export const Game = () => {
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
           });
-          
-        
           break;
 
         case USER_TIMEOUT:
@@ -212,15 +209,20 @@ export const Game = () => {
     }
   }, [started, gameMetadata, user]);
 
+  const handleGameTimeSelection = (timeInMinutes: number) => {
+    setGameTime(timeInMinutes);
+  };
+
   const getTimer = (timeConsumed: number) => {
+    const GAME_TIME_MS = gameTime * 60 * 1000;
     const timeLeftMs = GAME_TIME_MS - timeConsumed;
     const minutes = Math.floor(timeLeftMs / (1000 * 60));
     const remainingSeconds = Math.floor((timeLeftMs % (1000 * 60)) / 1000);
 
     return (
       <div className="text-white">
-        Time Left: {minutes < 10 ? '0' : ''}
-        {minutes}:{remainingSeconds < 10 ? '0' : ''}
+        Time Left: {minutes < gameTime ? '0' : ''}
+        {minutes}:{remainingSeconds < gameTime ? '0' : ''}
         {remainingSeconds}
       </div>
     );
@@ -270,9 +272,7 @@ export const Game = () => {
                     )}
                   </div>
                   <div>
-                    <div
-                      className={`w-full flex justify-center text-white`}
-                    >
+                    <div className={`w-full flex justify-center text-white`}>
                       <ChessBoard
                         started={started}
                         gameId={gameId ?? ''}
@@ -307,22 +307,70 @@ export const Game = () => {
             </div>
             <div className="rounded-md bg-brown-500 overflow-auto h-[90vh] mt-10">
               {!started && (
-                <div className="pt-8 flex justify-center w-full">
+                <div className="pt-8 flex justify-center ">
                   {added ? (
                     <div className="text-white"><Waitopponent/></div>
                   ) : (
                     gameId === 'random' && (
-                      <Button
-                        onClick={() => {
-                          socket.send(
-                            JSON.stringify({
-                              type: INIT_GAME,
-                            }),
-                          );
-                        }}
-                      >
-                        Play
-                      </Button>
+                      <div className="flex flex-col justify-center">
+                        <div className="flex text-center text-white text-xl mb-5">
+                          <div>
+                            <div className="border border-white p-4">
+                              <div className="mb-3">Bullet</div>
+                              <Button
+                                className={`text-sm hover:bg-green-400  ${gameTime === 1 ? ' text-zinc-700' : 'text-white'}`}
+                                onClick={() => handleGameTimeSelection(1)}
+                              >
+                                1 Minute
+                              </Button>
+                            </div>
+                            <div className="border border-white p-4">
+                              <div className="mb-3">Blitz</div>
+                              <Button
+                                className={`text-sm  hover:bg-green-400 ${gameTime === 3 ? ' text-zinc-700' : 'text-white'}`}
+                                onClick={() => handleGameTimeSelection(3)}
+                              >
+                                3 Minutes
+                              </Button>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="border border-white p-4">
+                              <div className="mb-3">Rapid</div>
+                              <Button
+                                className={`text-sm  hover:bg-green-400 ${gameTime === 5 ? ' text-zinc-700' : 'text-white'}`}
+                                onClick={() => handleGameTimeSelection(5)}
+                              >
+                                5 Minutes
+                              </Button>
+                            </div>
+                            <div className="border border-white p-4">
+                              <div className="mb-3">Classic</div>
+                              <Button
+                                className={`text-sm  hover:bg-green-400 ${gameTime === 10 ? ' text-zinc-700' : 'text-white'}`}
+                                onClick={() => handleGameTimeSelection(10)}
+                              >
+                                10 Minutes
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-center">
+                          <Button
+                            onClick={() => {
+                              socket.send(
+                                JSON.stringify({
+                                  type: INIT_GAME,
+                                  time: gameTime,
+                                }),
+                              );
+                            }}
+                          >
+                            Play
+                          </Button>
+                        </div>
+                      </div>
                     )
                   )}
                 </div>

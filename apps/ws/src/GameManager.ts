@@ -51,16 +51,47 @@ export class GameManager {
   private addHandler(user: User) {
     user.socket.on('message', async (data) => {
       const message = JSON.parse(data.toString());
+      let gameToJoin = null;
       if (message.type === INIT_GAME) {
+        const gameTime = message.time;
+        if (![1, 3, 5, 10].includes(gameTime)) {
+          console.error('Invalid time amount: ' + gameTime);
+          return;
+        }
+        const gamesWithSameTimeLimit = this.games.filter(
+          (game) => game.gameTime === gameTime && game.player2UserId === null,
+        );
         if (this.pendingGameId) {
           const game = this.games.find((x) => x.gameId === this.pendingGameId);
           if (!game) {
             console.error('Pending game not found?');
             return;
           }
-          if (user.userId === game.player1UserId) {
+          if (gamesWithSameTimeLimit.length > 0) {
+            gameToJoin = gamesWithSameTimeLimit[0];
+          }
+          this.pendingGameId = null;
+        } else {
+          if (gamesWithSameTimeLimit.length > 0) {
+            gameToJoin = gamesWithSameTimeLimit[0];
+          } else {
+            const game = new Game(user.userId, null, gameTime);
+            this.games.push(game);
+            this.pendingGameId = game.gameId;
+            SocketManager.getInstance().addUser(user, game.gameId);
             SocketManager.getInstance().broadcast(
               game.gameId,
+              JSON.stringify({
+                type: GAME_ADDED,
+              }),
+            );
+            return;
+          }
+        }
+        if (gameToJoin) {
+          if (user.userId === gameToJoin.player1UserId) {
+            SocketManager.getInstance().broadcast(
+              gameToJoin.gameId,
               JSON.stringify({
                 type: GAME_ALERT,
                 payload: {
@@ -70,20 +101,9 @@ export class GameManager {
             );
             return;
           }
-          SocketManager.getInstance().addUser(user, game.gameId);
-          await game?.updateSecondPlayer(user.userId);
+          SocketManager.getInstance().addUser(user, gameToJoin.gameId);
+          await gameToJoin?.updateSecondPlayer(user.userId);
           this.pendingGameId = null;
-        } else {
-          const game = new Game(user.userId, null);
-          this.games.push(game);
-          this.pendingGameId = game.gameId;
-          SocketManager.getInstance().addUser(user, game.gameId);
-          SocketManager.getInstance().broadcast(
-            game.gameId,
-            JSON.stringify({
-              type: GAME_ADDED,
-            }),
-          );
         }
       }
 
@@ -92,7 +112,7 @@ export class GameManager {
         const game = this.games.find((game) => game.gameId === gameId);
         if (game) {
           game.makeMove(user, message.payload.move);
-          if (game.result)  {
+          if (game.result) {
             this.removeGame(game.gameId);
           }
         }
