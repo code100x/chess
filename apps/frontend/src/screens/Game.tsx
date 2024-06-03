@@ -23,6 +23,7 @@ export const GAME_ADDED = 'game_added';
 export const USER_TIMEOUT = 'user_timeout';
 export const GAME_TIME = 'game_time';
 export const GAME_ENDED = 'game_ended';
+export const LIVE_COUNTER = 'live_counter';
 export enum Result {
   WHITE_WINS = 'WHITE_WINS',
   BLACK_WINS = 'BLACK_WINS',
@@ -32,7 +33,6 @@ export interface GameResult {
   result: Result;
   by: string;
 }
-
 
 const GAME_TIME_MS = 10 * 60 * 1000;
 
@@ -61,13 +61,10 @@ export const Game = () => {
   const [added, setAdded] = useState(false);
   const [started, setStarted] = useState(false);
   const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
-  const [result, setResult] = useState<
-    GameResult
-    | null
-  >(null);
+  const [result, setResult] = useState<GameResult | null>(null);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
-
+  const [counter, setCounter] = useState(0);
   const setMoves = useSetRecoilState(movesAtom);
   const userSelectedMoveIndex = useRecoilValue(userSelectedMoveIndexAtom);
   const userSelectedMoveIndexRef = useRef(userSelectedMoveIndex);
@@ -86,11 +83,23 @@ export const Game = () => {
     if (!socket) {
       return;
     }
+
+    socket.send(JSON.stringify({ type: LIVE_COUNTER }));
+  }, [socket]);
+
+  useEffect(() => {
+    if (!socket) {
+      return;
+    }
+
     socket.onmessage = function (event) {
       const message = JSON.parse(event.data);
       switch (message.type) {
         case GAME_ADDED:
           setAdded(true);
+          break;
+        case LIVE_COUNTER:
+          setCounter(message.payload.counter);
           break;
         case INIT_GAME:
           setBoard(chess.board());
@@ -131,8 +140,12 @@ export const Game = () => {
           break;
 
         case GAME_ENDED:
-          const wonBy = message.payload.status === 'COMPLETED' ? 
-            message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw' : 'Timeout';
+          const wonBy =
+            message.payload.status === 'COMPLETED'
+              ? message.payload.result !== 'DRAW'
+                ? 'CheckMate'
+                : 'Draw'
+              : 'Timeout';
           setResult({
             result: message.payload.result,
             by: wonBy,
@@ -148,8 +161,7 @@ export const Game = () => {
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
           });
-          
-        
+
           break;
 
         case USER_TIMEOUT:
@@ -269,9 +281,9 @@ export const Game = () => {
                       </div>
                     )}
                   </div>
-                  <div>
+                  <div className="flex flex-col md:flex-row">
                     <div
-                      className={`w-full flex justify-center text-white`}
+                      className={`w-full flex justify-center text-white ml-2`}
                     >
                       <ChessBoard
                         started={started}
@@ -285,6 +297,53 @@ export const Game = () => {
                         board={board}
                       />
                     </div>
+                    {!started && (
+                      <div className="flex justify-start flex-col items-center mt-4 p-3">
+                        {counter - 1 !== 0 ? (
+                          <>
+                            <p className="text-3xl text-center font-bold text-white mb-4">
+                              <span className="text-yellow-500 text-3xl drop-shadow-[0_1.5px_1.5px_rgba(0,0,0,0.8)] underline underline-offset-4">
+                                {counter}
+                              </span>
+                              {counter == 1 ? ' Player is ' : " Player's are "}
+                              currently online.
+                            </p>
+                            <p className="text-center text-gray-200">
+                              Click on{' '}
+                              <span className="text-green-500">Play</span> to
+                              start a game.
+                            </p>
+                          </>
+                        ) : (
+                          <p className="text-3xl text-center font-bold text-white ">
+                            <span className="text-red-700 text-3xl drop-shadow-[0_1.5px_1.5px_rgba(0,0,0,0.8)]">
+                              No
+                            </span>{' '}
+                            players are currently online :(
+                          </p>
+                        )}
+
+                        <div className=" mt-4 flex">
+                          {added ? (
+                            <div className="text-white">Waiting</div>
+                          ) : (
+                            gameId === 'random' && (
+                              <Button
+                                onClick={() => {
+                                  socket.send(
+                                    JSON.stringify({
+                                      type: INIT_GAME,
+                                    }),
+                                  );
+                                }}
+                              >
+                                Play
+                              </Button>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   {started && (
                     <div className="mt-4 flex justify-between">
@@ -306,6 +365,7 @@ export const Game = () => {
               </div>
             </div>
             <div className="rounded-md bg-brown-500 overflow-auto h-[90vh] mt-10">
+<<<<<<< HEAD
               {!started && (
                 <div className="pt-8 flex justify-center w-full">
                   {added ? (
@@ -327,6 +387,8 @@ export const Game = () => {
                   )}
                 </div>
               )}
+=======
+>>>>>>> pr-319
               <div>
                 <MovesTable />
               </div>
