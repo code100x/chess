@@ -10,6 +10,8 @@ import {
   GAME_NOT_FOUND,
   GAME_ALERT,
   GAME_ADDED,
+  SPECTATE_MESSAGE,
+  GAME_MESSAGE,
   GAME_ENDED,
 } from './messages';
 import { Game, isPromoting } from './Game';
@@ -90,9 +92,10 @@ export class GameManager {
       if (message.type === MOVE) {
         const gameId = message.payload.gameId;
         const game = this.games.find((game) => game.gameId === gameId);
+        console.log(message.payload.move);
         if (game) {
           game.makeMove(user, message.payload.move);
-          if (game.result)  {
+          if (game.result) {
             this.removeGame(game.gameId);
           }
         }
@@ -127,23 +130,25 @@ export class GameManager {
           return;
         }
 
-        if(gameFromDb.status !== GameStatus.IN_PROGRESS) {
-          user.socket.send(JSON.stringify({
-            type: GAME_ENDED,
-            payload: {
-              result: gameFromDb.result,
-              status: gameFromDb.status,
-              moves: gameFromDb.moves,
-              blackPlayer: {
-                id: gameFromDb.blackPlayer.id,
-                name: gameFromDb.blackPlayer.name,
+        if (gameFromDb.status !== GameStatus.IN_PROGRESS) {
+          user.socket.send(
+            JSON.stringify({
+              type: GAME_ENDED,
+              payload: {
+                result: gameFromDb.result,
+                status: gameFromDb.status,
+                moves: gameFromDb.moves,
+                blackPlayer: {
+                  id: gameFromDb.blackPlayer.id,
+                  name: gameFromDb.blackPlayer.name,
+                },
+                whitePlayer: {
+                  id: gameFromDb.whitePlayer.id,
+                  name: gameFromDb.whitePlayer.name,
+                },
               },
-              whitePlayer: {
-                id: gameFromDb.whitePlayer.id,
-                name: gameFromDb.whitePlayer.name,
-              },
-            }
-          }));
+            }),
+          );
           return;
         }
 
@@ -152,15 +157,12 @@ export class GameManager {
             gameFromDb?.whitePlayerId!,
             gameFromDb?.blackPlayerId!,
             gameFromDb.id,
-            gameFromDb.startAt
+            gameFromDb.startAt,
           );
-          game.seedMoves(gameFromDb?.moves || [])
+          game.seedMoves(gameFromDb?.moves || []);
           this.games.push(game);
           availableGame = game;
         }
-
-        console.log(availableGame.getPlayer1TimeConsumed());
-        console.log(availableGame.getPlayer2TimeConsumed());
 
         user.socket.send(
           JSON.stringify({
@@ -183,6 +185,14 @@ export class GameManager {
         );
 
         SocketManager.getInstance().addUser(user, gameId);
+      }
+
+      if (message.type === GAME_MESSAGE) {
+        const gameId = message.payload.gameId;
+        const game = this.games.find((game) => game.gameId === gameId);
+        if (game) {
+          game.sendMessage(message.payload.message, user.userId);
+        }
       }
     });
   }

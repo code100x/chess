@@ -2,19 +2,23 @@ import React, { useState } from 'react';
 import WhiteKing from '../../public/wk.png';
 import BlackKing from '../../public/bk.png';
 import { GameResult, Result } from '@/screens/Game';
+import { useNavigate } from 'react-router-dom';
 
 interface ModalProps {
   blackPlayer?: { id: string; name: string };
   whitePlayer?: { id: string; name: string };
   gameResult: GameResult;
+  gameId: string;
 }
 
 const GameEndModal: React.FC<ModalProps> = ({
   blackPlayer,
   whitePlayer,
   gameResult,
+  gameId,
 }) => {
   const [isOpen, setIsOpen] = useState(true);
+  const Navigate = useNavigate();
 
   const closeModal = () => {
     setIsOpen(false);
@@ -53,6 +57,12 @@ const GameEndModal: React.FC<ModalProps> = ({
     );
   };
 
+  const reviewRedirect = () => {
+    Navigate(`/review/${gameId}`, {
+      replace: false,
+    });
+  };
+
   const getWinnerMessage = (result: Result) => {
     switch (result) {
       case Result.BLACK_WINS:
@@ -76,20 +86,38 @@ const GameEndModal: React.FC<ModalProps> = ({
           <div className="relative rounded-lg shadow-lg bg-gray-800 w-96">
             <div className="px-6 py-8 items-center self-center m-auto">
               <div className="m-auto mb-6">
-                <h2 className={`text-4xl font-bold mb-2 text-yellow-400 text-center text-wrap`}>
-                 {getWinnerMessage(gameResult.result)}  
+                <h2
+                  className={`text-4xl font-bold mb-2 text-yellow-400 text-center text-wrap`}
+                >
+                  {getWinnerMessage(gameResult.result)}
                 </h2>
               </div>
               <div className="m-auto mb-6">
-                <p className="text-xl text-white text-center">by {gameResult.by}</p>
+                <p className="text-xl text-white text-center">
+                  by {gameResult.by}
+                </p>
               </div>
               <div className="flex flex-row justify-between items-center bg-gray-700 rounded-lg px-4 py-6">
-                <PlayerDisplay isWhite={true} player={whitePlayer} gameResult={gameResult.result} />
+                <PlayerDisplay
+                  isWhite={true}
+                  player={whitePlayer}
+                  gameResult={gameResult.result}
+                />
                 <div className="text-white text-2xl font-bold">vs</div>
-                <PlayerDisplay isWhite={false} player={blackPlayer} gameResult={gameResult.result} />
+                <PlayerDisplay
+                  isWhite={false}
+                  player={blackPlayer}
+                  gameResult={gameResult.result}
+                />
               </div>
             </div>
-            <div className="px-6 py-4 bg-gray-900 text-right rounded-b-lg">
+            <div className="px-6 py-4 bg-gray-900 text-right rounded-b-lg gap-2 flex justify-end">
+              <button
+                className="px-6 py-3 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none"
+                onClick={reviewRedirect}
+              >
+                Review
+              </button>
               <button
                 className="px-6 py-3 text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none"
                 onClick={closeModal}

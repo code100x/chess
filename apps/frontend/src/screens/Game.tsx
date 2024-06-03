@@ -5,7 +5,7 @@ import MoveSound from '/move.wav';
 import { Button } from '../components/Button';
 import { ChessBoard, isPromoting } from '../components/ChessBoard';
 import { useSocket } from '../hooks/useSocket';
-import { Chess, Move } from 'chess.js';
+import { Chess, Move, Square } from 'chess.js';
 import { useNavigate, useParams } from 'react-router-dom';
 import MovesTable from '../components/MovesTable';
 import { useUser } from '@repo/store/useUser';
@@ -22,6 +22,7 @@ export const GAME_ALERT = 'game_alert';
 export const GAME_ADDED = 'game_added';
 export const USER_TIMEOUT = 'user_timeout';
 export const GAME_TIME = 'game_time';
+export const GAME_MESSAGE = 'game_message';
 export const GAME_ENDED = 'game_ended';
 export enum Result {
   WHITE_WINS = 'WHITE_WINS',
@@ -33,7 +34,6 @@ export interface GameResult {
   by: string;
 }
 
-
 const GAME_TIME_MS = 10 * 60 * 1000;
 
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -41,6 +41,19 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
 import GameEndModal from '@/components/GameEndModal';
 import { Waitopponent } from '@/components/ui/waitopponent';
+
+export interface IMove {
+  from: Square;
+  to: Square;
+  piece: string;
+  startTime: number;
+  endTime: number;
+}
+
+export interface Message {
+  value: string;
+  userId: string;
+}
 
 const moveAudio = new Audio(MoveSound);
 
@@ -61,12 +74,11 @@ export const Game = () => {
   const [added, setAdded] = useState(false);
   const [started, setStarted] = useState(false);
   const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
-  const [result, setResult] = useState<
-    GameResult
-    | null
-  >(null);
+  const [result, setResult] = useState<GameResult | null>(null);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [messageState, setMessageState] = useState('');
 
   const setMoves = useSetRecoilState(movesAtom);
   const userSelectedMoveIndex = useRecoilValue(userSelectedMoveIndexAtom);
@@ -102,12 +114,15 @@ export const Game = () => {
           });
           break;
         case MOVE:
-          const { move, player1TimeConsumed, player2TimeConsumed } =
+          const { move, player1TimeConsumed, player2TimeConsumed, userId } =
             message.payload;
+          if (user.id === userId) {
+            setMoves((moves) => [...moves, move]);
+          }
+          // setMoves((moves) => [...moves, move]);
           setPlayer1TimeConsumed(player1TimeConsumed);
           setPlayer2TimeConsumed(player2TimeConsumed);
           if (userSelectedMoveIndexRef.current !== null) {
-            setMoves((moves) => [...moves, move]);
             return;
           }
           try {
@@ -120,8 +135,10 @@ export const Game = () => {
             } else {
               chess.move({ from: move.from, to: move.to });
             }
-            setMoves((moves) => [...moves, move]);
             moveAudio.play();
+            setBoard(chess.board());
+            const piece = chess.get(move.to)?.type;
+            setMoves((moves) => [...moves, move]);
           } catch (error) {
             console.log('Error', error);
           }
@@ -131,8 +148,12 @@ export const Game = () => {
           break;
 
         case GAME_ENDED:
-          const wonBy = message.payload.status === 'COMPLETED' ? 
-            message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw' : 'Timeout';
+          const wonBy =
+            message.payload.status === 'COMPLETED'
+              ? message.payload.result !== 'DRAW'
+                ? 'CheckMate'
+                : 'Draw'
+              : 'Timeout';
           setResult({
             result: message.payload.result,
             by: wonBy,
@@ -148,8 +169,7 @@ export const Game = () => {
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
           });
-          
-        
+
           break;
 
         case USER_TIMEOUT:
@@ -163,7 +183,6 @@ export const Game = () => {
           });
           setPlayer1TimeConsumed(message.payload.player1TimeConsumed);
           setPlayer2TimeConsumed(message.payload.player2TimeConsumed);
-          console.error(message.payload);
           setStarted(true);
 
           message.payload.moves.map((x: Move) => {
@@ -179,6 +198,17 @@ export const Game = () => {
         case GAME_TIME:
           setPlayer1TimeConsumed(message.payload.player1Time);
           setPlayer2TimeConsumed(message.payload.player2Time);
+          break;
+
+        case GAME_MESSAGE:
+          setMessages((messages) => [
+            ...messages,
+            {
+              value: message.payload.message,
+              userId: message.payload.user.id,
+              name: message.payload.user.name,
+            },
+          ]);
           break;
 
         default:
@@ -200,7 +230,7 @@ export const Game = () => {
   }, [chess, socket]);
 
   useEffect(() => {
-    if (started) {
+    if (started && result === null) {
       const interval = setInterval(() => {
         if (chess.turn() === 'w') {
           setPlayer1TimeConsumed((p) => p + 100);
@@ -212,10 +242,20 @@ export const Game = () => {
     }
   }, [started, gameMetadata, user]);
 
-  const getTimer = (timeConsumed: number) => {
-    const timeLeftMs = GAME_TIME_MS - timeConsumed;
-    const minutes = Math.floor(timeLeftMs / (1000 * 60));
-    const remainingSeconds = Math.floor((timeLeftMs % (1000 * 60)) / 1000);
+  const sendMessage = () => {
+    if (!messageState) return;
+    socket?.send(
+      JSON.stringify({
+        type: GAME_MESSAGE,
+        payload: { message: messageState, gameId },
+      }),
+    );
+    setMessageState('');
+  };
+
+  const getTimer = (tempTime: number) => {
+    const minutes = Math.floor(tempTime / (1000 * 60));
+    const remainingSeconds = Math.floor((tempTime % (1000 * 60)) / 1000);
 
     return (
       <div className="text-white">
@@ -235,6 +275,7 @@ export const Game = () => {
           blackPlayer={gameMetadata?.blackPlayer}
           whitePlayer={gameMetadata?.whitePlayer}
           gameResult={result}
+          gameId={gameId!}
         ></GameEndModal>
       )}
       {started && (
@@ -270,9 +311,7 @@ export const Game = () => {
                     )}
                   </div>
                   <div>
-                    <div
-                      className={`w-full flex justify-center text-white`}
-                    >
+                    <div className={`w-full flex justify-center text-white`}>
                       <ChessBoard
                         started={started}
                         gameId={gameId ?? ''}
@@ -307,7 +346,7 @@ export const Game = () => {
             </div>
             <div className="rounded-md bg-brown-500 overflow-auto h-[90vh] mt-10">
               {!started && (
-                <div className="pt-8 flex justify-center w-full">
+                <div className="pt-8 flex justify-center ">
                   {added ? (
                     <div className="text-white"><Waitopponent/></div>
                   ) : (
@@ -320,6 +359,7 @@ export const Game = () => {
                             }),
                           );
                         }}
+                        className="h-16"
                       >
                         Play
                       </Button>
@@ -327,9 +367,46 @@ export const Game = () => {
                   )}
                 </div>
               )}
-              <div>
-                <MovesTable />
-              </div>
+              {started && (
+                <div>
+                  <MovesTable />
+                  <div className="bg-brown-600 rounded-lg shadow-md p-6 mt-8 md:mt-0 h-[49%] flex flex-col justify-between overflow-hidden">
+                    <div>
+                      <h2 className="text-2xl font-bold mb-4 text-white">
+                        Chat Messages
+                      </h2>
+                      <div className="overflow-y-auto max-h-[17.5rem]">
+                        {messages.map((it, i) => (
+                          <div
+                            key={i}
+                            className={`flex ${it.userId === user.id ? 'justify-end' : 'justify-start'} mb-2`}
+                          >
+                            <div className="bg-gray-300 p-2 py-1 rounded">
+                              <p>{it.value}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mt-4 flex">
+                      <input
+                        type="text"
+                        value={messageState}
+                        onChange={(e) => {
+                          setMessageState(e.target.value);
+                        }}
+                        className="flex-1 border border-gray-300 rounded-md px-3 py-1 mr-2 focus:outline-none focus:border-blue-400"
+                      />
+                      <button
+                        onClick={sendMessage}
+                        className="bg-[#739552] text-white px-4 py-2 rounded-md"
+                      >
+                        Send
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

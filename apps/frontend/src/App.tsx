@@ -6,6 +6,8 @@ import Login from './screens/Login';
 import { Suspense } from 'react';
 import { RecoilRoot } from 'recoil';
 import { Loader } from './components/Loader';
+import { Spectate } from './screens/Spectate';
+import { Review } from './screens/Review';
 import { Layout } from './layout';
 
 function App() {
@@ -25,13 +27,15 @@ function AuthApp() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout children={<Landing />} />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/game/:gameId" element={<Layout children={<Game />} />} />
         <Route
-          path="/login"
-          element={<Login />}
+          path="/spectate/:gameId"
+          element={<Layout children={<Spectate />} />}
         />
         <Route
-          path="/game/:gameId"
-          element={<Layout children={<Game />} />}
+          path="/review/:gameId"
+          element={<Layout children={<Review />} />}
         />
       </Routes>
     </BrowserRouter>

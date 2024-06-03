@@ -50,6 +50,7 @@ model Move {
   moveNumber  Int
   from        String
   to          String
+  piece       String?
   comments    String?
   before      String
   after       String

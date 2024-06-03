@@ -1,9 +1,9 @@
 import {
+  TimingMove,
   isBoardFlippedAtom,
   movesAtom,
   userSelectedMoveIndexAtom,
 } from '@repo/store/chessBoard';
-import { Move } from 'chess.js';
 import { useEffect, useRef } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
@@ -16,19 +16,39 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
-const MovesTable = () => {
+interface MovesTableProps {
+  newMoves?: TimingMove[];
+}
+
+const MovesTable: React.FC<MovesTableProps> = ({ newMoves }) => {
   const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
     userSelectedMoveIndexAtom,
   );
   const setIsFlipped = useSetRecoilState(isBoardFlippedAtom);
   const moves = useRecoilValue(movesAtom);
   const movesTableRef = useRef<HTMLInputElement>(null);
-  const movesArray = moves.reduce((result, _, index: number, array: Move[]) => {
-    if (index % 2 === 0) {
-      result.push(array.slice(index, index + 2));
-    }
-    return result;
-  }, [] as Move[][]);
+  let movesArray: TimingMove[][] = [];
+  if (newMoves) {
+    movesArray = newMoves.reduce(
+      (result, _, index: number, array: TimingMove[]) => {
+        if (index % 2 === 0) {
+          result.push(array.slice(index, index + 2));
+        }
+        return result;
+      },
+      [] as TimingMove[][],
+    );
+  } else {
+    movesArray = moves.reduce(
+      (result, _, index: number, array: TimingMove[]) => {
+        if (index % 2 === 0) {
+          result.push(array.slice(index, index + 2));
+        }
+        return result;
+      },
+      [] as TimingMove[][],
+    );
+  }
 
   useEffect(() => {
     if (movesTableRef && movesTableRef.current) {
@@ -39,7 +59,7 @@ const MovesTable = () => {
     }
   }, [moves]);
   return (
-    <div className="text-[#C3C3C0] relative w-full ">
+    <div className="text-[#C3C3C0] relative w-full bg-zinc-800">
       <div
         className="text-sm h-[45vh] max-h-[45vh] overflow-y-auto"
         ref={movesTableRef}
@@ -72,6 +92,9 @@ const MovesTable = () => {
                       }}
                     >
                       <span className="text-[#C3C3C0]">{san}</span>
+                      <p className="text-xs ml-2 mb-2">
+                        {(move.timeTaken / 1000).toString() + 's'}
+                      </p>
                     </div>
                   );
                 })}
