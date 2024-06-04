@@ -4,7 +4,7 @@ import {
   INIT_GAME,
   MOVE,
 } from './messages';
-import { db } from './db';
+import db from '@repo/db/client';
 import { randomUUID } from 'crypto';
 import { SocketManager, User } from './SocketManager';
 

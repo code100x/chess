@@ -13,7 +13,7 @@ import {
   GAME_ENDED,
 } from './messages';
 import { Game, isPromoting } from './Game';
-import { db } from './db';
+import db from '@repo/db/client';
 import { SocketManager, User } from './SocketManager';
 import { Square } from 'chess.js';
 import { GameStatus } from '@prisma/client';

@@ -2,7 +2,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const GithubStrategy = require('passport-github2').Strategy;
 import passport from 'passport';
 import dotenv from 'dotenv';
-import { db } from './db';
+import db from '@repo/db/client';
 
 interface GithubEmailRes {
   email: string;
