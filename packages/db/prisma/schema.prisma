@@ -14,13 +14,11 @@ model User {
   email         String   @unique
   provider      AuthProvider
   password      String?
-  rating        Int      @default(1200)
+  rating        Rating?        
   gamesAsWhite  Game[]   @relation("GamesAsWhite")
   gamesAsBlack  Game[]   @relation("GamesAsBlack")
   createdAt     DateTime @default(now())
   lastLogin     DateTime?
-
-  @@index([rating])
 }
 
 model Game {
@@ -58,6 +56,18 @@ model Move {
   san         String?   
 
   @@index([gameId])
+}
+
+model Rating {
+  id String  @id @default(uuid())
+  classic Int?  @default(1200)
+  blitz Int?  @default(1200)
+  rapid Int?  @default(1200)
+  bullet Int?  @default(1200)
+  userId String  @unique
+  user  User  @relation(fields: [userId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime? @default(now())
 }
 
 enum GameStatus {

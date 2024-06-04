@@ -15,7 +15,7 @@ import { UserAvatar } from '../components/UserAvatar';
 export const INIT_GAME = 'init_game';
 export const MOVE = 'move';
 export const OPPONENT_DISCONNECTED = 'opponent_disconnected';
-export const GAME_OVER = 'game_over';
+export const GAME_ENDED = 'game_ended';
 export const JOIN_ROOM = 'join_room';
 export const GAME_JOINED = 'game_joined';
 export const GAME_ALERT = 'game_alert';
@@ -43,10 +43,16 @@ import GameEndModal from '@/components/GameEndModal';
 import { Waitopponent } from '@/components/ui/waitopponent';
 
 const moveAudio = new Audio(MoveSound);
-
+interface PlayerData {
+  id: string; name: string; rating: number; expectedRating: {
+    win: number,
+    draw: number,
+    lose: number
+  }
+}
 interface Metadata {
-  blackPlayer: { id: string; name: string };
-  whitePlayer: { id: string; name: string };
+  blackPlayer: PlayerData
+  whitePlayer: PlayerData;
 }
 
 export const Game = () => {
@@ -61,6 +67,8 @@ export const Game = () => {
   const [added, setAdded] = useState(false);
   const [started, setStarted] = useState(false);
   const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
+  const [playerInfo, setPlayerInfo] = useState<PlayerData | undefined>(undefined)
+  const [oppenentInfo, setOppenentInfo] = useState<PlayerData | undefined>(undefined)
   const [result, setResult] = useState<
     GameResult
     | null
@@ -100,6 +108,14 @@ export const Game = () => {
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
           });
+          if (user.id == message.payload.blackPlayer.id) {
+            setPlayerInfo(message.payload.blackPlayer)
+            setOppenentInfo(message.payload.whitePlayer)
+          } else {
+            setPlayerInfo(message.payload.whitePlayer)
+            setOppenentInfo(message.payload.blackPlayer)
+          }
+
           break;
         case MOVE:
           const { move, player1TimeConsumed, player2TimeConsumed } =
@@ -126,8 +142,18 @@ export const Game = () => {
             console.log('Error', error);
           }
           break;
-        case GAME_OVER:
+        case GAME_ENDED:
           setResult(message.payload.result);
+          setStarted(false)
+          setGameMetadata({
+            blackPlayer: message.payload.blackPlayer,
+            whitePlayer: message.payload.whitePlayer,
+          });
+          if (user.id == message.payload.blackPlayer.id) {
+            setPlayerInfo(message.payload.blackPlayer)
+          } else {
+            setPlayerInfo(message.payload.whitePlayer)
+          }
           break;
 
         case GAME_ENDED:
@@ -161,6 +187,14 @@ export const Game = () => {
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
           });
+
+          if (user.id == message.payload.blackPlayer.id) {
+            setPlayerInfo(message.payload.blackPlayer)
+            setOppenentInfo(message.payload.whitePlayer)
+          } else {
+            setPlayerInfo(message.payload.whitePlayer)
+            setOppenentInfo(message.payload.blackPlayer)
+          }
           setPlayer1TimeConsumed(message.payload.player1TimeConsumed);
           setPlayer2TimeConsumed(message.payload.player2TimeConsumed);
           console.error(message.payload);
@@ -196,8 +230,10 @@ export const Game = () => {
           },
         }),
       );
+    }else{
+      setResult(null)
     }
-  }, [chess, socket]);
+  }, [chess, socket,result]);
 
   useEffect(() => {
     if (started) {
@@ -240,7 +276,7 @@ export const Game = () => {
       {started && (
         <div className="justify-center flex pt-4 text-white">
           {(user.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w') ===
-          chess.turn()
+            chess.turn()
             ? 'Your turn'
             : "Opponent's turn"}
         </div>
@@ -251,23 +287,11 @@ export const Game = () => {
             <div className="text-white">
               <div className="flex justify-center">
                 <div>
-                  <div className="mb-4">
-                    {started && (
-                      <div className="flex justify-between">
-                        <UserAvatar
-                          name={
-                            user.id === gameMetadata?.whitePlayer?.id
-                              ? gameMetadata?.blackPlayer?.name
-                              : gameMetadata?.whitePlayer?.name ?? ''
-                          }
-                        />
-                        {getTimer(
-                          user.id === gameMetadata?.whitePlayer?.id
-                            ? player2TimeConsumed
-                            : player1TimeConsumed,
-                        )}
-                      </div>
-                    )}
+                  <div className='mb-4'>
+                    {started && <div className="flex justify-between">
+                      <UserAvatar name={oppenentInfo?.name ?? ''} rating={oppenentInfo?.rating ?? 0} />
+                      {getTimer(user.id === gameMetadata?.whitePlayer?.id ? player2TimeConsumed : player1TimeConsumed)}
+                    </div>}
                   </div>
                   <div>
                     <div
@@ -286,22 +310,19 @@ export const Game = () => {
                       />
                     </div>
                   </div>
-                  {started && (
-                    <div className="mt-4 flex justify-between">
-                      <UserAvatar
-                        name={
-                          user.id === gameMetadata?.blackPlayer?.id
-                            ? gameMetadata?.blackPlayer?.name
-                            : gameMetadata?.whitePlayer?.name ?? ''
-                        }
-                      />
-                      {getTimer(
-                        user.id === gameMetadata?.blackPlayer?.id
+                  {(started || result) &&
+                    <div>
+                      <div className="mt-4 flex justify-between">
+                        <UserAvatar name={playerInfo?.name ?? ''} rating={playerInfo?.rating ?? 0} />
+                        {getTimer(user.id === gameMetadata?.blackPlayer?.id
                           ? player2TimeConsumed
-                          : player1TimeConsumed,
-                      )}
+                          : player1TimeConsumed)}
+                      </div>
+                      {!result &&
+                        <div className="text-white">win:{playerInfo?.expectedRating?.win}/draw:{playerInfo?.expectedRating?.draw}/lose:{playerInfo?.expectedRating?.lose}</div>
+                      }
                     </div>
-                  )}
+                  }
                 </div>
               </div>
             </div>
