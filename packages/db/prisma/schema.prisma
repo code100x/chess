@@ -83,6 +83,5 @@ enum TimeControl {
 enum AuthProvider {
   EMAIL
   GOOGLE
-  FACEBOOK
   GITHUB
 }
