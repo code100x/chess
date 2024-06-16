@@ -7,6 +7,7 @@ import { Suspense } from 'react';
 import { RecoilRoot } from 'recoil';
 import { Loader } from './components/Loader';
 import { Layout } from './layout';
+import SFU from './screens/SFU';
 
 function App() {
   return (
@@ -32,6 +33,10 @@ function AuthApp() {
         <Route
           path="/game/:gameId"
           element={<Layout children={<Game />} />}
+        />
+        <Route
+          path="/sfu"
+          element={<Layout children={<SFU />} />}
         />
       </Routes>
     </BrowserRouter>
