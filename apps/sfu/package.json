@@ -1,0 +1,23 @@
+{
+  "name": "sfu",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js",
+    "start": "MEDIASOUP_WORKER_BIN=\"$(node -p 'path.resolve(__dirname, \"../../node_modules/mediasoup/worker/out/Release/mediasoup-worker\")')\" node dist/index.js",
+    "dev": "npm run build && npm run start"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "mediasoup": "^3.14.6",
+    "ws": "^8.17.0",
+    "@repo/common" : "*"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
+}

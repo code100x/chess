@@ -7,6 +7,7 @@ import { Suspense } from 'react';
 import { RecoilRoot } from 'recoil';
 import { Loader } from './components/Loader';
 import { Layout } from './layout';
+import Meet from './screens/Meet';
 
 function App() {
   return (
@@ -32,6 +33,9 @@ function AuthApp() {
         <Route
           path="/game/:gameId"
           element={<Layout children={<Game />} />}
+        />
+        <Route path='/meeting/:roomId' 
+          element = {<Layout children={<Meet />}></Layout>}
         />
       </Routes>
     </BrowserRouter>
