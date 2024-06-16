@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/hooks/useSidebar';
 import { buttonVariants } from '@/components/ui/button';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import {
   Accordion,
   AccordionContent,
@@ -81,9 +81,9 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
               </AccordionTrigger>
               <AccordionContent className="mt-2 space-y-4 pb-1">
                 {item.children?.map((child) => (
-                  <a
+                  <Link
                     key={child.title}
-                    href={child.href}
+                    to={child.href}
                     onClick={() => {
                       if (setOpen) setOpen(false);
                     }}
@@ -103,7 +103,7 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
                     >
                       {child.title}
                     </div>
-                  </a>
+                  </Link>
                 ))}
               </AccordionContent>
             </AccordionItem>
@@ -118,9 +118,9 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
             }
           >
             {' '}
-            <a
+            <Link
               key={item.title}
-              href={item.href}
+              to={item.href}
               onClick={() => {
                 if (setOpen) setOpen(false);
               }}
@@ -140,7 +140,7 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
               >
                 {item.title}
               </span>
-            </a>
+            </Link>
           </div>
         ),
       )}
