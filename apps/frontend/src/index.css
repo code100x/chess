@@ -74,8 +74,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-.chess-board {
-  background-color: #302e2b;
-}
-
