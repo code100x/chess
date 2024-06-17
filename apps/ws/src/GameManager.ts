@@ -171,10 +171,12 @@ export class GameManager {
               blackPlayer: {
                 id: gameFromDb.blackPlayer.id,
                 name: gameFromDb.blackPlayer.name,
+                avatar: gameFromDb.blackPlayer.avatar,
               },
               whitePlayer: {
                 id: gameFromDb.whitePlayer.id,
                 name: gameFromDb.whitePlayer.name,
+                avatar: gameFromDb.whitePlayer.avatar,
               },
               player1TimeConsumed: availableGame.getPlayer1TimeConsumed(),
               player2TimeConsumed: availableGame.getPlayer2TimeConsumed(),

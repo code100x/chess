@@ -19,6 +19,7 @@ model User {
   gamesAsBlack  Game[]   @relation("GamesAsBlack")
   createdAt     DateTime @default(now())
   lastLogin     DateTime?
+  avatar        String   @default("https://t4.ftcdn.net/jpg/03/46/93/61/360_F_346936114_RaxE6OQogebgAWTalE1myseY1Hbb5qPM.jpg")
 
   @@index([rating])
 }
