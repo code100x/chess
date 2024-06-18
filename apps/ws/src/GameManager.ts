@@ -122,7 +122,7 @@ export class GameManager {
         // There is a game created but no second player available
         
         if (availableGame && !availableGame.player2UserId) {
-          SocketManager.getInstance().addUser(user, availableGame.gameId);
+          socketManager.addUser(user, availableGame.gameId);
           await availableGame.updateSecondPlayer(user.userId);
           return;
         }
