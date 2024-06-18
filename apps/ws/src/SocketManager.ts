@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { WebSocket } from 'ws';
+import { NEW_MSG } from './messages';
 
 export class User {
   public socket: WebSocket;
@@ -52,20 +53,33 @@ class SocketManager {
     });
   }
 
+  sendMessage(user: User, msgSentTo: string, message: string) {
+    const roomId = this.userRoomMappping.get(user.userId);
+    if (!roomId) {
+      console.error('No User available');
+      return;
+    }
+    const room = this.interestedSockets.get(roomId) || [];
+
+    const player2 = room.find((player) => player.userId === msgSentTo);
+    player2 &&
+      player2.socket.send(
+        JSON.stringify({
+          type: NEW_MSG,
+          payload: { msg: message },
+        }),
+      );
+  }
+
   removeUser(user: User) {
     const roomId = this.userRoomMappping.get(user.userId);
     if (!roomId) {
       console.error('User was not interested in any room?');
       return;
     }
-    const room = this.interestedSockets.get(roomId) || []
-    const remainingUsers = room.filter(u =>
-      u.userId !== user.userId
-    )
-    this.interestedSockets.set(
-      roomId,
-      remainingUsers
-    );
+    const room = this.interestedSockets.get(roomId) || [];
+    const remainingUsers = room.filter((u) => u.userId !== user.userId);
+    this.interestedSockets.set(roomId, remainingUsers);
     if (this.interestedSockets.get(roomId)?.length === 0) {
       this.interestedSockets.delete(roomId);
     }

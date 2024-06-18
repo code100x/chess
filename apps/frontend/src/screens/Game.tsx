@@ -23,6 +23,7 @@ export const GAME_ADDED = 'game_added';
 export const USER_TIMEOUT = 'user_timeout';
 export const GAME_TIME = 'game_time';
 export const GAME_ENDED = 'game_ended';
+export const NEW_MSG = 'new_msg';
 export enum Result {
   WHITE_WINS = 'WHITE_WINS',
   BLACK_WINS = 'BLACK_WINS',
@@ -32,7 +33,6 @@ export interface GameResult {
   result: Result;
   by: string;
 }
-
 
 const GAME_TIME_MS = 10 * 60 * 1000;
 
@@ -62,10 +62,8 @@ export const Game = () => {
   const [added, setAdded] = useState(false);
   const [started, setStarted] = useState(false);
   const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
-  const [result, setResult] = useState<
-    GameResult
-    | null
-  >(null);
+  const [result, setResult] = useState<GameResult | null>(null);
+  const [myMessage, setMyMessage] = useState<string>('');
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
   const [gameID,setGameID] = useState("");
@@ -132,9 +130,18 @@ export const Game = () => {
           setResult(message.payload.result);
           break;
 
+        case NEW_MSG:
+          console.log(NEW_MSG);
+          setMyMessage(message.payload.msg);
+          break;
+
         case GAME_ENDED:
-          const wonBy = message.payload.status === 'COMPLETED' ? 
-            message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw' : 'Timeout';
+          const wonBy =
+            message.payload.status === 'COMPLETED'
+              ? message.payload.result !== 'DRAW'
+                ? 'CheckMate'
+                : 'Draw'
+              : 'Timeout';
           setResult({
             result: message.payload.result,
             by: wonBy,
@@ -150,8 +157,7 @@ export const Game = () => {
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
           });
-          
-        
+
           break;
 
         case USER_TIMEOUT:
@@ -272,9 +278,7 @@ export const Game = () => {
                     </div>
                   )}
                   <div>
-                    <div
-                      className={`w-full flex justify-center text-white`}
-                    >
+                    <div className={`w-full flex justify-center text-white`}>
                       <ChessBoard
                         started={started}
                         gameId={gameId ?? ''}
@@ -334,7 +338,12 @@ export const Game = () => {
                 </div>
               )}
               <div>
-                <MovesTable />
+                <MovesTable
+                  gameId={gameId ?? ''}
+                  socket={socket}
+                  myMessage={myMessage}
+                  started={started}
+                />
               </div>
             </div>
           </div>

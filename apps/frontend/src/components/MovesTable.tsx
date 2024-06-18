@@ -4,7 +4,7 @@ import {
   userSelectedMoveIndexAtom,
 } from '@repo/store/chessBoard';
 import { Move } from 'chess.js';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   HandshakeIcon,
@@ -14,15 +14,29 @@ import {
   ChevronLeft,
   ChevronRight,
   RefreshCw,
+  ArrowUpDownIcon,
 } from 'lucide-react';
+import { ChatRoom } from './ChatRoom';
 
-const MovesTable = () => {
+const MovesTable = ({
+  gameId,
+  socket,
+  myMessage,
+  started,
+}: {
+  gameId: string;
+  socket: WebSocket;
+  myMessage: string;
+  started: boolean;
+}) => {
   const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
     userSelectedMoveIndexAtom,
   );
   const setIsFlipped = useSetRecoilState(isBoardFlippedAtom);
   const moves = useRecoilValue(movesAtom);
   const movesTableRef = useRef<HTMLInputElement>(null);
+  const [newMessage, setNewMessage] = useState<boolean>(false);
+  const [toggleMove, setToggleMove] = useState<boolean>(true);
   const movesArray = moves.reduce((result, _, index: number, array: Move[]) => {
     if (index % 2 === 0) {
       result.push(array.slice(index, index + 2));
@@ -39,49 +53,9 @@ const MovesTable = () => {
     }
   }, [moves]);
   return (
-    <div className="text-[#C3C3C0] relative w-full ">
-      <div
-        className="text-sm h-[45vh] max-h-[45vh] overflow-y-auto"
-        ref={movesTableRef}
-      >
-        {movesArray.map((movePairs, index) => {
-          return (
-            <div
-              key={index}
-              className={`w-full py-px px-4 font-bold items-stretch ${index % 2 !== 0 ? 'bg-[#2B2927]' : ''}`}
-            >
-              <div className="grid grid-cols-6 gap-16 w-4/5">
-                <span className="text-[#C3C3C0] px-2 py-1.5">{`${index + 1}.`}</span>
-
-                {movePairs.map((move, movePairIndex) => {
-                  const isLastIndex =
-                    movePairIndex === movePairs.length - 1 &&
-                    movesArray.length - 1 === index;
-                  const isHighlighted =
-                    userSelectedMoveIndex !== null
-                      ? userSelectedMoveIndex === index * 2 + movePairIndex
-                      : isLastIndex;
-                  const { san } = move;
-
-                  return (
-                    <div
-                      key={movePairIndex}
-                      className={`col-span-2 cursor-pointer flex items-center w-full pl-1 ${isHighlighted ? 'bg-[#484644] rounded border-b-[#5A5858] border-b-[3px]' : ''}`}
-                      onClick={() => {
-                        setUserSelectedMoveIndex(index * 2 + movePairIndex);
-                      }}
-                    >
-                      <span className="text-[#C3C3C0]">{san}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      {moves.length ? (
-        <div className="w-full p-2 bg-[#20211D] flex items-center justify-between">
+    <div className="text-[#C3C3C0] relative w-full">
+      {started ? (
+        <div className="w-[100vh] p-2 bg-[#20211D] flex items-center justify-between">
           <div className="flex gap-4">
             <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
               {<HandshakeIcon size={16} />}
@@ -90,6 +64,21 @@ const MovesTable = () => {
             <button className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1">
               {<FlagIcon size={16} />}
               Resign
+            </button>
+            <button
+              className="flex items-center gap-2 hover:bg-[#32302E] rounded px-2.5 py-1 border relative"
+              onClick={() => {
+                setToggleMove((p) => !p);
+                setNewMessage(false);
+              }}
+            >
+              {<ArrowUpDownIcon size={16} />}
+              {toggleMove ? 'Moves' : 'Message'}
+              {toggleMove && newMessage && (
+                <span className=" absolute top-1 right-1 bg-red-700 text-white text-xs py-1 px-1 rounded-full leading-3">
+                  {' '}
+                </span>
+              )}
             </button>
           </div>
           <div className="flex gap-1">
@@ -151,6 +140,56 @@ const MovesTable = () => {
           </div>
         </div>
       ) : null}
+      <div
+        className="text-sm h-[65vh] max-h-[85vh] overflow-y-auto w-full"
+        ref={movesTableRef}
+      >
+        <div className={`${toggleMove ? 'block' : 'hidden'}`}>
+          {movesArray.map((movePairs, index) => {
+            return (
+              <div
+                key={index}
+                className={`w-full py-px px-4 font-bold items-stretch ${index % 2 !== 0 ? 'bg-[#2B2927]' : ''}`}
+              >
+                <div className="grid grid-cols-6 gap-16 w-4/5">
+                  <span className="text-[#C3C3C0] px-1.5 py-1.5">{`${index + 1}.`}</span>
+
+                  {movePairs.map((move, movePairIndex) => {
+                    const isLastIndex =
+                      movePairIndex === movePairs.length - 1 &&
+                      movesArray.length - 1 === index;
+                    const isHighlighted =
+                      userSelectedMoveIndex !== null
+                        ? userSelectedMoveIndex === index * 2 + movePairIndex
+                        : isLastIndex;
+                    const { san } = move;
+
+                    return (
+                      <div
+                        key={movePairIndex}
+                        className={`col-span-2 cursor-pointer flex items-center w-full pl-1 ${isHighlighted ? 'bg-[#484644] rounded border-b-[#5A5858] border-b-[3px]' : ''}`}
+                        onClick={() => {
+                          setUserSelectedMoveIndex(index * 2 + movePairIndex);
+                        }}
+                      >
+                        <span className="text-[#C3C3C0]">{san}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className={`${toggleMove ? 'hidden' : 'block'} w-full`}>
+          <ChatRoom
+            gameId={gameId ?? ''}
+            socket={socket}
+            myMessage={myMessage}
+            setNewMessage={setNewMessage}
+          />
+        </div>
+      </div>
     </div>
   );
 };
