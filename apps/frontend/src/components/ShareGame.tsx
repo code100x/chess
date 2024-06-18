@@ -3,7 +3,7 @@ import { Button } from "./Button";
 
 export const ShareGame = ({className,gameId}:{className?:string,gameId:string}) => {
 
-    const [url] = useState(window.origin+"/game/"+gameId);
+    const url = window.origin+"/game/"+gameId;
     const [copied,setCopied] = useState(false);
 
     const handleCopy = ()=>{
