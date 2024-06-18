@@ -41,6 +41,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
 import GameEndModal from '@/components/GameEndModal';
 import { Waitopponent } from '@/components/ui/waitopponent';
+import { ShareGame } from '../components/ShareGame';
 
 const moveAudio = new Audio(MoveSound);
 
@@ -67,7 +68,7 @@ export const Game = () => {
   >(null);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
-
+  const [gameID,setGameID] = useState("");
   const setMoves = useSetRecoilState(movesAtom);
   const userSelectedMoveIndex = useRecoilValue(userSelectedMoveIndexAtom);
   const userSelectedMoveIndexRef = useRef(userSelectedMoveIndex);
@@ -91,6 +92,7 @@ export const Game = () => {
       switch (message.type) {
         case GAME_ADDED:
           setAdded(true);
+          setGameID((p)=>message.gameId);
           break;
         case INIT_GAME:
           setBoard(chess.board());
@@ -305,11 +307,15 @@ export const Game = () => {
                 </div>
               </div>
             </div>
-            <div className="rounded-md pt-2 bg-bgAuxiliary3 flex-1 overflow-auto h-[95vh]">
+            <div className="rounded-md pt-2 bg-bgAuxiliary3 flex-1 overflow-auto h-[95vh] overflow-y-scroll no-scrollbar">
               {!started && (
                 <div className="pt-8 flex justify-center w-full">
                   {added ? (
-                    <div className="text-white"><Waitopponent/></div>
+                    <div className='flex flex-col items-center space-y-4 justify-center'>
+                      <div className="text-white"><Waitopponent/></div>
+                      <ShareGame gameId={gameID}/>
+                    </div>
+                    
                   ) : (
                     gameId === 'random' && (
                       <Button
