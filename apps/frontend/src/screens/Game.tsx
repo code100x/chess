@@ -129,12 +129,9 @@ export const Game = () => {
           break;
 
         case GAME_ENDED:
-          const wonBy =
-            message.payload.status === 'COMPLETED'
-              ? message.payload.result !== 'DRAW'
-                ? 'CheckMate'
-                : 'Draw'
-              : 'Timeout';
+          const wonBy = message.payload.status === 'COMPLETED' ? 
+            message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw' 
+            :  message.payload.status === 'PLAYER_EXIT'? 'Player Exit' : 'Timeout';
           setResult({
             result: message.payload.result,
             by: wonBy,
