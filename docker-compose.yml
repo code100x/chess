@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   postgres:
-    image: postgres
+    image: postgres:15
     container_name: postgres_container
     networks:
       - my_network
@@ -53,7 +53,7 @@ services:
       - my_network
 
   websocket:
-    image: ws_img:latest
+    image: chess:ws_img
     build:
       context: .
       dockerfile: Dockerfile
