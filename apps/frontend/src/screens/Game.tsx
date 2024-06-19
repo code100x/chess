@@ -23,6 +23,7 @@ export const GAME_ADDED = 'game_added';
 export const USER_TIMEOUT = 'user_timeout';
 export const GAME_TIME = 'game_time';
 export const GAME_ENDED = 'game_ended';
+export const EXIT_GAME = 'exit_game';
 export enum Result {
   WHITE_WINS = 'WHITE_WINS',
   BLACK_WINS = 'BLACK_WINS',
@@ -33,7 +34,6 @@ export interface GameResult {
   by: string;
 }
 
-
 const GAME_TIME_MS = 10 * 60 * 1000;
 
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -42,6 +42,7 @@ import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
 import GameEndModal from '@/components/GameEndModal';
 import { Waitopponent } from '@/components/ui/waitopponent';
 import { ShareGame } from '../components/ShareGame';
+import ExitGameModel from '@/components/ExitGameModel';
 
 const moveAudio = new Audio(MoveSound);
 
@@ -62,10 +63,7 @@ export const Game = () => {
   const [added, setAdded] = useState(false);
   const [started, setStarted] = useState(false);
   const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
-  const [result, setResult] = useState<
-    GameResult
-    | null
-  >(null);
+  const [result, setResult] = useState<GameResult | null>(null);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
   const [gameID,setGameID] = useState("");
@@ -133,25 +131,25 @@ export const Game = () => {
           break;
 
         case GAME_ENDED:
-          const wonBy = message.payload.status === 'COMPLETED' ? 
-            message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw' : 'Timeout';
+          let wonBy;
+          switch (message.payload.status) {
+            case 'COMPLETED':
+              wonBy = message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw';
+              break;
+            case 'PLAYER_EXIT':
+              wonBy = 'Player Exit';
+              break;
+            default:
+              wonBy = 'Timeout';
+          }
           setResult({
             result: message.payload.result,
             by: wonBy,
           });
           chess.reset();
-          setMoves(() => {
-            message.payload.moves.map((curr_move: Move) => {
-              chess.move(curr_move as Move);
-            });
-            return message.payload.moves;
-          });
-          setGameMetadata({
-            blackPlayer: message.payload.blackPlayer,
-            whitePlayer: message.payload.whitePlayer,
-          });
-          
-        
+          setStarted(false);
+          setAdded(false);
+
           break;
 
         case USER_TIMEOUT:
@@ -228,6 +226,19 @@ export const Game = () => {
     );
   };
 
+  const handleExit = () => {
+    socket?.send(
+      JSON.stringify({
+        type: EXIT_GAME,
+        payload: {
+          gameId,
+        },
+      }),
+    );
+    setMoves([]);
+    navigate('/');
+  };
+
   if (!socket) return <div>Connecting...</div>;
 
   return (
@@ -255,26 +266,24 @@ export const Game = () => {
                 <div>
                   {started && (
                     <div className="mb-4">
-                    <div className="flex justify-between">
-                      <UserAvatar
-                        name={
+                      <div className="flex justify-between">
+                        <UserAvatar
+                          name={
+                            user.id === gameMetadata?.whitePlayer?.id
+                              ? gameMetadata?.blackPlayer?.name
+                              : gameMetadata?.whitePlayer?.name ?? ''
+                          }
+                        />
+                        {getTimer(
                           user.id === gameMetadata?.whitePlayer?.id
-                            ? gameMetadata?.blackPlayer?.name
-                            : gameMetadata?.whitePlayer?.name ?? ''
-                        }
-                      />
-                      {getTimer(
-                        user.id === gameMetadata?.whitePlayer?.id
-                          ? player2TimeConsumed
-                          : player1TimeConsumed,
-                      )}
-                    </div>
+                            ? player2TimeConsumed
+                            : player1TimeConsumed,
+                        )}
+                      </div>
                     </div>
                   )}
                   <div>
-                    <div
-                      className={`w-full flex justify-center text-white`}
-                    >
+                    <div className={`w-full flex justify-center text-white`}>
                       <ChessBoard
                         started={started}
                         gameId={gameId ?? ''}
@@ -308,14 +317,13 @@ export const Game = () => {
               </div>
             </div>
             <div className="rounded-md pt-2 bg-bgAuxiliary3 flex-1 overflow-auto h-[95vh] overflow-y-scroll no-scrollbar">
-              {!started && (
+              {!started ? (
                 <div className="pt-8 flex justify-center w-full">
                   {added ? (
                     <div className='flex flex-col items-center space-y-4 justify-center'>
                       <div className="text-white"><Waitopponent/></div>
                       <ShareGame gameId={gameID}/>
                     </div>
-                    
                   ) : (
                     gameId === 'random' && (
                       <Button
@@ -331,6 +339,10 @@ export const Game = () => {
                       </Button>
                     )
                   )}
+                </div>
+              ) : (
+                <div className="p-8 flex justify-center w-full">
+                  <ExitGameModel onClick={() => handleExit()} />
                 </div>
               )}
               <div>

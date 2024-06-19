@@ -65,6 +65,7 @@ enum GameStatus {
   COMPLETED
   ABANDONED
   TIME_UP
+  PLAYER_EXIT
 }
 
 enum GameResult {

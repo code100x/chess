@@ -8,7 +8,7 @@ import { db } from './db';
 import { randomUUID } from 'crypto';
 import { socketManager, User } from './SocketManager';
 
-type GAME_STATUS = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'TIME_UP';
+type GAME_STATUS = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'TIME_UP' | 'PLAYER_EXIT';
 type GAME_RESULT = "WHITE_WINS" | "BLACK_WINS" | "DRAW";
 
 const GAME_TIME_MS = 10 * 60 * 60 * 1000;
@@ -311,6 +311,10 @@ export class Game {
     this.moveTimer = setTimeout(() => {
       this.endGame("TIME_UP", turn === 'b' ? 'WHITE_WINS' : 'BLACK_WINS');
     }, timeLeft);
+  }
+
+  async exitGame(user : User) {
+    this.endGame('PLAYER_EXIT', user.userId === this.player2UserId ? 'WHITE_WINS' : 'BLACK_WINS');
   }
 
   async endGame(status: GAME_STATUS, result: GAME_RESULT) {

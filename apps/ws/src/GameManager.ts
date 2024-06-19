@@ -11,6 +11,7 @@ import {
   GAME_ALERT,
   GAME_ADDED,
   GAME_ENDED,
+  EXIT_GAME,
 } from './messages';
 import { Game, isPromoting } from './Game';
 import { db } from './db';
@@ -96,6 +97,16 @@ export class GameManager {
           if (game.result)  {
             this.removeGame(game.gameId);
           }
+        }
+      }
+
+      if (message.type === EXIT_GAME){
+        const gameId = message.payload.gameId;
+        const game = this.games.find((game) => game.gameId === gameId);
+
+        if (game) {
+          game.exitGame(user);
+          this.removeGame(game.gameId)
         }
       }
 
