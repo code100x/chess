@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import MoveSound from '/move.wav';
 import { Button } from '../components/Button';
-import { ChessBoard, isPromoting } from '../components/ChessBoard';
+import { ChessBoard } from '../components/ChessBoard';
 import { useSocket } from '../hooks/useSocket';
 import { Chess, Move } from 'chess.js';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -33,7 +33,6 @@ export interface GameResult {
   by: string;
 }
 
-
 const GAME_TIME_MS = 10 * 60 * 1000;
 
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -62,10 +61,7 @@ export const Game = () => {
   const [added, setAdded] = useState(false);
   const [started, setStarted] = useState(false);
   const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
-  const [result, setResult] = useState<
-    GameResult
-    | null
-  >(null);
+  const [result, setResult] = useState<GameResult | null>(null);
   const [player1TimeConsumed, setPlayer1TimeConsumed] = useState(0);
   const [player2TimeConsumed, setPlayer2TimeConsumed] = useState(0);
   const [gameID,setGameID] = useState("");
@@ -113,15 +109,7 @@ export const Game = () => {
             return;
           }
           try {
-            if (isPromoting(chess, move.from, move.to)) {
-              chess.move({
-                from: move.from,
-                to: move.to,
-                promotion: 'q',
-              });
-            } else {
-              chess.move({ from: move.from, to: move.to });
-            }
+            chess.move(move);
             setMoves((moves) => [...moves, move]);
             moveAudio.play();
           } catch (error) {
@@ -133,8 +121,12 @@ export const Game = () => {
           break;
 
         case GAME_ENDED:
-          const wonBy = message.payload.status === 'COMPLETED' ? 
-            message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw' : 'Timeout';
+          const wonBy =
+            message.payload.status === 'COMPLETED'
+              ? message.payload.result !== 'DRAW'
+                ? 'CheckMate'
+                : 'Draw'
+              : 'Timeout';
           setResult({
             result: message.payload.result,
             by: wonBy,
@@ -150,8 +142,7 @@ export const Game = () => {
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
           });
-          
-        
+
           break;
 
         case USER_TIMEOUT:
@@ -159,6 +150,9 @@ export const Game = () => {
           break;
 
         case GAME_JOINED:
+          if(gameId != message.payload.gameId) {
+            navigate(`/game/${message.payload.gameId}`);
+          }
           setGameMetadata({
             blackPlayer: message.payload.blackPlayer,
             whitePlayer: message.payload.whitePlayer,
@@ -169,11 +163,7 @@ export const Game = () => {
           setStarted(true);
 
           message.payload.moves.map((x: Move) => {
-            if (isPromoting(chess, x.from, x.to)) {
-              chess.move({ ...x, promotion: 'q' });
-            } else {
-              chess.move(x);
-            }
+            chess.move(x);
           });
           setMoves(message.payload.moves);
           break;
@@ -272,9 +262,7 @@ export const Game = () => {
                     </div>
                   )}
                   <div>
-                    <div
-                      className={`w-full flex justify-center text-white`}
-                    >
+                    <div className={`w-full flex justify-center text-white`}>
                       <ChessBoard
                         started={started}
                         gameId={gameId ?? ''}
@@ -315,7 +303,6 @@ export const Game = () => {
                       <div className="text-white"><Waitopponent/></div>
                       <ShareGame gameId={gameID}/>
                     </div>
-                    
                   ) : (
                     gameId === 'random' && (
                       <Button
