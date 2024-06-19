@@ -94,9 +94,12 @@ router.get(
 router.get(
   '/github/callback',
   passport.authenticate('github', {
-    successRedirect: CLIENT_URL,
+    // successRedirect: CLIENT_URL,
     failureRedirect: '/login/failed',
   }),
+  (req, res) => {
+    res.redirect('/auth/capture-mode');
+  },
 );
 
 router.get(

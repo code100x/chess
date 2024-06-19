@@ -9,9 +9,9 @@ import { BackgroundSvg, Button, Container, Loading, Logo, Text } from '~/compone
 import { storedCookie } from '~/store/atoms';
 
 const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-const signIn = async () => {
+const signIn = async (provider: string) => {
   try {
-    const authUrl = `${apiUrl}/auth/google`;
+    const authUrl = `${apiUrl}/auth/${provider}`;
     await openAuthSessionAsync(authUrl);
   } catch (error) {
     console.log(error);
@@ -31,7 +31,10 @@ export default function SignIn() {
   }, [cookie]);
 
   const handlePressGoogle = () => {
-    signIn();
+    signIn('google');
+  };
+  const handlePressGithub = () => {
+    signIn('github');
   };
   return (
     <>
@@ -58,7 +61,7 @@ export default function SignIn() {
               className="flex-row gap-x-4 rounded-xl"
               roundClass="rounded-xl"
               size="lg"
-              onPress={() => console.log('Button pressed: GITHUB')}>
+              onPress={handlePressGithub}>
               <AntDesign name="github" size={24} color="white" />
               <Text className="text-xl font-bold text-white">Login with Github</Text>
             </Button>
