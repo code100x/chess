@@ -41,6 +41,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
 import GameEndModal from '@/components/GameEndModal';
 import { Waitopponent } from '@/components/ui/waitopponent';
+
 import ExitGameModel from '@/components/ExitGameModel';
 
 const moveAudio = new Audio(MoveSound);
@@ -129,25 +130,24 @@ export const Game = () => {
           break;
 
         case GAME_ENDED:
-          const wonBy = message.payload.status === 'COMPLETED' ? 
-            message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw' 
-            :  message.payload.status === 'PLAYER_EXIT'? 'Player Exit' : 'Timeout';
+          let wonBy;
+          switch (message.payload.status) {
+            case 'COMPLETED':
+              wonBy = message.payload.result !== 'DRAW' ? 'CheckMate' : 'Draw';
+              break;
+            case 'PLAYER_EXIT':
+              wonBy = 'Player Exit';
+              break;
+            default:
+              wonBy = 'Timeout';
+          }
           setResult({
             result: message.payload.result,
             by: wonBy,
           });
           chess.reset();
-          setMoves(() => {
-            message.payload.moves.map((curr_move: Move) => {
-              chess.move(curr_move as Move);
-            });
-            return message.payload.moves;
-          });
-          setGameMetadata({
-            blackPlayer: message.payload.blackPlayer,
-            whitePlayer: message.payload.whitePlayer,
-          });
           setStarted(false);
+          setAdded(false);
 
           break;
 
@@ -234,6 +234,7 @@ export const Game = () => {
         },
       }),
     );
+    setMoves([]);
     navigate('/');
   };
 
