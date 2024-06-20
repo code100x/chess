@@ -7,8 +7,7 @@ import dotenv from 'dotenv';
 import session from 'express-session';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
-
-export const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000;
+import { COOKIE_MAX_AGE } from './consts';
 
 const app = express();
 

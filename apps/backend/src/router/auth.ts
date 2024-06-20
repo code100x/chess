@@ -3,7 +3,7 @@ import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import { db } from '../db';
 import { v4 as uuidv4 } from 'uuid';
-import { COOKIE_MAX_AGE } from '..';
+import { COOKIE_MAX_AGE } from '../consts';
 const router = Router();
 
 const CLIENT_URL =
