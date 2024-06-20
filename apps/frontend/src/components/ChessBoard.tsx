@@ -1,5 +1,5 @@
 import { Chess, Color, Move, PieceSymbol, Square } from 'chess.js';
-import { MouseEvent, useEffect, useState } from 'react';
+import { MouseEvent, memo, useEffect, useState } from 'react';
 import { MOVE } from '../screens/Game';
 import LetterNotation from './chess-board/LetterNotation';
 import LegalMoveIndicator from './chess-board/LegalMoveIndicator';
@@ -8,8 +8,8 @@ import NumberNotation from './chess-board/NumberNotation';
 import { drawArrow } from '../utils/canvas';
 import useWindowSize from '../hooks/useWindowSize';
 import Confetti from 'react-confetti';
-import MoveSound from '../../public/move.wav';
-import CaptureSound from '../../public/capture.wav';
+import MoveSound from '/move.wav';
+import CaptureSound from '/capture.wav';
 
 import { useRecoilState } from 'recoil';
 
@@ -44,7 +44,7 @@ export function isPromoting(chess: Chess, from: Square, to: Square) {
     .includes(to);
 }
 
-export const ChessBoard = ({
+export const ChessBoard = memo(({
   gameId,
   started,
   myColor,
@@ -73,7 +73,7 @@ export const ChessBoard = ({
   } | null)[][];
   socket: WebSocket;
 }) => {
-  const { height, width } = useWindowSize();
+  console.log("chessboard reloaded")
 
   const [isFlipped, setIsFlipped] = useRecoilState(isBoardFlippedAtom);
   const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
@@ -92,11 +92,7 @@ export const ChessBoard = ({
 
   const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
-  const OFFSET = 100;
-  const boxSize =
-    width > height
-      ? Math.floor((height - OFFSET) / 8)
-      : Math.floor((width - OFFSET) / 8);
+  const boxSize = 80;
   const [gameOver, setGameOver] = useState(false);
   const moveAudio = new Audio(MoveSound);
   const captureAudio = new Audio(CaptureSound);
@@ -336,7 +332,7 @@ export const ChessBoard = ({
                         height: boxSize,
                       }}
                       key={j}
-                      className={`${isRightClickedSquare ? (isMainBoxColor ? 'bg-[#CF664E]' : 'bg-[#E87764]') : isKingInCheckSquare ? 'bg-[#FF6347]' : isHighlightedSquare ? `${isMainBoxColor ? 'bg-[#BBCB45]' : 'bg-[#F4F687]'}` : isMainBoxColor ? 'bg-[#739552]' : 'bg-[#EBEDD0]'} ${''}`}
+                      className={`${isRightClickedSquare ? (isMainBoxColor ? 'bg-[#CF664E]' : 'bg-[#E87764]') : isKingInCheckSquare ? 'bg-[#FF6347]' : isHighlightedSquare ? `${isMainBoxColor ? 'bg-[#BBCB45]' : 'bg-[#F4F687]'}` : isMainBoxColor ? 'bg-boardDark' : 'bg-boardLight'} ${''}`}
                       onContextMenu={(e) => {
                         e.preventDefault();
                       }}
@@ -397,4 +393,4 @@ export const ChessBoard = ({
       </div>
     </>
   );
-};
+});

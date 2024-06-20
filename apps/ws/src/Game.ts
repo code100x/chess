@@ -6,10 +6,9 @@ import {
 } from './messages';
 import { db } from './db';
 import { randomUUID } from 'crypto';
-import { SocketManager, User } from './SocketManager';
-import { AuthProvider } from '@prisma/client';
+import { socketManager, User } from './SocketManager';
 
-type GAME_STATUS = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'TIME_UP';
+type GAME_STATUS = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'TIME_UP' | 'PLAYER_EXIT';
 type GAME_RESULT = "WHITE_WINS" | "BLACK_WINS" | "DRAW";
 
 const GAME_TIME_MS = 10 * 60 * 60 * 1000;
@@ -71,11 +70,10 @@ export class Game {
     from: string;
     to: string;
     comments: string | null;
-    startFen: string;
-    endFen: string;
     timeTaken: number | null;
     createdAt: Date;
   }[]) {
+    console.log(moves);
     moves.forEach((move) => {
       if (
         isPromoting(this.board, move.from as Square, move.to as Square)
@@ -93,7 +91,9 @@ export class Game {
       }
     });
     this.moveCount = moves.length;
-    this.lastMoveTime = moves[moves.length - 1].createdAt;
+    if (moves[moves.length - 1]) {
+      this.lastMoveTime = moves[moves.length - 1].createdAt;
+    }
 
     moves.map((move, index) => {
       if (move.timeTaken) {
@@ -262,7 +262,7 @@ export class Game {
 
     this.lastMoveTime = moveTimestamp;
 
-    SocketManager.getInstance().broadcast(
+    socketManager.broadcast(
       this.gameId,
       JSON.stringify({
         type: MOVE,
@@ -318,6 +318,10 @@ export class Game {
     }, timeLeft);
   }
 
+  async exitGame(user : User) {
+    this.endGame('PLAYER_EXIT', user.userId === this.player2UserId ? 'WHITE_WINS' : 'BLACK_WINS');
+  }
+
   async endGame(status: GAME_STATUS, result: GAME_RESULT) {
     const updatedGame = await db.game.update({
       data: {
@@ -338,7 +342,7 @@ export class Game {
       }
     });
 
-    SocketManager.getInstance().broadcast(
+    socketManager.broadcast(
       this.gameId,
       JSON.stringify({
         type: GAME_ENDED,

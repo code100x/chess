@@ -3,17 +3,17 @@ import {
   VideoIcon,
   TwitterLogoIcon,
 } from '@radix-ui/react-icons';
+import { Link } from 'react-router-dom';
 
 export const Footer = () => {
   return (
-    <footer className="mt-40 border-t border-gray-600 py-16 text-white">
-      <div className="w-[96%] max-w-screen-lg mx-auto flex flex-row justify-between">
-        <div className="flex items-center">
-          <img
-            className="w-4 h-4 mt-[-5px]"
-            src="https://res.cloudinary.com/dcugqfvvg/image/upload/v1713654408/chess-svgrepo-com_m9g5p1.svg"
-          />
-          <h2 className="text-lg text-white">chess.100x</h2>
+    <footer className="mt-40 py-16 text-gray-400">
+      <div className="w-[96%] max-w-screen-lg mx-auto flex flex-col items-center justify-center">
+        <div>
+          <Link to={"/"}>Home</Link> |
+          <Link to={"/settings"}> Settings</Link> |
+          <Link to={"/login"}> Login</Link> |
+          <Link to={"/game/random"}> Play</Link>
         </div>
         <div>
           <div className="flex gap-3 mt-4">

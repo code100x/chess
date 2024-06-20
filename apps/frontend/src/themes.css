@@ -1,0 +1,19 @@
+:root {
+  --bg-color-main: #302e2b;
+  --text-color-main: #fff;
+  --bg-color-auxiliary-1: rgba(0, 0, 0, 0.2);
+  --bg-color-auxiliary-2: rgba(0, 0, 0, 0.6);
+  --bg-color-auxiliary-3: rgba(0, 0, 0, 0.1);
+  --board-light: #EBECD0;
+  --board-dark: #739552;
+}
+
+[data-theme="bubblegum"]:root {
+  --bg-color-main: #E6455E;
+  --text-color-main: #fff;
+  --bg-color-auxiliary-1: rgba(0, 0, 0, 0.2);
+  --bg-color-auxiliary-2: rgba(0, 0, 0, 0.6);
+  --bg-color-auxiliary-3: rgba(0, 0, 0, 0.1);
+  --board-light:#FEFFFE;
+  --board-dark: #FBD9E1;
+}
