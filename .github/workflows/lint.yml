@@ -1,0 +1,27 @@
+name: Lint, Format and Type check workflow
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  linting_and_type-checking:
+    name: Linting, Formatting and Type checking
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Linting and Formatting checks
+        run: yarn run lint
+
+      - name: Type checking
+        run: yarn run typecheck
