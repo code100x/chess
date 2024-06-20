@@ -16,7 +16,7 @@ interface userJwtClaims {
   isGuest?: boolean;
 }
 
-interface User {
+interface UserDetails {
   id: string;
   token?: string;
   name: string;
@@ -41,19 +41,19 @@ router.post('/guest', async (req: Request, res: Response) => {
     { userId: user.id, name: user.name, isGuest: true },
     JWT_SECRET,
   );
-  let User: User = {
+  const UserDetails: UserDetails = {
     id: user.id,
     name: user.name!,
     token: token,
     isGuest: true,
   };
   res.cookie('guest', token, { maxAge: COOKIE_MAX_AGE });
-  res.json(User);
+  res.json(UserDetails);
 });
 
 router.get('/refresh', async (req: Request, res: Response) => {
   if (req.user) {
-    const user = req.user as User;
+    const user = req.user as UserDetails;
 
     // Token is issued so it can be shared b/w HTTP and ws server
     // Todo: Make this temporary and add refresh logic here
@@ -76,7 +76,7 @@ router.get('/refresh', async (req: Request, res: Response) => {
       { userId: decoded.userId, name: decoded.name, isGuest: true },
       JWT_SECRET,
     );
-    let User: User = {
+    let User: UserDetails = {
       id: decoded.userId,
       name: decoded.name,
       token: token,
