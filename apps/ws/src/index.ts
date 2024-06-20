@@ -10,8 +10,8 @@ const gameManager = new GameManager();
 wss.on('connection', function connection(ws, req) {
   //@ts-ignore
   const token: string = url.parse(req.url, true).query.token;
-  const User = extractAuthUser(token, ws);
-  gameManager.addUser(User);
+  const user = extractAuthUser(token, ws);
+  gameManager.addUser(user);
 
   ws.on('close', () => {
     gameManager.removeUser(ws);
