@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile.backend
+    volumes:
+      - ./apps/backend:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile.frontend
+    volumes:
+      - ./apps/frontend:/app
+    ports:
+      - "5173:5173"
+
+  ws:
+    build:
+      context: ./apps/ws
+      dockerfile: Dockerfile.ws
+    volumes:
+      - ./apps/ws:/app
+    ports:
+      - "8080:8080"
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: chessdb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
