@@ -65,6 +65,7 @@ enum GameStatus {
   COMPLETED
   ABANDONED
   TIME_UP
+  PLAYER_EXIT
 }
 
 enum GameResult {
@@ -83,6 +84,5 @@ enum TimeControl {
 enum AuthProvider {
   EMAIL
   GOOGLE
-  FACEBOOK
   GITHUB
 }

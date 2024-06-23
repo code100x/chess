@@ -13,7 +13,7 @@ export class User {
   }
 }
 
-export class SocketManager {
+class SocketManager {
   private static instance: SocketManager;
   private interestedSockets: Map<string, User[]>;
   private userRoomMappping: Map<string, string>;
@@ -24,12 +24,12 @@ export class SocketManager {
   }
 
   static getInstance() {
-    if (this.instance) {
-      return this.instance;
+    if (SocketManager.instance) {
+      return SocketManager.instance;
     }
 
-    this.instance = new SocketManager();
-    return this.instance;
+    SocketManager.instance = new SocketManager();
+    return SocketManager.instance;
   }
 
   addUser(user: User, roomId: string) {
@@ -72,3 +72,5 @@ export class SocketManager {
     this.userRoomMappping.delete(user.userId);
   }
 }
+
+export const socketManager = SocketManager.getInstance()
