@@ -56,7 +56,7 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
             value={openItem}
             onValueChange={setOpenItem}
           >
-            <AccordionItem value={item.title} className="border-none ">
+            <AccordionItem value={item.title} className="border-none">
               <AccordionTrigger
                 className={cn(
                   buttonVariants({ variant: 'ghost' }),
@@ -110,6 +110,7 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
           </Accordion>
         ) : (
           <div
+            key={item.title}
             hidden={
               (user && item.title == 'Login') ||
               (!user && item.title == 'Logout')
@@ -119,22 +120,19 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
           >
             {' '}
             <a
-              key={item.title}
               href={item.href}
               onClick={() => {
                 if (setOpen) setOpen(false);
               }}
               className={cn(
-                buttonVariants({ variant: 'ghost' }),
-                'group relative flex h-12 justify-start',
-                location.pathname === item.href &&
-                  'bg-muted font-bold hover:bg-muted',
+                buttonVariants({ variant: 'default' }),
+                'group relative bg-transparent flex h-12 justify-start hover:bg-transparent]'
               )}
             >
               <item.icon className={cn('h-5 w-5', item.color)} />
               <span
                 className={cn(
-                  'absolute left-12 text-base duration-200',
+                  'absolute left-12 text-white text-base duration-200',
                   !isOpen && className,
                 )}
               >

@@ -63,15 +63,10 @@ const styles = StyleSheet.create({
   },
   button2: {
     backgroundColor: '#302c2a',
-
     padding: 12,
     margin: 10,
     borderRadius: 8,
     justifyContent: 'center',
-  },
-  facebookButton: {
-    backgroundColor: '#3b5998',
-    margin: 10,
   },
   loginText: {
     color: '#FFF',
