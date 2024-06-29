@@ -3,6 +3,7 @@ import v1Router from './router/v1';
 import cors from 'cors';
 import { initPassport } from './passport';
 import authRoute from './router/auth';
+import metricsRouter from './router/metrics';
 import dotenv from 'dotenv';
 import session from 'express-session';
 import passport from 'passport';
@@ -37,6 +38,7 @@ app.use(
 
 app.use('/auth', authRoute);
 app.use('/v1', v1Router);
+app.use('/metrics', metricsRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
