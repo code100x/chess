@@ -42,6 +42,7 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
       setLastOpenItem(openItem);
       setOpenItem('');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   return (
@@ -126,7 +127,7 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
               }}
               className={cn(
                 buttonVariants({ variant: 'default' }),
-                'group relative bg-transparent flex h-12 justify-start hover:bg-transparent]'
+                'group relative bg-transparent flex h-12 justify-start hover:bg-transparent]',
               )}
             >
               <item.icon className={cn('h-5 w-5', item.color)} />

@@ -7,5 +7,5 @@ export const Loader = () => {
         <div className="loader__dot"></div>
       </div>
     </div>
-  )
+  );
 };

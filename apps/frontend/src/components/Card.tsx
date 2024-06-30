@@ -86,7 +86,7 @@ export function PlayCard() {
     <Card className="bg-transparent border-none">
       <CardHeader className="pb-3 text-center">
         <CardTitle className="font-semibold tracking-wide flex flex-col items-center justify-center">
-          <p className='text-white'>
+          <p className="text-white">
             Play <span className="text-green-600 font-bold pt-1">Chess</span>
           </p>
           <img className="pl-1 w-1/2 mt-4" src={chessIcon} alt="chess" />

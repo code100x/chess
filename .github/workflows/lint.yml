@@ -1,0 +1,29 @@
+name: Lint check
+on:
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  lint-check:
+    name: Lint check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout the Repository
+        uses: actions/checkout@v4
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        
+        with:
+          path: ~/.cache/yarn
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn
+      
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint check
+        run: yarn lint
