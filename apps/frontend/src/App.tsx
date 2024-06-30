@@ -1,5 +1,9 @@
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import "./App.css";
 import "./themes.css";
+
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Landing } from './screens/Landing';
 import { Game } from './screens/Game';

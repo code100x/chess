@@ -393,4 +393,7 @@ export const ChessBoard = memo(({
       </div>
     </>
   );
-});
+
+};
+
+

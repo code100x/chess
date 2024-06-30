@@ -355,3 +355,4 @@ export const Game = () => {
     </div>
   );
 };
+
