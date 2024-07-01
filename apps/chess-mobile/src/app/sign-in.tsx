@@ -1,0 +1,90 @@
+import { AntDesign } from '@expo/vector-icons';
+import base64 from 'base-64';
+import { router, useLocalSearchParams } from 'expo-router';
+import { openAuthSessionAsync } from 'expo-web-browser';
+import { useEffect } from 'react';
+import { Image, View } from 'react-native';
+import { useSetRecoilState } from 'recoil';
+import { BackgroundSvg, Button, Container, Loading, Logo, Text } from '~/components';
+import { storedCookie } from '~/store/atoms';
+
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+const signIn = async (provider: string) => {
+  try {
+    const authUrl = `${apiUrl}/auth/${provider}`;
+    await openAuthSessionAsync(authUrl);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export default function SignIn() {
+  const { cookie } = useLocalSearchParams<{ cookie: string }>();
+  const setCookie = useSetRecoilState(storedCookie);
+  const isLoading = false;
+  useEffect(() => {
+    if (cookie) {
+      const token = base64.decode(cookie);
+      setCookie(token);
+      router.replace('/');
+    }
+  }, [cookie]);
+
+  const handlePressGoogle = () => {
+    signIn('google');
+  };
+  const handlePressGithub = () => {
+    signIn('github');
+  };
+  return (
+    <>
+      <Container className="bg-slate-950 p-10">
+        <BackgroundSvg />
+        <View className="flex-1 justify-end gap-y-8 py-10">
+          <View className="items-center justify-center gap-y-3">
+            <Text className="text-center text-3xl font-bold text-slate-300">
+              Conquer the Board with
+            </Text>
+            <Logo />
+          </View>
+          <Image source={require('~assets/chess.png')} className="mx-auto max-h-60 max-w-full" />
+          <View className="gap-y-6">
+            <Button
+              className="flex-row gap-x-4 rounded-xl"
+              roundClass="rounded-xl"
+              size="lg"
+              onPress={handlePressGoogle}>
+              <AntDesign name="google" size={24} color="white" />
+              <Text className="text-xl font-bold text-white">Login with Google</Text>
+            </Button>
+            <Button
+              className="flex-row gap-x-4 rounded-xl"
+              roundClass="rounded-xl"
+              size="lg"
+              onPress={handlePressGithub}>
+              <AntDesign name="github" size={24} color="white" />
+              <Text className="text-xl font-bold text-white">Login with Github</Text>
+            </Button>
+            <View className="relative items-center justify-center">
+              <View className="absolute h-[1px] w-full bg-slate-400" />
+              <Text className="bg-slate-950 px-2 font-bold text-white">OR</Text>
+            </View>
+            <Button
+              variant="secondary"
+              className="flex-row gap-x-4 rounded-xl"
+              roundClass="rounded-xl"
+              size="lg"
+              onPress={() => router.push('/guest')}>
+              <Text className="text-xl font-bold text-white">Play as Guest</Text>
+            </Button>
+          </View>
+        </View>
+      </Container>
+      {isLoading && (
+        <View className="absolute h-full w-full items-center justify-center bg-black/50">
+          <Loading className="bg-slate-950" />
+        </View>
+      )}
+    </>
+  );
+}
