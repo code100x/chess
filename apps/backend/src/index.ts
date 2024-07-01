@@ -6,16 +6,20 @@ import authRoute from './router/auth';
 import dotenv from 'dotenv';
 import session from 'express-session';
 import passport from 'passport';
+import cookieParser from 'cookie-parser';
+import { COOKIE_MAX_AGE } from './consts';
 
 const app = express();
 
 dotenv.config();
+app.use(express.json());
+app.use(cookieParser());
 app.use(
   session({
     secret: process.env.COOKIE_SECRET || 'keyboard cat',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 },
+    cookie: { secure: false, maxAge: COOKIE_MAX_AGE },
   }),
 );
 

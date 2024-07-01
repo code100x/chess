@@ -1,10 +1,15 @@
 import { useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
+import { useRecoilState } from 'recoil';
+import { userAtom } from '@repo/store/userAtom';
 
 const BACKEND_URL =
   import.meta.env.VITE_APP_BACKEND_URL ?? 'http://localhost:3000';
 
 const Login = () => {
   const navigate = useNavigate();
+  const guestName = useRef<HTMLInputElement>(null);
+  const [_, setUser] = useRecoilState(userAtom);
 
   const google = () => {
     window.open(`${BACKEND_URL}/auth/google`, '_self');
@@ -12,6 +17,22 @@ const Login = () => {
 
   const github = () => {
     window.open(`${BACKEND_URL}/auth/github`, '_self');
+  };
+
+  const loginAsGuest = async () => {
+    const response = await fetch(`${BACKEND_URL}/auth/guest`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        name: (guestName.current && guestName.current.value) || '',
+      }),
+    });
+    const user = await response.json();
+    setUser(user);
+    navigate('/game/random');
   };
 
   return (
@@ -44,12 +65,13 @@ const Login = () => {
           </div>
           <input
             type="text"
+            ref={guestName}
             placeholder="Username"
             className="border px-4 py-2 rounded-md mb-4 w-full md:w-64"
           />
           <button
             className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors duration-300"
-            onClick={() => navigate('/game/random')}
+            onClick={() => loginAsGuest()}
           >
             Enter as guest
           </button>

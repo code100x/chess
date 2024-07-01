@@ -94,7 +94,7 @@ export class GameManager {
         const game = this.games.find((game) => game.gameId === gameId);
         if (game) {
           game.makeMove(user, message.payload.move);
-          if (game.result)  {
+          if (game.result) {
             this.removeGame(game.gameId);
           }
         }
@@ -172,9 +172,9 @@ export class GameManager {
             gameFromDb?.whitePlayerId!,
             gameFromDb?.blackPlayerId!,
             gameFromDb.id,
-            gameFromDb.startAt
+            gameFromDb.startAt,
           );
-          game.seedMoves(gameFromDb?.moves || [])
+          game.seedMoves(gameFromDb?.moves || []);
           this.games.push(game);
           availableGame = game;
         }
