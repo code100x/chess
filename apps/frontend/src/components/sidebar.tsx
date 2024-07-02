@@ -36,26 +36,22 @@ export default function Sidebar({ className }: SidebarProps) {
     <nav
       className={cn(
         `relative hidden h-screen pt-4 md:block bg-bgAuxiliary1 text-white w-12 lg:w-36 top-0 relative sticky`,
-        className,
+        className
       )}
     >
       <div className="flex flex-col h-full justify-between">
         <div className="flex flex-col justify-start">
-          {isOpen && (
-            <span className="text-center text-2xl font-bold tracking-tighter ">
-              100xchess
-            </span>
-          )}
+          {isOpen && <span className="text-center text-2xl font-bold tracking-tighter ">100xchess</span>}
 
           <SideNav
-            className="opacity-0 transition-all duration-300 group-hover:z-50  group-hover:rounded group-hover:bg-foreground group-hover:opacity-100"
+            className="opacity-0 transition-all duration-300 group-hover:z-50  group-hover:rounded group-hover:bg-black p-1 group-hover:opacity-100"
             items={UpperNavItems}
           />
         </div>
 
         <div className="flex flex-col justify-end mb-2">
           <SideNav
-            className="opacity-0 transition-all duration-300 group-hover:z-50  group-hover:rounded group-hover:bg-foreground group-hover:opacity-100"
+            className="opacity-0 transition-all duration-300 group-hover:z-50  group-hover:rounded group-hover:bg-black p-1 group-hover:opacity-100"
             items={LowerNavItems}
           />
         </div>
