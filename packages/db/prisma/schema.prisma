@@ -8,33 +8,33 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  username      String?   @unique
-  name          String?
-  email         String   @unique
-  provider      AuthProvider
-  password      String?
-  rating        Int      @default(1200)
-  gamesAsWhite  Game[]   @relation("GamesAsWhite")
-  gamesAsBlack  Game[]   @relation("GamesAsBlack")
-  createdAt     DateTime @default(now())
-  lastLogin     DateTime?
+  id           String       @id @default(uuid())
+  username     String?      @unique
+  name         String?
+  email        String       @unique
+  provider     AuthProvider
+  password     String?
+  rating       Int          @default(1200)
+  gamesAsWhite Game[]       @relation("GamesAsWhite")
+  gamesAsBlack Game[]       @relation("GamesAsBlack")
+  createdAt    DateTime     @default(now())
+  lastLogin    DateTime?
 
   @@index([rating])
 }
 
 model Game {
-  id            String     @id @default(uuid())
+  id            String      @id @default(uuid())
   whitePlayerId String
   blackPlayerId String
-  whitePlayer   User       @relation("GamesAsWhite", fields: [whitePlayerId], references: [id])
-  blackPlayer   User       @relation("GamesAsBlack", fields: [blackPlayerId], references: [id])
+  whitePlayer   User        @relation("GamesAsWhite", fields: [whitePlayerId], references: [id])
+  blackPlayer   User        @relation("GamesAsBlack", fields: [blackPlayerId], references: [id])
   status        GameStatus
   result        GameResult?
   timeControl   TimeControl
-  startingFen   String     @default("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") // default value for the startingFen
+  startingFen   String      @default("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") // default value for the startingFen
   currentFen    String?
-  startAt       DateTime   @default(now())
+  startAt       DateTime    @default(now())
   endAt         DateTime?
   moves         Move[]
   opening       String?
@@ -44,18 +44,19 @@ model Game {
 }
 
 model Move {
-  id          String   @id @default(uuid())
-  gameId      String
-  game        Game     @relation(fields: [gameId], references: [id])
-  moveNumber  Int
-  from        String
-  to          String
-  comments    String?
-  before      String
-  after       String
-  timeTaken   Int?     @default(0)
-  createdAt   DateTime @default(now())
-  san         String?   
+  id         String   @id @default(uuid())
+  gameId     String
+  game       Game     @relation(fields: [gameId], references: [id])
+  moveNumber Int
+  from       String
+  to         String
+  comments   String?
+  promotion  String?
+  before     String
+  after      String
+  timeTaken  Int?     @default(0)
+  createdAt  DateTime @default(now())
+  san        String?
 
   @@index([gameId])
 }
