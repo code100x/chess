@@ -1,10 +1,5 @@
 import type { PieceType, Square } from 'chess.js';
-import React, {
-  createContext,
-  useCallback,
-  useImperativeHandle,
-  useMemo,
-} from 'react';
+import React, { createContext, useCallback, useImperativeHandle, useMemo } from 'react';
 import type Animated from 'react-native-reanimated';
 import { useSharedValue } from 'react-native-reanimated';
 import { getChessboardState } from '../../helpers/get-chessboard-state';
@@ -27,9 +22,7 @@ type BoardOperationsContextType = {
   turn: Animated.SharedValue<'w' | 'b'>;
 };
 
-const BoardOperationsContext = createContext<BoardOperationsContextType>(
-  {} as any,
-);
+const BoardOperationsContext = createContext<BoardOperationsContextType>({} as any);
 
 export type BoardOperationsRef = {
   reset: () => void;
@@ -63,7 +56,7 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
         turn.value = chess.turn();
       },
     }),
-    [chess, controller, selectableSquares, turn],
+    [chess, controller, selectableSquares, turn]
   );
 
   const isPromoting = useCallback(
@@ -77,11 +70,10 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
 
       return (
         piece?.type === chess.PAWN &&
-        ((to.includes('8') && piece.color === chess.WHITE) ||
-          (to.includes('1') && piece.color === chess.BLACK))
+        ((to.includes('8') && piece.color === chess.WHITE) || (to.includes('1') && piece.color === chess.BLACK))
       );
     },
-    [chess, pieceSize, toTranslation],
+    [chess, pieceSize, toTranslation]
   );
 
   const findKing = useCallback(
@@ -97,13 +89,12 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
           const square = `${col}${row}` as Square;
 
           const piece = chess.get(square);
-          if (piece?.color === type.charAt(0) && piece.type === type.charAt(1))
-            return square;
+          if (piece?.color === type.charAt(0) && piece.type === type.charAt(1)) return square;
         }
       }
       return null;
     },
-    [chess],
+    [chess]
   );
 
   const moveProgrammatically = useCallback(
@@ -136,15 +127,7 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
 
       setBoard(chess.board());
     },
-    [
-      checkmateHighlight,
-      chess,
-      controller,
-      findKing,
-      onChessboardMoveCallback,
-      setBoard,
-      turn,
-    ],
+    [checkmateHighlight, chess, controller, findKing, onChessboardMoveCallback, setBoard, turn]
   );
 
   const onMove = useCallback(
@@ -180,7 +163,7 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
       selectableSquares,
       selectedSquare,
       showPromotionDialog,
-    ],
+    ]
   );
 
   const onSelectPiece = useCallback(
@@ -201,7 +184,7 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
         return splittedSquare[splittedSquare.length - 1] as Square;
       });
     },
-    [chess, selectableSquares, selectedSquare],
+    [chess, selectableSquares, selectedSquare]
   );
 
   const moveTo = useCallback(
@@ -212,7 +195,7 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
       }
       return false;
     },
-    [controller, selectedSquare.value],
+    [controller, selectedSquare.value]
   );
 
   const value = useMemo(() => {
@@ -225,25 +208,11 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
       isPromoting,
       turn,
     };
-  }, [
-    isPromoting,
-    moveTo,
-    onMove,
-    onSelectPiece,
-    selectableSquares,
-    selectedSquare,
-    turn,
-  ]);
+  }, [isPromoting, moveTo, onMove, onSelectPiece, selectableSquares, selectedSquare, turn]);
 
-  return (
-    <BoardOperationsContext.Provider value={value}>
-      {children}
-    </BoardOperationsContext.Provider>
-  );
+  return <BoardOperationsContext.Provider value={value}>{children}</BoardOperationsContext.Provider>;
 });
 
-const BoardOperationsContextProvider = React.memo(
-  BoardOperationsContextProviderComponent,
-);
+const BoardOperationsContextProvider = React.memo(BoardOperationsContextProviderComponent);
 
 export { BoardOperationsContextProvider, BoardOperationsContext };

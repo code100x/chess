@@ -9,11 +9,7 @@ interface ModalProps {
   gameResult: GameResult;
 }
 
-const GameEndModal: React.FC<ModalProps> = ({
-  blackPlayer,
-  whitePlayer,
-  gameResult,
-}) => {
+const GameEndModal: React.FC<ModalProps> = ({ blackPlayer, whitePlayer, gameResult }) => {
   const [isOpen, setIsOpen] = useState(true);
 
   const closeModal = () => {
@@ -31,18 +27,12 @@ const GameEndModal: React.FC<ModalProps> = ({
   }) => {
     const imageSrc = isWhite ? WhiteKing : BlackKing;
     const borderColor =
-      gameResult === (isWhite ? Result.WHITE_WINS : Result.BLACK_WINS)
-        ? 'border-green-400'
-        : 'border-red-400';
+      gameResult === (isWhite ? Result.WHITE_WINS : Result.BLACK_WINS) ? 'border-green-400' : 'border-red-400';
 
     return (
       <div className="flex flex-col items-center">
         <div className={`border-4 rounded-full p-2 ${borderColor}`}>
-          <img
-            src={imageSrc}
-            alt={`${isWhite ? 'White' : 'Black'} King`}
-            className="w-10 h-10"
-          />
+          <img src={imageSrc} alt={`${isWhite ? 'White' : 'Black'} King`} className="w-10 h-10" />
         </div>
         <div className="text-center text-xm p-2">
           <p className="text-white truncate w-24" title={getPlayerName(player)}>
@@ -77,7 +67,7 @@ const GameEndModal: React.FC<ModalProps> = ({
             <div className="px-6 py-8 items-center self-center m-auto">
               <div className="m-auto mb-6">
                 <h2 className={`text-4xl font-bold mb-2 text-yellow-400 text-center text-wrap`}>
-                 {getWinnerMessage(gameResult.result)}  
+                  {getWinnerMessage(gameResult.result)}
                 </h2>
               </div>
               <div className="m-auto mb-6">

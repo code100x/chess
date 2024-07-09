@@ -18,9 +18,7 @@ const ChessPiece: React.FC<ChessPieceType> = React.memo(({ id, ...rest }) => {
           {
             width: pieceSize,
             height: pieceSize,
-            transform: [
-              { rotate: boardOrientation === 'white' ? '0deg' : '180deg' },
-            ],
+            transform: [{ rotate: boardOrientation === 'white' ? '0deg' : '180deg' }],
           },
           rest.style,
         ]}

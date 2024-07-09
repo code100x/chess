@@ -19,16 +19,8 @@ const SuggestedDots: React.FC = React.memo(() => {
     >
       {board.map((row, y) =>
         row.map((_, x) => {
-          return (
-            <PlaceholderDot
-              key={`${x}-${y}`}
-              x={x}
-              y={y}
-              selectableSquares={selectableSquares}
-              moveTo={moveTo}
-            />
-          );
-        }),
+          return <PlaceholderDot key={`${x}-${y}`} x={x} y={y} selectableSquares={selectableSquares} moveTo={moveTo} />;
+        })
       )}
     </View>
   );

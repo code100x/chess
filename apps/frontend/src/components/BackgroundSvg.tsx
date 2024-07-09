@@ -36,78 +36,18 @@ export default function BackgroundSvg() {
         strokeLinecap="round"
         strokeLinejoin="round"
       ></path>
-      <path
-        d="M0.494019 38.004H119.504"
-        stroke="white"
-        strokeOpacity="0.1292"
-        strokeWidth="0.125"
-      ></path>
-      <path
-        d="M0.494019 82.004H119.504"
-        stroke="white"
-        strokeOpacity="0.1292"
-        strokeWidth="0.125"
-      ></path>
-      <path
-        d="M59.9969 0.494019V119.504"
-        stroke="white"
-        strokeOpacity="0.1292"
-        strokeWidth="0.125"
-      ></path>
-      <path
-        d="M81.9969 0.494019V119.504"
-        stroke="white"
-        strokeOpacity="0.1292"
-        strokeWidth="0.125"
-      ></path>
-      <path
-        d="M37.9969 0.494019V119.504"
-        stroke="white"
-        strokeOpacity="0.1292"
-        strokeWidth="0.125"
-      ></path>
-      <path
-        d="M0.494019 60.004H119.504"
-        stroke="white"
-        strokeOpacity="0.1292"
-        strokeWidth="0.125"
-      ></path>
-      <path
-        d="M0.494019 112.454H119.504"
-        stroke="white"
-        strokeOpacity="0.1292"
-        strokeWidth="0.125"
-      ></path>
-      <path
-        d="M0.494019 7.50403H119.504"
-        stroke="white"
-        strokeOpacity="0.1292"
-        strokeWidth="0.125"
-      ></path>
-      <path
-        d="M112.497 0.494019V119.504"
-        stroke="white"
-        strokeOpacity="0.1292"
-        strokeWidth="0.125"
-      ></path>
-      <path
-        d="M7.5 0.494019V119.504"
-        stroke="white"
-        strokeOpacity="0.1292"
-        strokeWidth="0.125"
-      ></path>
-      <path
-        d="M0.5 119.454L119.5 0.504028"
-        stroke="white"
-        strokeOpacity="0.1292"
-        strokeWidth="0.125"
-      ></path>
-      <path
-        d="M119.497 119.454L0.496948 0.504028"
-        stroke="white"
-        strokeOpacity="0.1292"
-        strokeWidth="0.125"
-      ></path>
+      <path d="M0.494019 38.004H119.504" stroke="white" strokeOpacity="0.1292" strokeWidth="0.125"></path>
+      <path d="M0.494019 82.004H119.504" stroke="white" strokeOpacity="0.1292" strokeWidth="0.125"></path>
+      <path d="M59.9969 0.494019V119.504" stroke="white" strokeOpacity="0.1292" strokeWidth="0.125"></path>
+      <path d="M81.9969 0.494019V119.504" stroke="white" strokeOpacity="0.1292" strokeWidth="0.125"></path>
+      <path d="M37.9969 0.494019V119.504" stroke="white" strokeOpacity="0.1292" strokeWidth="0.125"></path>
+      <path d="M0.494019 60.004H119.504" stroke="white" strokeOpacity="0.1292" strokeWidth="0.125"></path>
+      <path d="M0.494019 112.454H119.504" stroke="white" strokeOpacity="0.1292" strokeWidth="0.125"></path>
+      <path d="M0.494019 7.50403H119.504" stroke="white" strokeOpacity="0.1292" strokeWidth="0.125"></path>
+      <path d="M112.497 0.494019V119.504" stroke="white" strokeOpacity="0.1292" strokeWidth="0.125"></path>
+      <path d="M7.5 0.494019V119.504" stroke="white" strokeOpacity="0.1292" strokeWidth="0.125"></path>
+      <path d="M0.5 119.454L119.5 0.504028" stroke="white" strokeOpacity="0.1292" strokeWidth="0.125"></path>
+      <path d="M119.497 119.454L0.496948 0.504028" stroke="white" strokeOpacity="0.1292" strokeWidth="0.125"></path>
     </svg>
   );
 }

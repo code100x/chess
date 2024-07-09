@@ -1,15 +1,11 @@
 import { Chess, Move, Square } from 'chess.js';
-import {
-  GAME_ENDED,
-  INIT_GAME,
-  MOVE,
-} from './messages';
+import { GAME_ENDED, INIT_GAME, MOVE } from './messages';
 import { db } from './db';
 import { randomUUID } from 'crypto';
 import { socketManager, User } from './SocketManager';
 
 type GAME_STATUS = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'TIME_UP' | 'PLAYER_EXIT';
-type GAME_RESULT = "WHITE_WINS" | "BLACK_WINS" | "DRAW";
+type GAME_RESULT = 'WHITE_WINS' | 'BLACK_WINS' | 'DRAW';
 
 const GAME_TIME_MS = 10 * 60 * 60 * 1000;
 
@@ -63,21 +59,21 @@ export class Game {
     }
   }
 
-  seedMoves(moves: {
-    id: string;
-    gameId: string;
-    moveNumber: number;
-    from: string;
-    to: string;
-    comments: string | null;
-    timeTaken: number | null;
-    createdAt: Date;
-  }[]) {
+  seedMoves(
+    moves: {
+      id: string;
+      gameId: string;
+      moveNumber: number;
+      from: string;
+      to: string;
+      comments: string | null;
+      timeTaken: number | null;
+      createdAt: Date;
+    }[]
+  ) {
     console.log(moves);
     moves.forEach((move) => {
-      if (
-        isPromoting(this.board, move.from as Square, move.to as Square)
-      ) {
+      if (isPromoting(this.board, move.from as Square, move.to as Square)) {
         this.board.move({
           from: move.from,
           to: move.to,
@@ -142,7 +138,7 @@ export class Game {
           fen: this.board.fen(),
           moves: [],
         },
-      }),
+      })
     );
   }
 
@@ -177,7 +173,6 @@ export class Game {
   }
 
   async addMoveToDb(move: Move, moveTimestamp: Date) {
-    
     await db.$transaction([
       db.move.create({
         data: {
@@ -189,7 +184,7 @@ export class Game {
           after: move.after,
           createdAt: moveTimestamp,
           timeTaken: moveTimestamp.getTime() - this.lastMoveTime.getTime(),
-          san: move.san
+          san: move.san,
         },
       }),
       db.game.update({
@@ -203,11 +198,7 @@ export class Game {
     ]);
   }
 
-  async makeMove(
-    user: User,
-    move: Move
-  ) {
-    
+  async makeMove(user: User, move: Move) {
     // validate the type of move using zod
     if (this.board.turn() === 'w' && user.userId !== this.player1UserId) {
       return;
@@ -238,7 +229,7 @@ export class Game {
         });
       }
     } catch (e) {
-      console.error("Error while making move");
+      console.error('Error while making move');
       return;
     }
 
@@ -252,7 +243,7 @@ export class Game {
     }
 
     await this.addMoveToDb(move, moveTimestamp);
-    this.resetAbandonTimer()
+    this.resetAbandonTimer();
     this.resetMoveTimer();
 
     this.lastMoveTime = moveTimestamp;
@@ -262,17 +253,13 @@ export class Game {
       JSON.stringify({
         type: MOVE,
         payload: { move, player1TimeConsumed: this.player1TimeConsumed, player2TimeConsumed: this.player2TimeConsumed },
-      }),
+      })
     );
 
     if (this.board.isGameOver()) {
-      const result = this.board.isDraw()
-      ? 'DRAW'
-      : this.board.turn() === 'b'
-        ? 'WHITE_WINS'
-        : 'BLACK_WINS';
-        
-      this.endGame("COMPLETED", result);
+      const result = this.board.isDraw() ? 'DRAW' : this.board.turn() === 'b' ? 'WHITE_WINS' : 'BLACK_WINS';
+
+      this.endGame('COMPLETED', result);
     }
 
     this.moveCount++;
@@ -297,23 +284,23 @@ export class Game {
       clearTimeout(this.timer);
     }
     this.timer = setTimeout(() => {
-      this.endGame("ABANDONED", this.board.turn() === 'b' ? 'WHITE_WINS' : 'BLACK_WINS');
+      this.endGame('ABANDONED', this.board.turn() === 'b' ? 'WHITE_WINS' : 'BLACK_WINS');
     }, 60 * 1000);
   }
 
   async resetMoveTimer() {
     if (this.moveTimer) {
-      clearTimeout(this.moveTimer)
+      clearTimeout(this.moveTimer);
     }
     const turn = this.board.turn();
     const timeLeft = GAME_TIME_MS - (turn === 'w' ? this.player1TimeConsumed : this.player2TimeConsumed);
 
     this.moveTimer = setTimeout(() => {
-      this.endGame("TIME_UP", turn === 'b' ? 'WHITE_WINS' : 'BLACK_WINS');
+      this.endGame('TIME_UP', turn === 'b' ? 'WHITE_WINS' : 'BLACK_WINS');
     }, timeLeft);
   }
 
-  async exitGame(user : User) {
+  async exitGame(user: User) {
     this.endGame('PLAYER_EXIT', user.userId === this.player2UserId ? 'WHITE_WINS' : 'BLACK_WINS');
   }
 
@@ -334,7 +321,7 @@ export class Game {
         },
         blackPlayer: true,
         whitePlayer: true,
-      }
+      },
     });
 
     socketManager.broadcast(
@@ -354,7 +341,7 @@ export class Game {
             name: updatedGame.whitePlayer.name,
           },
         },
-      }),
+      })
     );
     // clear timers
     this.clearTimer();
@@ -362,7 +349,7 @@ export class Game {
   }
 
   clearMoveTimer() {
-    if(this.moveTimer) clearTimeout(this.moveTimer);
+    if (this.moveTimer) clearTimeout(this.moveTimer);
   }
 
   setTimer(timer: NodeJS.Timeout) {

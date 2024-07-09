@@ -25,7 +25,7 @@ const useReversePiecePosition = () => {
         y: 7 * pieceSize - indexes.y * pieceSize,
       };
     },
-    [pieceSize],
+    [pieceSize]
   );
 
   const toPosition = useCallback(
@@ -35,7 +35,7 @@ const useReversePiecePosition = () => {
       const row = `${8 - Math.round(y / pieceSize)}`;
       return `${col}${row}` as Square;
     },
-    [pieceSize],
+    [pieceSize]
   );
 
   return { toPosition, toTranslation };

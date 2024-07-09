@@ -1,6 +1,4 @@
-
 const calculateX = (square: string, isFlipped: boolean, squareSize: number) => {
-  
   let columnIndex = square.charCodeAt(0) - 'a'.charCodeAt(0); // Convert column letter to index
   if (isFlipped) {
     columnIndex = 7 - columnIndex; // Reverse the column index if the board is flipped
@@ -10,21 +8,25 @@ const calculateX = (square: string, isFlipped: boolean, squareSize: number) => {
 };
 
 const calculateY = (square: string, isFlipped: boolean, squareSize: number) => {
-  
   let rowIndex = 8 - parseInt(square[1]); // Convert row number to index (assuming rank 1 is at the bottom)
   if (isFlipped) {
     rowIndex = 7 - rowIndex; // Reverse the row index if the board is flipped
   }
   return rowIndex * squareSize + squareSize / 2;
 };
-export const drawArrow = (
- {
-  ctx, start, end, isFlipped, squareSize
- }:{ ctx: CanvasRenderingContext2D,
-  start: string,
-  end: string,
-  isFlipped: boolean,squareSize: number}
-) => {
+export const drawArrow = ({
+  ctx,
+  start,
+  end,
+  isFlipped,
+  squareSize,
+}: {
+  ctx: CanvasRenderingContext2D;
+  start: string;
+  end: string;
+  isFlipped: boolean;
+  squareSize: number;
+}) => {
   const startX = calculateX(start, isFlipped, squareSize);
   const startY = calculateY(start, isFlipped, squareSize);
   const endX = calculateX(end, isFlipped, squareSize);

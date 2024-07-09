@@ -2,12 +2,7 @@ import { cn } from '@/lib/utils';
 import { useSidebar } from '@/hooks/useSidebar';
 import { buttonVariants } from '@/components/ui/button';
 import { useLocation } from 'react-router-dom';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/subnav-accordian';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/subnav-accordian';
 import { useEffect, useState } from 'react';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { type LucideIcon } from 'lucide-react';
@@ -60,20 +55,13 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
               <AccordionTrigger
                 className={cn(
                   buttonVariants({ variant: 'ghost' }),
-                  'group relative flex h-12 justify-between px-4 py-2 text-base duration-200 hover:bg-muted hover:no-underline',
+                  'group relative flex h-12 justify-between px-4 py-2 text-base duration-200 hover:bg-muted hover:no-underline'
                 )}
               >
                 <div>
                   <item.icon className={cn('h-5 w-5', item.color)} />
                 </div>
-                <div
-                  className={cn(
-                    'absolute left-12 text-base duration-200 ',
-                    !isOpen && className,
-                  )}
-                >
-                  {item.title}
-                </div>
+                <div className={cn('absolute left-12 text-base duration-200 ', !isOpen && className)}>{item.title}</div>
 
                 {isOpen && (
                   <ChevronDownIcon className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
@@ -90,17 +78,11 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
                     className={cn(
                       buttonVariants({ variant: 'ghost' }),
                       'group relative flex h-12 justify-start gap-x-3',
-                      location.pathname === child.href &&
-                        'bg-muted font-bold hover:bg-muted',
+                      location.pathname === child.href && 'bg-muted font-bold hover:bg-muted'
                     )}
                   >
                     <child.icon className={cn('h-5 w-5', child.color)} />
-                    <div
-                      className={cn(
-                        'absolute left-12 text-base duration-200',
-                        !isOpen && className,
-                      )}
-                    >
+                    <div className={cn('absolute left-12 text-base duration-200', !isOpen && className)}>
                       {child.title}
                     </div>
                   </a>
@@ -111,12 +93,7 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
         ) : (
           <div
             key={item.title}
-            hidden={
-              (user && item.title == 'Login') ||
-              (!user && item.title == 'Logout')
-                ? true
-                : false
-            }
+            hidden={(user && item.title == 'Login') || (!user && item.title == 'Logout') ? true : false}
           >
             {' '}
             <a
@@ -130,17 +107,12 @@ export function SideNav({ items, setOpen, className }: SideNavProps) {
               )}
             >
               <item.icon className={cn('h-5 w-5', item.color)} />
-              <span
-                className={cn(
-                  'absolute left-12 text-white text-base duration-200',
-                  !isOpen && className,
-                )}
-              >
+              <span className={cn('absolute left-12 text-white text-base duration-200', !isOpen && className)}>
                 {item.title}
               </span>
             </a>
           </div>
-        ),
+        )
       )}
     </nav>
   );

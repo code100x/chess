@@ -7,10 +7,7 @@ import { Pieces } from './components/pieces';
 import { SuggestedDots } from './components/suggested-dots';
 import { ChessboardContextProvider } from './context/board-context-provider';
 import type { ChessboardRef } from './context/board-refs-context';
-import {
-  ChessboardProps,
-  ChessboardPropsContextProvider,
-} from './context/props-context';
+import { ChessboardProps, ChessboardPropsContextProvider } from './context/props-context';
 import { useChessboardProps } from './context/props-context/hooks';
 import type { ChessboardState } from './helpers/get-chessboard-state';
 
@@ -29,9 +26,7 @@ const Chessboard: React.FC = React.memo(() => {
         styles.container,
         {
           width: boardSize,
-          transform: [
-            { rotate: boardOrientation === 'white' ? '0deg' : '180deg' },
-          ],
+          transform: [{ rotate: boardOrientation === 'white' ? '0deg' : '180deg' }],
         },
       ]}
     >
@@ -43,10 +38,7 @@ const Chessboard: React.FC = React.memo(() => {
   );
 });
 
-const ChessboardContainerComponent = React.forwardRef<
-  ChessboardRef,
-  ChessboardProps
->((props, ref) => {
+const ChessboardContainerComponent = React.forwardRef<ChessboardRef, ChessboardProps>((props, ref) => {
   const chessboardRef = useRef<ChessboardRef>(null);
 
   useImperativeHandle(
@@ -54,12 +46,11 @@ const ChessboardContainerComponent = React.forwardRef<
     () => ({
       move: (params) => chessboardRef.current?.move?.(params),
       highlight: (params) => chessboardRef.current?.highlight(params),
-      resetAllHighlightedSquares: () =>
-        chessboardRef.current?.resetAllHighlightedSquares(),
+      resetAllHighlightedSquares: () => chessboardRef.current?.resetAllHighlightedSquares(),
       getState: () => chessboardRef?.current?.getState() as ChessboardState,
       resetBoard: (params) => chessboardRef.current?.resetBoard(params),
     }),
-    [],
+    []
   );
 
   return (

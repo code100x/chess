@@ -35,7 +35,7 @@ const Pieces = React.memo(() => {
             );
           }
           return null;
-        }),
+        })
       )}
     </>
   );

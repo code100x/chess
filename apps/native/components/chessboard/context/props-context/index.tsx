@@ -67,12 +67,9 @@ type ChessboardProps = {
 };
 
 type ChessboardContextType = ChessboardProps &
-  Required<
-    Pick<
-      ChessboardProps,
-      'gestureEnabled' | 'withLetters' | 'withNumbers' | 'boardSize'
-    >
-  > & { pieceSize: number } & {
+  Required<Pick<ChessboardProps, 'gestureEnabled' | 'withLetters' | 'withNumbers' | 'boardSize'>> & {
+    pieceSize: number;
+  } & {
     colors: Required<ChessboardColorsType>;
     durations: Required<ChessboardDurationsType>;
   };
@@ -99,29 +96,23 @@ const defaultChessboardProps: ChessboardContextType = {
   boardOrientation: 'white',
 };
 
-const ChessboardPropsContext = React.createContext<ChessboardContextType>(
-  defaultChessboardProps,
+const ChessboardPropsContext = React.createContext<ChessboardContextType>(defaultChessboardProps);
+
+const ChessboardPropsContextProvider: React.FC<{ children: React.ReactNode } & ChessboardProps> = React.memo(
+  ({ children, ...rest }) => {
+    const value = useMemo(() => {
+      const data = {
+        ...defaultChessboardProps,
+        ...rest,
+        colors: { ...defaultChessboardProps.colors, ...rest.colors },
+        durations: { ...defaultChessboardProps.durations, ...rest.durations },
+      };
+      return { ...data, pieceSize: data.boardSize / 8 };
+    }, [rest]);
+
+    return <ChessboardPropsContext.Provider value={value}>{children}</ChessboardPropsContext.Provider>;
+  }
 );
-
-const ChessboardPropsContextProvider: React.FC<
-  { children: React.ReactNode } & ChessboardProps
-> = React.memo(({ children, ...rest }) => {
-  const value = useMemo(() => {
-    const data = {
-      ...defaultChessboardProps,
-      ...rest,
-      colors: { ...defaultChessboardProps.colors, ...rest.colors },
-      durations: { ...defaultChessboardProps.durations, ...rest.durations },
-    };
-    return { ...data, pieceSize: data.boardSize / 8 };
-  }, [rest]);
-
-  return (
-    <ChessboardPropsContext.Provider value={value}>
-      {children}
-    </ChessboardPropsContext.Provider>
-  );
-});
 
 export { ChessboardPropsContextProvider, ChessboardPropsContext };
 // eslint-disable-next-line no-undef

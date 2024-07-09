@@ -19,12 +19,4 @@ type ChessMove = {
 
 type MoveType = { from: Square; to: Square };
 
-export type {
-  Player,
-  Type,
-  PieceType,
-  PiecesType,
-  Vector,
-  ChessMove,
-  MoveType,
-};
+export type { Player, Type, PieceType, PiecesType, Vector, ChessMove, MoveType };

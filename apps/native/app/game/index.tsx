@@ -1,12 +1,5 @@
 import { memo, useRef, useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  Text,
-  Image,
-  Dimensions,
-  ScrollView,
-} from 'react-native';
+import { View, StyleSheet, Text, Image, Dimensions, ScrollView } from 'react-native';
 import { Move } from 'chess.js';
 import Chessboard, { ChessboardRef } from '../../components/chessboard';
 import { PIECES } from '../../components/chessboard/constants';
@@ -42,9 +35,7 @@ const ChessBoard = () => {
         <ScrollView
           horizontal
           ref={scrollViewRef}
-          onContentSizeChange={() =>
-            scrollViewRef.current.scrollToEnd({ animated: true })
-          }
+          onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
         >
           <View
             style={{
@@ -57,9 +48,7 @@ const ChessBoard = () => {
             {moves.map((move, index) => {
               return (
                 <React.Fragment key={index}>
-                  {index % 2 === 0 ? (
-                    <Text style={{ color: '#787674' }}>{index / 2 + 1}. </Text>
-                  ) : null}
+                  {index % 2 === 0 ? <Text style={{ color: '#787674' }}>{index / 2 + 1}. </Text> : null}
                   <Text style={{ color: '#c8c6c4' }}>{move.move.san} </Text>
                 </React.Fragment>
               );
@@ -118,13 +107,7 @@ function get_captured_pieces(moves: Move[], color: string) {
   return captured;
 }
 
-const CapturedPieces = memo(function CapturedPieces({
-  moves,
-  color,
-}: {
-  moves: Move[];
-  color: 'black' | 'white';
-}) {
+const CapturedPieces = memo(function CapturedPieces({ moves, color }: { moves: Move[]; color: 'black' | 'white' }) {
   const captured = get_captured_pieces(moves, color);
 
   return (
@@ -132,17 +115,14 @@ const CapturedPieces = memo(function CapturedPieces({
       {Object.entries(captured).map((item) =>
         item[1] ? (
           <View key={PIECES[color[0] + item[0]]}>
-            <Image
-              style={{ width: 40, height: 40 }}
-              source={PIECES[color[0] + item[0]]}
-            />
+            <Image style={{ width: 40, height: 40 }} source={PIECES[color[0] + item[0]]} />
             <View style={styles.blueDot}>
               <Text style={{ color: '#fff', fontSize: 12 }}>{item[1]}</Text>
             </View>
           </View>
         ) : (
           <></>
-        ),
+        )
       )}
     </View>
   );

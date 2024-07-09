@@ -3,10 +3,7 @@ import type { ChessInstance, PieceType } from 'chess.js';
 import { PromotionDialog } from './dialog';
 
 export type BoardPromotionContextType = {
-  showPromotionDialog: (_: {
-    type: PromotionDialogType;
-    onSelect?: (_: PieceType) => void;
-  }) => void;
+  showPromotionDialog: (_: { type: PromotionDialogType; onSelect?: (_: PieceType) => void }) => void;
   isPromoting: boolean;
 };
 
@@ -30,17 +27,16 @@ const BoardPromotionContextProvider: React.FC = React.memo(({ children }) => {
     isDialogActive: false,
   });
 
-  const showPromotionDialog: BoardPromotionContextType['showPromotionDialog'] =
-    useCallback(({ type, onSelect }) => {
-      setDialog({ isDialogActive: true, type, onSelect });
-    }, []);
+  const showPromotionDialog: BoardPromotionContextType['showPromotionDialog'] = useCallback(({ type, onSelect }) => {
+    setDialog({ isDialogActive: true, type, onSelect });
+  }, []);
 
   const onSelect = useCallback(
     (piece: PieceType) => {
       dialog.onSelect?.(piece);
       setDialog({ isDialogActive: false });
     },
-    [dialog],
+    [dialog]
   );
 
   const value = useMemo(
@@ -48,14 +44,12 @@ const BoardPromotionContextProvider: React.FC = React.memo(({ children }) => {
       showPromotionDialog,
       isPromoting: dialog.isDialogActive,
     }),
-    [dialog.isDialogActive, showPromotionDialog],
+    [dialog.isDialogActive, showPromotionDialog]
   );
 
   return (
     <BoardPromotionContext.Provider value={value}>
-      {dialog.isDialogActive && (
-        <PromotionDialog type="w" {...dialog} onSelect={onSelect} />
-      )}
+      {dialog.isDialogActive && <PromotionDialog type="w" {...dialog} onSelect={onSelect} />}
       {children}
     </BoardPromotionContext.Provider>
   );

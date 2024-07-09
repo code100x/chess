@@ -9,36 +9,28 @@ import { DialogPiece } from './dialog-piece';
 
 const PROMOTION_PIECES: PieceType[] = ['q', 'r', 'n', 'b'];
 
-const PromotionDialog: React.FC<Required<BoardPromotionContextState>> =
-  React.memo(({ type, onSelect }) => {
-    const { boardSize } = useChessboardProps();
+const PromotionDialog: React.FC<Required<BoardPromotionContextState>> = React.memo(({ type, onSelect }) => {
+  const { boardSize } = useChessboardProps();
 
-    return (
-      <Animated.View
-        entering={FadeIn}
-        exiting={FadeOut}
-        style={[
-          {
-            width: boardSize / 3,
-          },
-          styles.container,
-        ]}
-      >
-        {PROMOTION_PIECES.map((piece, i) => {
-          return (
-            <DialogPiece
-              key={i}
-              width={boardSize / 6}
-              index={i}
-              piece={piece}
-              type={type}
-              onSelectPiece={onSelect}
-            />
-          );
-        })}
-      </Animated.View>
-    );
-  });
+  return (
+    <Animated.View
+      entering={FadeIn}
+      exiting={FadeOut}
+      style={[
+        {
+          width: boardSize / 3,
+        },
+        styles.container,
+      ]}
+    >
+      {PROMOTION_PIECES.map((piece, i) => {
+        return (
+          <DialogPiece key={i} width={boardSize / 6} index={i} piece={piece} type={type} onSelectPiece={onSelect} />
+        );
+      })}
+    </Animated.View>
+  );
+});
 
 const styles = StyleSheet.create({
   container: {

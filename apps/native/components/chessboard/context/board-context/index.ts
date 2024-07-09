@@ -3,9 +3,7 @@ import React, { createContext } from 'react';
 import type { Player } from '../../types';
 import { useContext } from 'react';
 
-const BoardContext = createContext<ReturnType<ChessInstance['board']>>(
-  {} as any,
-);
+const BoardContext = createContext<ReturnType<ChessInstance['board']>>({} as any);
 
 const BoardSetterContext = createContext<
   React.Dispatch<

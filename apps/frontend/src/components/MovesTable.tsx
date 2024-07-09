@@ -1,25 +1,11 @@
-import {
-  isBoardFlippedAtom,
-  movesAtom,
-  userSelectedMoveIndexAtom,
-} from '@repo/store/chessBoard';
+import { isBoardFlippedAtom, movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
 import { Move } from 'chess.js';
 import { useEffect, useRef } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import {
-  HandshakeIcon,
-  FlagIcon,
-  ChevronFirst,
-  ChevronLast,
-  ChevronLeft,
-  ChevronRight,
-  RefreshCw,
-} from 'lucide-react';
+import { HandshakeIcon, FlagIcon, ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 
 const MovesTable = () => {
-  const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(
-    userSelectedMoveIndexAtom,
-  );
+  const [userSelectedMoveIndex, setUserSelectedMoveIndex] = useRecoilState(userSelectedMoveIndexAtom);
   const setIsFlipped = useSetRecoilState(isBoardFlippedAtom);
   const moves = useRecoilValue(movesAtom);
   const movesTableRef = useRef<HTMLInputElement>(null);
@@ -40,10 +26,7 @@ const MovesTable = () => {
   }, [moves]);
   return (
     <div className="text-[#C3C3C0] relative w-full ">
-      <div
-        className="text-sm h-[45vh] max-h-[45vh] overflow-y-auto"
-        ref={movesTableRef}
-      >
+      <div className="text-sm h-[45vh] max-h-[45vh] overflow-y-auto" ref={movesTableRef}>
         {movesArray.map((movePairs, index) => {
           return (
             <div
@@ -54,13 +37,9 @@ const MovesTable = () => {
                 <span className="text-[#C3C3C0] px-2 py-1.5">{`${index + 1}.`}</span>
 
                 {movePairs.map((move, movePairIndex) => {
-                  const isLastIndex =
-                    movePairIndex === movePairs.length - 1 &&
-                    movesArray.length - 1 === index;
+                  const isLastIndex = movePairIndex === movePairs.length - 1 && movesArray.length - 1 === index;
                   const isHighlighted =
-                    userSelectedMoveIndex !== null
-                      ? userSelectedMoveIndex === index * 2 + movePairIndex
-                      : isLastIndex;
+                    userSelectedMoveIndex !== null ? userSelectedMoveIndex === index * 2 + movePairIndex : isLastIndex;
                   const { san } = move;
 
                   return (
@@ -106,9 +85,7 @@ const MovesTable = () => {
 
             <button
               onClick={() => {
-                setUserSelectedMoveIndex((prev) =>
-                  prev !== null ? prev - 1 : moves.length - 2,
-                );
+                setUserSelectedMoveIndex((prev) => (prev !== null ? prev - 1 : moves.length - 2));
               }}
               disabled={userSelectedMoveIndex === 0}
               className="hover:text-white"
@@ -118,11 +95,7 @@ const MovesTable = () => {
             <button
               onClick={() => {
                 setUserSelectedMoveIndex((prev) =>
-                  prev !== null
-                    ? prev + 1 >= moves.length - 1
-                      ? moves.length - 1
-                      : prev + 1
-                    : null,
+                  prev !== null ? (prev + 1 >= moves.length - 1 ? moves.length - 1 : prev + 1) : null
                 );
               }}
               disabled={userSelectedMoveIndex === null}

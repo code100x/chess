@@ -34,15 +34,12 @@ const HighlightedSquares: React.FC = React.memo(() => {
                 styles.highlightedSquare,
                 {
                   width: pieceSize,
-                  transform: [
-                    { translateX: translation.x },
-                    { translateY: translation.y },
-                  ],
+                  transform: [{ translateX: translation.x }, { translateY: translation.y }],
                 },
               ]}
             />
           );
-        }),
+        })
       )}
     </View>
   );

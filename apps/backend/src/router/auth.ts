@@ -4,8 +4,7 @@ import jwt from 'jsonwebtoken';
 import { db } from '../db';
 const router = Router();
 
-const CLIENT_URL =
-  process.env.AUTH_REDIRECT_URL ?? 'http://localhost:5173/game/random';
+const CLIENT_URL = process.env.AUTH_REDIRECT_URL ?? 'http://localhost:5173/game/random';
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
 interface User {
@@ -52,30 +51,24 @@ router.get('/logout', (req: Request, res: Response) => {
   });
 });
 
-router.get(
-  '/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] }),
-);
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get(
   '/google/callback',
   passport.authenticate('google', {
     successRedirect: CLIENT_URL,
     failureRedirect: '/login/failed',
-  }),
+  })
 );
 
-router.get(
-  '/github',
-  passport.authenticate('github', { scope: ['read:user', 'user:email'] }),
-);
+router.get('/github', passport.authenticate('github', { scope: ['read:user', 'user:email'] }));
 
 router.get(
   '/github/callback',
   passport.authenticate('github', {
     successRedirect: CLIENT_URL,
     failureRedirect: '/login/failed',
-  }),
+  })
 );
 
 export default router;

@@ -4,10 +4,7 @@ export function Waitopponent() {
       <h5 className="mb-2 text-xl font-extrabold tracking-tight text-black opacity-40">
         Wait opponent will join soon...
       </h5>
-      <div
-        role="status"
-        className="absolute -translate-x-1/2 -translate-y-1/2 top-2/4 left-1/2"
-      >
+      <div role="status" className="absolute -translate-x-1/2 -translate-y-1/2 top-2/4 left-1/2">
         <svg
           aria-hidden="true"
           className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"

@@ -25,14 +25,9 @@ export const MobileSidebar = () => {
             <h1 className="text-lg font-semibold">100xchess</h1>
           </div>
         </SheetTrigger>
-        <SheetContent
-          side="left"
-          className="w-36 text-muted-foreground flex flex-col h-full justify-between"
-        >
+        <SheetContent side="left" className="w-36 text-muted-foreground flex flex-col h-full justify-between">
           <div className="flex flex-col justify-start">
-            <h1 className="text-center text-white text-2xl font-bold tracking-tighter ">
-              100xchess
-            </h1>
+            <h1 className="text-center text-white text-2xl font-bold tracking-tighter ">100xchess</h1>
             <SideNav items={UpperNavItems} setOpen={setOpen} />
           </div>
           <div className="flex flex-col justify-end mb-2">
