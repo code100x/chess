@@ -36,6 +36,11 @@ export interface GameResult {
 
 const GAME_TIME_MS = 10 * 60 * 1000;
 
+export interface Player {
+  id: string;
+  name: string;
+  isGuest: boolean;
+}
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { movesAtom, userSelectedMoveIndexAtom } from '@repo/store/chessBoard';
@@ -46,9 +51,9 @@ import ExitGameModel from '@/components/ExitGameModel';
 
 const moveAudio = new Audio(MoveSound);
 
-interface Metadata {
-  blackPlayer: { id: string; name: string };
-  whitePlayer: { id: string; name: string };
+export interface Metadata {
+  blackPlayer: Player;
+  whitePlayer: Player;
 }
 
 export const Game = () => {
@@ -267,13 +272,7 @@ export const Game = () => {
                   {started && (
                     <div className="mb-4">
                       <div className="flex justify-between">
-                        <UserAvatar
-                          name={
-                            user.id === gameMetadata?.whitePlayer?.id
-                              ? gameMetadata?.blackPlayer?.name
-                              : gameMetadata?.whitePlayer?.name ?? ''
-                          }
-                        />
+                        <UserAvatar gameMetadata={gameMetadata} />
                         {getTimer(
                           user.id === gameMetadata?.whitePlayer?.id
                             ? player2TimeConsumed
@@ -299,13 +298,7 @@ export const Game = () => {
                   </div>
                   {started && (
                     <div className="mt-4 flex justify-between">
-                      <UserAvatar
-                        name={
-                          user.id === gameMetadata?.blackPlayer?.id
-                            ? gameMetadata?.blackPlayer?.name
-                            : gameMetadata?.whitePlayer?.name ?? ''
-                        }
-                      />
+                      <UserAvatar gameMetadata={gameMetadata} self />
                       {getTimer(
                         user.id === gameMetadata?.blackPlayer?.id
                           ? player2TimeConsumed

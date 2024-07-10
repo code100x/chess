@@ -125,6 +125,9 @@ export class Game {
       return;
     }
 
+    const WhitePlayer = users.find((user) => user.id === this.player1UserId);
+    const BlackPlayer = users.find((user) => user.id === this.player2UserId);
+
     socketManager.broadcast(
       this.gameId,
       JSON.stringify({
@@ -132,12 +135,14 @@ export class Game {
         payload: {
           gameId: this.gameId,
           whitePlayer: {
-            name: users.find((user) => user.id === this.player1UserId)?.name,
+            name: WhitePlayer?.name,
             id: this.player1UserId,
+            isGuest: WhitePlayer?.provider === AuthProvider.GUEST,
           },
           blackPlayer: {
-            name: users.find((user) => user.id === this.player2UserId)?.name,
+            name: BlackPlayer?.name,
             id: this.player2UserId,
+            isGuest: BlackPlayer?.provider === AuthProvider.GUEST,
           },
           fen: this.board.fen(),
           moves: [],
