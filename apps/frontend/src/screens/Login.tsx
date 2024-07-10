@@ -67,7 +67,7 @@ const Login = () => {
             type="text"
             ref={guestName}
             placeholder="Username"
-            className="border px-4 py-2 rounded-md mb-4 w-full md:w-64"
+            className="border px-4 py-2 rounded-md mb-4 w-full md:w-64 text-black"
           />
           <button
             className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors duration-300"
