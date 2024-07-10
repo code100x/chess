@@ -1,9 +1,11 @@
 import { Request, Response, Router } from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
+import useragent from 'express-useragent';
 import { db } from '../db';
+import base64 from 'base-64';
 const router = Router();
-
+router.use(useragent.express());
 const CLIENT_URL =
   process.env.AUTH_REDIRECT_URL ?? 'http://localhost:5173/game/random';
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
@@ -13,6 +15,7 @@ interface User {
 }
 
 router.get('/refresh', async (req: Request, res: Response) => {
+  console.log(req.headers.cookie);
   if (req.user) {
     const user = req.user as User;
 
@@ -60,11 +63,29 @@ router.get(
 router.get(
   '/google/callback',
   passport.authenticate('google', {
-    successRedirect: CLIENT_URL,
+    // successRedirect: CLIENT_URL,
     failureRedirect: '/login/failed',
   }),
+  (req, res) => {
+    res.redirect('/auth/capture-mode');
+  },
 );
 
+router.get('/capture-mode', (req, res) => {
+  const cookies = req.headers.cookie?.split(';').map((cookie) => cookie.trim());
+  const authCookie = cookies?.find((cookie) =>
+    cookie.startsWith('connect.sid'),
+  );
+  const token = base64.encode(authCookie!);
+  console.log('authCookie', token);
+
+  const ua = req.useragent;
+  if (ua?.isMobile) {
+    res.redirect(`chess-mobile://sign-in?cookie=${token}`);
+  } else {
+    res.redirect(CLIENT_URL);
+  }
+});
 router.get(
   '/github',
   passport.authenticate('github', { scope: ['read:user', 'user:email'] }),
@@ -73,9 +94,12 @@ router.get(
 router.get(
   '/github/callback',
   passport.authenticate('github', {
-    successRedirect: CLIENT_URL,
+    // successRedirect: CLIENT_URL,
     failureRedirect: '/login/failed',
   }),
+  (req, res) => {
+    res.redirect('/auth/capture-mode');
+  },
 );
 
 export default router;
