@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - '5000:3000'
+    volumes:
+      - grafana-storage:/var/lib/grafana
+  prom-server:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana-loki:
+    image: grafana/loki
+    ports:
+      - 3100:3100
+volumes:
+  grafana-storage: {}
