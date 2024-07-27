@@ -1,51 +1,52 @@
-import { useNavigate } from 'react-router-dom';
-import { Button } from '../components/Button';
-import BackgroundSvg from '../components/BackgroundSvg';
+import { PlayCard } from '@/components/Card';
+import { Footer } from '@/components/Footer';
+import { useThemeContext } from '@/hooks/useThemes';
+import { THEMES_DATA } from '@/constants/themes';
 
 export const Landing = () => {
-  const navigate = useNavigate();
+  const { theme } = useThemeContext();
+  const currentTheme = THEMES_DATA.find(data => data.name === theme);
   return (
-    <div className="flex justify-center overflow-hidden relative h-full">
-      <BackgroundSvg />
-      <div className="grid content-center py-8 max-w-screen-xl z-[1]">
-        <div className="grid grid-cols-1 grid-rows-[max-content] lg:grid-rows-[auto] gap-4 lg:grid-cols-3 px-4 py-8 lg:p-8 h-full">
-          <div className="lg:col-span-2 flex justify-center items-center">
-            <img
-              src={'/chessboard.jpeg'}
-              className="w-2/3 lg:w-3/4 aspect-square animate-glow object-scale-down"
-            />
-          </div>
-          <div className="lg:pt-16 p-4 lg:p-0 grid content-center">
-            <div className="flex justify-center">
-              <h1 className="text-3xl xl:text-5xl text-center font-bold text-white">
-                Play chess online on the #2 Site!
-              </h1>
-            </div>
-
-            <div className="m-2 lg:mt-8 grid gap-4 xl:grid-flow-col">
-              <div className="bg-gradient-to-br from-yellow-500 to-orange-500 p-0.5 rounded-[6px] duration-500 shadow-[-30_0_1rem_-1rem,0_0_1rem_-1rem] hover:shadow-[-1rem_0_2rem_-0.5rem,1rem_0_2rem_-0.5rem] hover:shadow-orange-400">
-                <Button
-                  className="w-full bg-slate-950 rounded-[5px] px-4 duration-300 transition-colors hover:bg-black/80 font-medium"
-                  onClick={() => {
-                    navigate('/game/random');
-                  }}
-                >
-                  Play Online
-                </Button>
-              </div>
-
-              <Button
-                className="rounded-[6px] h-auto hover:bg-green-600 duration-300 font-medium"
-                onClick={() => {
-                  navigate('/login');
-                }}
-              >
-                Login
-              </Button>
-            </div>
-          </div>
+    <>
+      <div className="max-w-full mt-0">
+        <div className="flex flex-col md:flex-row w-full gap-x-16">
+          {
+            currentTheme ? (
+              <img
+                className="rounded-md w-full h-[650px] hidden md:block"
+                src={`${currentTheme['board-image']}`}
+                alt="chess-board"
+              />
+            ) : (
+              <img
+                className="rounded-md w-full md:h-3/4  hidden md:block"
+                src="https://res.cloudinary.com/dcugqfvvg/image/upload/v1713647295/standardboard.1d6f9426_asqzum.png"
+                alt="chess-board"
+              />
+            )}
+          <PlayCard />
         </div>
       </div>
-    </div>
+      <div className="mt-32 bg-bgAuxiliary2 text-textMain w-full px-14 py-14 rounded-[36px]">
+        <div className="lg:grid grid-cols-[45%,1fr] gap-28">
+            <div className="rounded-xl">
+                <img src="https://res.cloudinary.com/dcugqfvvg/image/upload/v1713657312/undraw_questions_re_1fy7_kqjpu3.svg" alt="chess-board" />
+            </div>
+            <div className="mt-16 lg:mt-0">
+                <h1 className="text-6xl font-bold text-left mt-[-10px]">Found an Issue!</h1>
+                <p className="text-xl mt-6">Please create an issue in our github website below. You are also invited to contribute on the project.</p>
+                <a 
+                    href="https://github.com/code100x/chess/issues"
+                    target="_blank"
+                    className="mt-10 rounded-2xl px-4 py-4 border border-slate-400 bg-transparent w-full text-2xl flex gap-10 items-center justify-center"  
+                    >
+                    <img className="w-16 h-16" src="https://res.cloudinary.com/dcugqfvvg/image/upload/v1713657100/github-svgrepo-com_uosbko.svg" alt="icon"/>
+                    <p className="text-4xl">Github</p>
+                </a>
+            </div>
+        </div>
+      </div>
+      <Footer />
+    </>
   );
 };

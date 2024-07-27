@@ -51,10 +51,11 @@ model Move {
   from        String
   to          String
   comments    String?
-  startFen    String
-  endFen      String
+  before      String
+  after       String
   timeTaken   Int?     @default(0)
   createdAt   DateTime @default(now())
+  san         String?   
 
   @@index([gameId])
 }
@@ -63,6 +64,8 @@ enum GameStatus {
   IN_PROGRESS
   COMPLETED
   ABANDONED
+  TIME_UP
+  PLAYER_EXIT
 }
 
 enum GameResult {
@@ -81,6 +84,6 @@ enum TimeControl {
 enum AuthProvider {
   EMAIL
   GOOGLE
-  FACEBOOK
   GITHUB
+  GUEST
 }
