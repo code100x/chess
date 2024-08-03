@@ -6,9 +6,9 @@ import {
 } from './messages';
 import { db } from './db';
 import { randomUUID } from 'crypto';
-import { SocketManager, User } from './SocketManager';
+import { socketManager, User } from './SocketManager';
 
-type GAME_STATUS = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'TIME_UP';
+type GAME_STATUS = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'TIME_UP' | 'PLAYER_EXIT';
 type GAME_RESULT = "WHITE_WINS" | "BLACK_WINS" | "DRAW";
 
 const GAME_TIME_MS = 10 * 60 * 60 * 1000;
@@ -125,19 +125,24 @@ export class Game {
       return;
     }
 
-    SocketManager.getInstance().broadcast(
+    const WhitePlayer = users.find((user) => user.id === this.player1UserId);
+    const BlackPlayer = users.find((user) => user.id === this.player2UserId);
+
+    socketManager.broadcast(
       this.gameId,
       JSON.stringify({
         type: INIT_GAME,
         payload: {
           gameId: this.gameId,
           whitePlayer: {
-            name: users.find((user) => user.id === this.player1UserId)?.name,
+            name: WhitePlayer?.name,
             id: this.player1UserId,
+            isGuest: WhitePlayer?.provider === AuthProvider.GUEST,
           },
           blackPlayer: {
-            name: users.find((user) => user.id === this.player2UserId)?.name,
+            name: BlackPlayer?.name,
             id: this.player2UserId,
+            isGuest: BlackPlayer?.provider === AuthProvider.GUEST,
           },
           fen: this.board.fen(),
           moves: [],
@@ -257,7 +262,7 @@ export class Game {
 
     this.lastMoveTime = moveTimestamp;
 
-    SocketManager.getInstance().broadcast(
+    socketManager.broadcast(
       this.gameId,
       JSON.stringify({
         type: MOVE,
@@ -313,6 +318,10 @@ export class Game {
     }, timeLeft);
   }
 
+  async exitGame(user : User) {
+    this.endGame('PLAYER_EXIT', user.userId === this.player2UserId ? 'WHITE_WINS' : 'BLACK_WINS');
+  }
+
   async endGame(status: GAME_STATUS, result: GAME_RESULT) {
     const updatedGame = await db.game.update({
       data: {
@@ -333,7 +342,7 @@ export class Game {
       }
     });
 
-    SocketManager.getInstance().broadcast(
+    socketManager.broadcast(
       this.gameId,
       JSON.stringify({
         type: GAME_ENDED,

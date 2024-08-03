@@ -39,7 +39,7 @@ export const LowerNavItems = [
   {
     title: 'Settings',
     icon: SettingsIcon,
-    href: '/',
+    href: '/settings',
     color: 'text-green-500',
   },
 ];

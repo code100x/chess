@@ -84,17 +84,16 @@ export function PlayCard() {
   const navigate = useNavigate();
   return (
     <Card className="bg-transparent border-none">
-      <CardHeader className="pb-3 text-center text-white shadow-md">
+      <CardHeader className="pb-3 text-center">
         <CardTitle className="font-semibold tracking-wide flex flex-col items-center justify-center">
-          <p>
-            Play
-            <span className="text-green-700 font-bold pt-1"> Chess</span>
+          <p className='text-white'>
+            Play <span className="text-green-600 font-bold pt-1">Chess</span>
           </p>
           <img className="pl-1 w-1/2 mt-4" src={chessIcon} alt="chess" />
         </CardTitle>
-        <CardDescription></CardDescription>
+        <CardDescription />
       </CardHeader>
-      <CardContent className="grid gap-2 cursor-pointer shadow-md mt-1">
+      <CardContent className="grid gap-2 cursor-pointer mt-1">
         {gameModeData.map((data) => {
           return <GameModeComponent {...data} />;
         })}
