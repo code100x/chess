@@ -14,7 +14,7 @@
     "AUTH_REDIRECT_URL",
     "JWT_SECRET"
   ],
-  "pipeline": {
+  "tasks": {
     "build": {
       "dependsOn": ["db:generate", "^build"],
       "outputs": [".next/**", "!.next/cache/**"]
