@@ -11,7 +11,7 @@ import { socketManager, User } from './SocketManager';
 type GAME_STATUS = 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'TIME_UP' | 'PLAYER_EXIT';
 type GAME_RESULT = "WHITE_WINS" | "BLACK_WINS" | "DRAW";
 
-const GAME_TIME_MS = 10 * 60 * 60 * 1000;
+const GAME_TIME_MS = 10 * 60 * 1000;
 
 export function isPromoting(chess: Chess, from: Square, to: Square) {
   if (!from) {
