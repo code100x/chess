@@ -19,19 +19,22 @@ Let's keep it simple
 
 ## Setting it up locally
 
- - Clone the repo
- - Copy over .env.example over to .env everywhere
- - Update .env
-    - Postgres DB Credentials
-    - Github/Google Auth credentials
- - npm install
- - Start ws server
-    - cd apps/ws
-    - npm run dev
- - Start Backend
-    - cd apps/backend
-    - npm run dev
- - Start frontend
-    - cd apps/frontend
-    - npm run dev
+- Clone the repo
+- Copy over .env.example over to .env everywhere
+- Update .env
+  - Postgres DB Credentials
+  - Github/Google Auth credentials
+- npm install
+- Start ws server
+  - cd apps/ws
+  - npm run dev
+- Start Backend
+  - cd apps/backend
+  - npm run dev
+- Start frontend
+  - cd apps/frontend
+  - npm run dev
 
+## live demo
+
+-production site:[chess.100xdevs.com](https://chess.100xdevs.com)
